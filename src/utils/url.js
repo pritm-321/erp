@@ -1,1 +1,1 @@
-export const API = "http://13.201.33.202/api/v1/";
+export const API = "https://web-api.quiktrack.in/api/v1/";

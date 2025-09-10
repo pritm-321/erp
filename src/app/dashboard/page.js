@@ -1,8 +1,8 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/utils/supabaseClient";
 import axios from "axios";
 import { API } from "@/utils/url";
-import { supabase } from "@/utils/supabaseClient";
 
 export default function Dashboard() {
   const [joinCode, setJoinCode] = useState("");
@@ -11,6 +11,29 @@ export default function Dashboard() {
   const [profile, setProfile] = useState(null);
   const [organizations, setOrganizations] = useState(null);
   const [error, setError] = useState("");
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const getSession = async () => {
+      const { data } = await supabase.auth.getSession();
+      setUser(data?.session?.user || null);
+    };
+    getSession();
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setUser(session?.user || null);
+      }
+    );
+    return () => {
+      listener.subscription.unsubscribe();
+    };
+  }, []);
+
+  const signOut = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+    window.location.href = "/";
+  };
 
   const handleJoin = async (e) => {
     e.preventDefault();
@@ -53,6 +76,9 @@ export default function Dashboard() {
         },
       });
       setOrganizations(res.data);
+      if (typeof window !== "undefined") {
+        localStorage.setItem("organizations", JSON.stringify(res.data));
+      }
     } catch (err) {
       setError("Failed to fetch joined organizations.");
     }
@@ -105,80 +131,98 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto py-10">
-      <h1 className="text-2xl font-bold mb-8">Dashboard</h1>
+    <div className="flex min-h-screen">
+      {/* Sidebar */}
+      <aside className="w-64 bg-gray-100 border-r flex flex-col items-center py-8 px-4">
+        <div className="mb-8 text-center">
+          <div className="w-16 h-16 rounded-full bg-gray-300 mx-auto mb-2 flex items-center justify-center text-2xl">
+            {user?.email ? user.email[0].toUpperCase() : "U"}
+          </div>
+          <div className="font-semibold">{user?.email || "User"}</div>
+        </div>
+        <button
+          onClick={signOut}
+          className="bg-red-500 text-white px-4 py-2 rounded shadow hover:bg-red-600"
+        >
+          Sign Out
+        </button>
+      </aside>
+      {/* Main Content */}
+      <main className="flex-1 max-w-2xl mx-auto py-10">
+        <h1 className="text-2xl font-bold mb-8">Dashboard</h1>
 
-      {/* Join Organization Section */}
-      <section className="mb-8 p-4 border rounded-lg">
-        <h2 className="text-lg font-semibold mb-2">Join Organization</h2>
-        <form onSubmit={handleJoin} className="flex gap-2">
-          <input
-            type="text"
-            value={joinCode}
-            onChange={(e) => setJoinCode(e.target.value)}
-            placeholder="Enter join code"
-            className="border px-2 py-1 rounded"
-            required
-          />
+        {/* Join Organization Section */}
+        <section className="mb-8 p-4 border rounded-lg">
+          <h2 className="text-lg font-semibold mb-2">Join Organization</h2>
+          <form onSubmit={handleJoin} className="flex gap-2">
+            <input
+              type="text"
+              value={joinCode}
+              onChange={(e) => setJoinCode(e.target.value)}
+              placeholder="Enter join code"
+              className="border px-2 py-1 rounded"
+              required
+            />
+            <button
+              type="submit"
+              className="bg-blue-600 text-white px-4 py-1 rounded"
+            >
+              Join
+            </button>
+          </form>
+          {joinResult && <p className="mt-2 text-green-600">{joinResult}</p>}
+        </section>
+
+        {/* Fetch Joined Organizations Section */}
+        <section className="mb-8 p-4 border rounded-lg">
+          <h2 className="text-lg font-semibold mb-2">Joined Organizations</h2>
           <button
-            type="submit"
-            className="bg-blue-600 text-white px-4 py-1 rounded"
+            onClick={fetchOrganizations}
+            className="bg-purple-700 text-white px-4 py-1 rounded mb-2"
           >
-            Join
+            Fetch Joined Organizations
           </button>
-        </form>
-        {joinResult && <p className="mt-2 text-green-600">{joinResult}</p>}
-      </section>
+          {organizations && (
+            <pre className="bg-gray-100 p-2 rounded text-sm overflow-x-auto">
+              {JSON.stringify(organizations, null, 2)}
+            </pre>
+          )}
+        </section>
 
-      {/* Fetch Joined Organizations Section */}
-      <section className="mb-8 p-4 border rounded-lg">
-        <h2 className="text-lg font-semibold mb-2">Joined Organizations</h2>
-        <button
-          onClick={fetchOrganizations}
-          className="bg-purple-700 text-white px-4 py-1 rounded mb-2"
-        >
-          Fetch Joined Organizations
-        </button>
-        {organizations && (
-          <pre className="bg-gray-100 p-2 rounded text-sm overflow-x-auto">
-            {JSON.stringify(organizations, null, 2)}
-          </pre>
-        )}
-      </section>
+        {/* Fetch Permissions Section */}
+        <section className="mb-8 p-4 border rounded-lg">
+          <h2 className="text-lg font-semibold mb-2">Employee Permissions</h2>
+          <button
+            onClick={fetchPermissions}
+            className="bg-gray-700 text-white px-4 py-1 rounded mb-2"
+          >
+            Fetch Permissions
+          </button>
+          {permissions && (
+            <pre className="bg-gray-100 p-2 rounded text-sm overflow-x-auto">
+              {JSON.stringify(permissions, null, 2)}
+            </pre>
+          )}
+        </section>
 
-      {/* Fetch Permissions Section */}
-      <section className="mb-8 p-4 border rounded-lg">
-        <h2 className="text-lg font-semibold mb-2">Employee Permissions</h2>
-        <button
-          onClick={fetchPermissions}
-          className="bg-gray-700 text-white px-4 py-1 rounded mb-2"
-        >
-          Fetch Permissions
-        </button>
-        {permissions && (
-          <pre className="bg-gray-100 p-2 rounded text-sm overflow-x-auto">
-            {JSON.stringify(permissions, null, 2)}
-          </pre>
-        )}
-      </section>
+        {/* Fetch Profile Section */}
+        <section className="mb-8 p-4 border rounded-lg">
+          <h2 className="text-lg font-semibold mb-2">Profile Info</h2>
+          <button
+            onClick={fetchProfile}
+            className="bg-gray-700 text-white px-4 py-1 rounded mb-2"
+          >
+            Fetch Profile
+          </button>
+          {profile && (
+            <pre className="bg-gray-100 p-2 rounded text-sm overflow-x-auto">
+              {JSON.stringify(profile, null, 2)}
+            </pre>
+          )}
+        </section>
 
-      {/* Fetch Profile Section */}
-      <section className="mb-8 p-4 border rounded-lg">
-        <h2 className="text-lg font-semibold mb-2">Profile Info</h2>
-        <button
-          onClick={fetchProfile}
-          className="bg-gray-700 text-white px-4 py-1 rounded mb-2"
-        >
-          Fetch Profile
-        </button>
-        {profile && (
-          <pre className="bg-gray-100 p-2 rounded text-sm overflow-x-auto">
-            {JSON.stringify(profile, null, 2)}
-          </pre>
-        )}
-      </section>
-
-      {error && <p className="text-red-600 mt-4">{error}</p>}
+        {error && <p className="text-red-600 mt-4">{error}</p>}
+      </main>
     </div>
   );
 }
