@@ -315,7 +315,7 @@ export default function ViewDesign() {
                                 className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 flex flex-col items-center mt-2"
                                 onClick={() => alert("Generate PO clicked!")}
                               >
-                                Generate PO
+                                View Fabric Requirements
                               </button>
                               {/* View Parts Modal */}
                               {viewPartsModal.open && (
