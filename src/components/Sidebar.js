@@ -58,6 +58,12 @@ export default function Sidebar() {
         >
           Create Design
         </a>
+        <a
+          href="/profile"
+          className="px-4 py-2 rounded-lg bg-white hover:bg-blue-200 text-blue-700 font-medium transition shadow text-center"
+        >
+          View Profile
+        </a>
       </nav>
       <button
         onClick={signOut}
