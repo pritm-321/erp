@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/utils/supabaseClient";
 import axios from "axios";
 import { API } from "@/utils/url";
+import Sidebar from "@/components/Sidebar";
 
 export default function Dashboard() {
   const [joinCode, setJoinCode] = useState("");
@@ -24,6 +25,7 @@ export default function Dashboard() {
         setUser(session?.user || null);
       }
     );
+    fetchOrganizations();
     return () => {
       listener.subscription.unsubscribe();
     };
@@ -133,20 +135,7 @@ export default function Dashboard() {
   return (
     <div className="flex min-h-screen">
       {/* Sidebar */}
-      <aside className="w-64 bg-gray-100 border-r flex flex-col items-center py-8 px-4">
-        <div className="mb-8 text-center">
-          <div className="w-16 h-16 rounded-full bg-gray-300 mx-auto mb-2 flex items-center justify-center text-2xl">
-            {user?.email ? user.email[0].toUpperCase() : "U"}
-          </div>
-          <div className="font-semibold">{user?.email || "User"}</div>
-        </div>
-        <button
-          onClick={signOut}
-          className="bg-red-500 text-white px-4 py-2 rounded shadow hover:bg-red-600"
-        >
-          Sign Out
-        </button>
-      </aside>
+      <Sidebar />
       {/* Main Content */}
       <main className="flex-1 max-w-2xl mx-auto py-10">
         <h1 className="text-2xl font-bold mb-8">Dashboard</h1>
@@ -176,12 +165,6 @@ export default function Dashboard() {
         {/* Fetch Joined Organizations Section */}
         <section className="mb-8 p-4 border rounded-lg">
           <h2 className="text-lg font-semibold mb-2">Joined Organizations</h2>
-          <button
-            onClick={fetchOrganizations}
-            className="bg-purple-700 text-white px-4 py-1 rounded mb-2"
-          >
-            Fetch Joined Organizations
-          </button>
           {organizations && (
             <pre className="bg-gray-100 p-2 rounded text-sm overflow-x-auto">
               {JSON.stringify(organizations, null, 2)}
