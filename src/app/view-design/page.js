@@ -33,19 +33,14 @@ export default function ViewDesign() {
   const [poError, setPoError] = useState("");
   const [poSuccess, setPoSuccess] = useState("");
 
+  const [organizationId, setOrganizationId] = useState("");
+  const [accessToken, setAccessToken] = useState("");
+
   // Fetch dropdown options when modal opens
   useEffect(() => {
     if (uploadModal.open) {
       const fetchDropdowns = async () => {
-        let organizationId = "";
-        if (typeof window !== "undefined") {
-          const orgs = JSON.parse(localStorage.getItem("organizations"));
-          organizationId = orgs?.data?.joined?.[0]?.organization_id || "";
-        }
-
-        const accessToken = await supabase.auth
-          .getSession()
-          .then(({ data }) => data?.session?.access_token);
+        // Use global organizationId and accessToken
         try {
           const [colorRes, fabricRes, partRes] = await Promise.all([
             axios.get(`${API}so/color-suggestions`, {
@@ -67,12 +62,6 @@ export default function ViewDesign() {
               },
             }),
           ]);
-          //   console.log(
-          //     colorRes.data?.data,
-          //     fabricRes.data?.data,
-          //     partRes.data?.data
-          //   );
-
           setColorOptions(colorRes.data?.data || []);
           setFabricTypeOptions(fabricRes.data?.data || []);
           setPartOptions(partRes.data?.data || []);
@@ -84,7 +73,7 @@ export default function ViewDesign() {
       };
       fetchDropdowns();
     }
-  }, [uploadModal.open]);
+  }, [uploadModal.open, organizationId, accessToken]);
   const [sizes, setSizes] = useState([{ size: "", ratio_component: "" }]);
   const [variants, setVariants] = useState([
     {
@@ -152,6 +141,16 @@ export default function ViewDesign() {
     fetchMerchantAndDesign();
   }, []);
 
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const orgs = JSON.parse(localStorage.getItem("organizations"));
+      setOrganizationId(orgs?.data?.joined?.[0]?.organization_id || "");
+      supabase.auth.getSession().then(({ data }) => {
+        setAccessToken(data?.session?.access_token || "");
+      });
+    }
+  }, []);
+
   if (error) {
     return <div className="text-red-600 p-4">{error}</div>;
   }
@@ -181,14 +180,6 @@ export default function ViewDesign() {
     setFabricLoading(true);
     setFabricError("");
     try {
-      let organizationId = "";
-      if (typeof window !== "undefined") {
-        const orgs = JSON.parse(localStorage.getItem("organizations"));
-        organizationId = orgs?.data?.joined?.[0]?.organization_id || "";
-      }
-      const accessToken = await supabase.auth
-        .getSession()
-        .then(({ data }) => data?.session?.access_token);
       const res = await axios.get(`${API}so/fabric-requirements/${designId}`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -210,14 +201,6 @@ export default function ViewDesign() {
     setPoError("");
     setPoSuccess("");
     setPoLoading(true);
-    let organizationId = "";
-    if (typeof window !== "undefined") {
-      const orgs = JSON.parse(localStorage.getItem("organizations"));
-      organizationId = orgs?.data?.joined?.[0]?.organization_id || "";
-    }
-    const accessToken = await supabase.auth
-      .getSession()
-      .then(({ data }) => data?.session?.access_token);
     try {
       const res = await axios.get(`${API}partners/vendors`, {
         headers: {
@@ -238,21 +221,11 @@ export default function ViewDesign() {
     setPoLoading(true);
     setPoError("");
     setPoSuccess("");
-    console.log("Submitting PO for vendor:", selectedVendor);
-
-    let organizationId = "";
-    if (typeof window !== "undefined") {
-      const orgs = JSON.parse(localStorage.getItem("organizations"));
-      organizationId = orgs?.data?.joined?.[0]?.organization_id || "";
-    }
-    const accessToken = await supabase.auth
-      .getSession()
-      .then(({ data }) => data?.session?.access_token);
     try {
       await axios.post(
         `${API}so/create-po/${fabricModal.designId}`,
         {
-          vendor_id: selectedVendor, // This is the vendor's id
+          vendor_id: selectedVendor,
         },
         {
           headers: {
@@ -365,20 +338,6 @@ export default function ViewDesign() {
                               <button
                                 className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 flex flex-col items-center mt-2"
                                 onClick={async () => {
-                                  let organizationId = "";
-                                  if (typeof window !== "undefined") {
-                                    const orgs = JSON.parse(
-                                      localStorage.getItem("organizations")
-                                    );
-                                    organizationId =
-                                      orgs?.data?.joined?.[0]
-                                        ?.organization_id || "";
-                                  }
-                                  const accessToken = await supabase.auth
-                                    .getSession()
-                                    .then(
-                                      ({ data }) => data?.session?.access_token
-                                    );
                                   try {
                                     const res = await axios.get(
                                       `${API}so/design/${d.design_id}/parts`,
@@ -389,21 +348,11 @@ export default function ViewDesign() {
                                         },
                                       }
                                     );
-                                    console.log(
-                                      "Parts details fetched successfully:",
-                                      res.data
-                                    );
                                     setPartsDetails(res.data || {});
-                                    setViewPartsModal({
-                                      open: true,
-                                      designId: d.design_id,
-                                    });
+                                    setViewPartsModal({ open: true, designId: d.design_id });
                                   } catch (err) {
                                     setPartsDetails([]);
-                                    setViewPartsModal({
-                                      open: true,
-                                      designId: d.design_id,
-                                    });
+                                    setViewPartsModal({ open: true, designId: d.design_id });
                                   }
                                 }}
                               >
@@ -585,24 +534,6 @@ export default function ViewDesign() {
                                         setUploadError("");
                                         setUploadSuccess("");
                                         try {
-                                          let organizationId = "";
-                                          if (typeof window !== "undefined") {
-                                            const orgs = JSON.parse(
-                                              localStorage.getItem(
-                                                "organizations"
-                                              )
-                                            );
-                                            organizationId =
-                                              orgs?.data?.joined?.[0]
-                                                ?.organization_id || "";
-                                          }
-                                          const accessToken =
-                                            await supabase.auth
-                                              .getSession()
-                                              .then(
-                                                ({ data }) =>
-                                                  data?.session?.access_token
-                                              );
                                           await axios.post(
                                             `${API}so/update-data/${uploadModal.designId}`,
                                             { sizes, variants },
