@@ -18,6 +18,20 @@ export default function ViewDesign() {
     open: false,
     designId: null,
   });
+  const [fabricModal, setFabricModal] = useState({
+    open: false,
+    designId: null,
+  });
+  const [fabricRequirements, setFabricRequirements] = useState(null);
+  const [fabricLoading, setFabricLoading] = useState(false);
+  const [fabricError, setFabricError] = useState("");
+
+  const [poModal, setPoModal] = useState(false);
+  const [vendors, setVendors] = useState([]);
+  const [selectedVendor, setSelectedVendor] = useState("");
+  const [poLoading, setPoLoading] = useState(false);
+  const [poError, setPoError] = useState("");
+  const [poSuccess, setPoSuccess] = useState("");
 
   // Fetch dropdown options when modal opens
   useEffect(() => {
@@ -160,6 +174,101 @@ export default function ViewDesign() {
     grouped[key].push(d);
   });
   const groupedEntries = Object.entries(grouped);
+
+  const handleViewFabricRequirements = async (designId) => {
+    setFabricModal({ open: true, designId });
+    setFabricRequirements(null);
+    setFabricLoading(true);
+    setFabricError("");
+    try {
+      let organizationId = "";
+      if (typeof window !== "undefined") {
+        const orgs = JSON.parse(localStorage.getItem("organizations"));
+        organizationId = orgs?.data?.joined?.[0]?.organization_id || "";
+      }
+      const accessToken = await supabase.auth
+        .getSession()
+        .then(({ data }) => data?.session?.access_token);
+      const res = await axios.get(`${API}so/fabric-requirements/${designId}`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Organization-ID": organizationId,
+        },
+      });
+      setFabricRequirements(res.data.fabric_requirements);
+    } catch (err) {
+      setFabricError("Failed to fetch fabric requirements.");
+    } finally {
+      setFabricLoading(false);
+    }
+  };
+
+  const handleGeneratePO = async () => {
+    setPoModal(true);
+    setVendors([]);
+    setSelectedVendor("");
+    setPoError("");
+    setPoSuccess("");
+    setPoLoading(true);
+    let organizationId = "";
+    if (typeof window !== "undefined") {
+      const orgs = JSON.parse(localStorage.getItem("organizations"));
+      organizationId = orgs?.data?.joined?.[0]?.organization_id || "";
+    }
+    const accessToken = await supabase.auth
+      .getSession()
+      .then(({ data }) => data?.session?.access_token);
+    try {
+      const res = await axios.get(`${API}partners/vendors`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Organization-ID": organizationId,
+        },
+      });
+      setVendors(res.data.vendors || []);
+    } catch (err) {
+      setPoError("Failed to fetch vendors.");
+    } finally {
+      setPoLoading(false);
+    }
+  };
+
+  const handleSubmitPO = async (e) => {
+    e.preventDefault();
+    setPoLoading(true);
+    setPoError("");
+    setPoSuccess("");
+    console.log("Submitting PO for vendor:", selectedVendor);
+
+    let organizationId = "";
+    if (typeof window !== "undefined") {
+      const orgs = JSON.parse(localStorage.getItem("organizations"));
+      organizationId = orgs?.data?.joined?.[0]?.organization_id || "";
+    }
+    const accessToken = await supabase.auth
+      .getSession()
+      .then(({ data }) => data?.session?.access_token);
+    try {
+      await axios.post(
+        `${API}so/create-po/${fabricModal.designId}`,
+        {
+          vendor_id: selectedVendor, // This is the vendor's id
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Organization-ID": organizationId,
+          },
+        }
+      );
+      setPoSuccess("PO generated successfully!");
+      setPoModal(false);
+    } catch (err) {
+      setPoError("Failed to generate PO.");
+    } finally {
+      setPoLoading(false);
+    }
+  };
 
   return (
     <div className="max-w-4xl mx-auto p-8 border rounded-lg mt-8">
@@ -313,7 +422,9 @@ export default function ViewDesign() {
                               </button>
                               <button
                                 className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 flex flex-col items-center mt-2"
-                                onClick={() => alert("Generate PO clicked!")}
+                                onClick={() =>
+                                  handleViewFabricRequirements(d.design_id)
+                                }
                               >
                                 View Fabric Requirements
                               </button>
@@ -341,23 +452,25 @@ export default function ViewDesign() {
                                       </div>
                                     ) : (
                                       <div className="space-y-4">
-                                        {partsDetails.sizes.map((part, idx) => (
-                                          <div
-                                            key={idx}
-                                            className="border rounded p-3 bg-gray-50"
-                                          >
-                                            <div className="font-semibold">
-                                              Part Size: {part.size}
-                                            </div>
-                                            <div className="ml-2">
-                                              <div className="font-medium">
-                                                Ratio Component :{" "}
-                                                {part.ratio_component}
+                                        {partsDetails.sizes?.map(
+                                          (part, idx) => (
+                                            <div
+                                              key={idx}
+                                              className="border rounded p-3 bg-gray-50"
+                                            >
+                                              <div className="font-semibold">
+                                                Part Size: {part.size}
+                                              </div>
+                                              <div className="ml-2">
+                                                <div className="font-medium">
+                                                  Ratio Component :{" "}
+                                                  {part.ratio_component}
+                                                </div>
                                               </div>
                                             </div>
-                                          </div>
-                                        ))}
-                                        {partsDetails.variants.map(
+                                          )
+                                        )}
+                                        {partsDetails.variants?.map(
                                           (part, idx) => (
                                             <div
                                               key={idx}
@@ -885,6 +998,118 @@ export default function ViewDesign() {
             </div>
           );
         })
+      )}
+      {/* Fabric Requirements Modal */}
+      {fabricModal.open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+          <div className="bg-white rounded-lg shadow-lg p-6 max-w-xl w-full relative max-h-[90vh] overflow-y-auto">
+            <button
+              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-xl"
+              onClick={() => setFabricModal({ open: false, designId: null })}
+            >
+              &times;
+            </button>
+            <h2 className="text-lg font-semibold mb-4">Fabric Requirements</h2>
+            {fabricLoading ? (
+              <div>Loading...</div>
+            ) : fabricError ? (
+              <div className="text-red-600">{fabricError}</div>
+            ) : fabricRequirements ? (
+              <>
+                <div className="space-y-4">
+                  {fabricRequirements.map((req, idx) => (
+                    <div key={idx} className="border rounded p-4 bg-gray-50">
+                      <h3 className="font-semibold mb-2">
+                        Fabric Requirement #{idx + 1}
+                      </h3>
+                      <div>
+                        Color ID:{" "}
+                        <span className="font-medium">{req.color_id}</span>
+                      </div>
+                      <div>
+                        Color Name:{" "}
+                        <span className="font-medium">{req.color_name}</span>
+                      </div>
+                      <div>
+                        Consumption per Piece:{" "}
+                        <span className="font-medium">
+                          {req.consumption_per_piece}
+                        </span>
+                      </div>
+                      <div>
+                        Fabric Type ID:{" "}
+                        <span className="font-medium">
+                          {req.fabric_type_id}
+                        </span>
+                      </div>
+                      <div>
+                        Fabric Type Name:{" "}
+                        <span className="font-medium">
+                          {req.fabric_type_name}
+                        </span>
+                      </div>
+                      <div>
+                        Total Required:{" "}
+                        <span className="font-medium">
+                          {req.total_required}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <button
+                  className="mt-6 px-6 py-3 bg-purple-600 text-white rounded-lg shadow hover:bg-purple-700 transition w-full"
+                  onClick={handleGeneratePO}
+                >
+                  Generate PO
+                </button>
+              </>
+            ) : (
+              <div>No data found.</div>
+            )}
+          </div>
+        </div>
+      )}
+      {/* PO Modal */}
+      {poModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+          <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full relative">
+            <button
+              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-xl"
+              onClick={() => setPoModal(false)}
+            >
+              &times;
+            </button>
+            <h2 className="text-lg font-semibold mb-4">Generate PO</h2>
+            {poError && <div className="text-red-600 mb-2">{poError}</div>}
+            {poSuccess && (
+              <div className="text-green-600 mb-2">{poSuccess}</div>
+            )}
+            <form onSubmit={handleSubmitPO}>
+              <label className="block mb-2 font-medium">Select Vendor</label>
+              <select
+                className="border px-2 py-1 rounded w-full mb-4"
+                value={selectedVendor}
+                onChange={(e) => setSelectedVendor(e.target.value)}
+                required
+              >
+                <option value="">Choose a vendor</option>
+                {vendors?.map((v) => (
+                  <option key={v.vendor_id} value={v.vendor_id}>
+                    {v.name}
+                  </option>
+                ))}
+              </select>
+              <button
+                type="submit"
+                className="bg-purple-600 text-white px-4 py-2 rounded w-full"
+                disabled={poLoading}
+              >
+                {poLoading ? "Generating..." : "Submit"}
+              </button>
+            </form>
+          </div>
+        </div>
       )}
     </div>
   );
