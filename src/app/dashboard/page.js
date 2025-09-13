@@ -13,6 +13,7 @@ export default function Dashboard() {
   const [organizations, setOrganizations] = useState(null);
   const [error, setError] = useState("");
   const [user, setUser] = useState(null);
+  const [showJoinModal, setShowJoinModal] = useState(false);
 
   useEffect(() => {
     const getSession = async () => {
@@ -86,30 +87,6 @@ export default function Dashboard() {
     }
   };
 
-  const fetchPermissions = async () => {
-    setError("");
-    console.log(organizations.data.joined[0]?.organization_id);
-
-    try {
-      const accessToken = await supabase.auth
-        .getSession()
-        .then(({ data }) => data?.session?.access_token);
-      const res = await axios.get(`${API}emp/get_permissions`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-          "Organization-ID":
-            organizations.data.joined[0]?.organization_id || "", // Replace with actual organization ID if needed
-        },
-      });
-      console.log(res);
-
-      setPermissions(res.data);
-    } catch (err) {
-      setError("Failed to fetch permissions.");
-    }
-  };
-
   const fetchProfile = async () => {
     setError("");
     try {
@@ -133,79 +110,125 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="flex min-h-screen">
-      {/* Sidebar */}
-      <Sidebar />
-      {/* Main Content */}
-      <main className="flex-1 max-w-2xl mx-auto py-10">
-        <h1 className="text-2xl font-bold mb-8">Dashboard</h1>
-
-        {/* Join Organization Section */}
-        <section className="mb-8 p-4 border rounded-lg">
-          <h2 className="text-lg font-semibold mb-2">Join Organization</h2>
-          <form onSubmit={handleJoin} className="flex gap-2">
-            <input
-              type="text"
-              value={joinCode}
-              onChange={(e) => setJoinCode(e.target.value)}
-              placeholder="Enter join code"
-              className="border px-2 py-1 rounded"
-              required
-            />
+    <section className="mb-8 p-6 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 shadow-lg h-screen">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-2xl font-bold text-blue-900">
+          Joined Organizations
+        </h2>
+        <button
+          onClick={() => setShowJoinModal(true)}
+          className="bg-gradient-to-r from-blue-600 to-blue-500 text-white px-5 py-2 rounded-xl shadow hover:from-blue-700 hover:to-blue-600 font-semibold transition"
+        >
+          + Join Organization
+        </button>
+      </div>
+      {organizations &&
+      organizations.data &&
+      organizations.data.joined &&
+      organizations.data.joined.length > 0 ? (
+        <div className="max-w-7xl grid grid-cols-4 gap-6">
+          {organizations.data.joined.map((org, idx) => (
             <button
-              type="submit"
-              className="bg-blue-600 text-white px-4 py-1 rounded"
+              key={idx}
+              className="flex items-center gap-4 bg-white border border-blue-200 rounded-xl p-5 shadow-md hover:shadow-lg transition w-full text-left cursor-pointer"
+              onClick={() =>
+                (window.location.href = `/organization/${org.organization_id}`)
+              }
             >
-              Join
+              <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-blue-400 to-blue-600 flex items-center justify-center text-xl text-white font-bold shadow border-2 border-blue-100">
+                {org.organization_name
+                  ? org.organization_name[0].toUpperCase()
+                  : "O"}
+              </div>
+              <div className="flex-1">
+                <div className="font-semibold text-blue-900 text-lg">
+                  {org.organization_name}
+                </div>
+                <div className="text-sm text-blue-700">
+                  ID: {org.organization_id}
+                </div>
+                <div className="text-xs text-gray-500 mt-1">
+                  Joined: {org.joined_at}
+                </div>
+              </div>
             </button>
-          </form>
-          {joinResult && <p className="mt-2 text-green-600">{joinResult}</p>}
-        </section>
-
-        {/* Fetch Joined Organizations Section */}
-        <section className="mb-8 p-4 border rounded-lg">
-          <h2 className="text-lg font-semibold mb-2">Joined Organizations</h2>
-          {organizations && (
-            <pre className="bg-gray-100 p-2 rounded text-sm overflow-x-auto">
-              {JSON.stringify(organizations, null, 2)}
-            </pre>
-          )}
-        </section>
-
-        {/* Fetch Permissions Section */}
-        <section className="mb-8 p-4 border rounded-lg">
-          <h2 className="text-lg font-semibold mb-2">Employee Permissions</h2>
-          <button
-            onClick={fetchPermissions}
-            className="bg-gray-700 text-white px-4 py-1 rounded mb-2"
-          >
-            Fetch Permissions
-          </button>
-          {permissions && (
-            <pre className="bg-gray-100 p-2 rounded text-sm overflow-x-auto">
-              {JSON.stringify(permissions, null, 2)}
-            </pre>
-          )}
-        </section>
-
-        {/* Fetch Profile Section */}
-        <section className="mb-8 p-4 border rounded-lg">
-          <h2 className="text-lg font-semibold mb-2">Profile Info</h2>
-          <button
-            onClick={fetchProfile}
-            className="bg-gray-700 text-white px-4 py-1 rounded mb-2"
-          >
-            Fetch Profile
-          </button>
-          {profile && (
-            <pre className="bg-gray-100 p-2 rounded text-sm overflow-x-auto">
-              {JSON.stringify(profile, null, 2)}
-            </pre>
-          )}
-        </section>
-
-        {error && <p className="text-red-600 mt-4">{error}</p>}
-      </main>
-    </div>
+          ))}
+        </div>
+      ) : (
+        <div className="text-gray-500">No organizations joined yet.</div>
+      )}
+      {/* Join Organization Modal */}
+      {showJoinModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md relative border border-blue-200">
+            <button
+              className="absolute top-3 right-3 text-gray-400 hover:text-blue-700 text-2xl font-bold"
+              onClick={() => setShowJoinModal(false)}
+              aria-label="Close"
+            >
+              &times;
+            </button>
+            <h3 className="text-xl font-bold mb-6 text-blue-900 text-center">
+              Join Organization
+            </h3>
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                setError("");
+                setJoinResult("");
+                try {
+                  const accessToken = await supabase.auth
+                    .getSession()
+                    .then(({ data }) => data?.session?.access_token);
+                  const res = await axios.post(
+                    `${API}emp/join_request`,
+                    {
+                      join_code: joinCode,
+                    },
+                    {
+                      headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${accessToken}`,
+                      },
+                    }
+                  );
+                  setJoinResult(res.data.message || "Joined successfully!");
+                  setShowJoinModal(false);
+                  setJoinCode("");
+                  // Optionally, refresh organizations
+                  fetchOrganizations();
+                } catch (err) {
+                  setError("Failed to join organization.");
+                }
+              }}
+              className="flex flex-col gap-5"
+            >
+              <input
+                type="text"
+                value={joinCode}
+                onChange={(e) => setJoinCode(e.target.value)}
+                placeholder="Enter join code"
+                className="border border-blue-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-lg"
+                required
+              />
+              <button
+                type="submit"
+                className="bg-gradient-to-r from-blue-600 to-blue-500 text-white px-4 py-2 rounded-lg shadow hover:from-blue-700 hover:to-blue-600 font-semibold transition"
+              >
+                Join
+              </button>
+              {joinResult && (
+                <p className="text-green-600 text-sm text-center">
+                  {joinResult}
+                </p>
+              )}
+              {error && (
+                <p className="text-red-600 text-sm text-center">{error}</p>
+              )}
+            </form>
+          </div>
+        </div>
+      )}
+    </section>
   );
 }
