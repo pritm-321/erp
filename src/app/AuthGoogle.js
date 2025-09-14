@@ -3,6 +3,8 @@ import { supabase } from "../utils/supabaseClient";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { API } from "@/utils/url";
+import Image from "next/image";
+import { Package, Store, ClipboardList } from "lucide-react";
 
 export default function AuthGoogle() {
   const [user, setUser] = useState(null);
@@ -77,20 +79,67 @@ export default function AuthGoogle() {
   };
 
   return (
-    <div>
+    <div className="relative flex min-h-screen items-center justify-center">
+      {/* Decorative background icons */}
+      <Package
+        className="absolute top-10 left-10 text-purple-200 opacity-30"
+        size={120}
+      />
+      <Store
+        className="absolute bottom-20 -right-20 text-purple-200 opacity-20"
+        size={160}
+      />
+      <Store
+        className="absolute top-60 -left-72 text-purple-200 opacity-20"
+        size={160}
+      />
+      <ClipboardList
+        className="absolute bottom-60 -left-24 text-purple-300 opacity-20"
+        size={100}
+      />
+      <ClipboardList
+        className="absolute top-36 -right-36 text-purple-300 opacity-20"
+        size={130}
+      />
+      <Package
+        className="absolute bottom-10 -left-96 text-purple-300 opacity-10"
+        size={180}
+      />
       {user ? (
-        <>
-          <p>Signed in as {user.email}</p>
-          <button onClick={signOut}>Sign Out</button>
-        </>
+        <div className="bg-white rounded-xl shadow-lg p-8 flex flex-col items-center relative z-10">
+          <p className="mb-4 text-lg text-purple-900">
+            Signed in as {user.email}
+          </p>
+          <button
+            onClick={signOut}
+            className="bg-red-500 text-white px-6 py-2 rounded-full shadow font-semibold hover:bg-red-600 transition"
+          >
+            Sign Out
+          </button>
+        </div>
       ) : (
-        <button
-          onClick={signInWithGoogle}
-          className="flex items-center px-4 py-2 bg-white text-black rounded-full  shadow cursor-pointer"
-        >
-          <img src="/google.png" alt="Google" className="mr-2" /> Sign In with
-          Google
-        </button>
+        <div className="bg-white rounded-2xl p-10 flex flex-col items-center w-full relative z-10">
+          <Image
+            src={"/logo.png"}
+            alt="Logo"
+            width={1000}
+            height={40}
+            className="object-contain w-full mb-5 rounded-full "
+          />
+          <h1 className="text-3xl font-bold text-purple-900 mb-4">
+            Welcome to Quiktrack
+          </h1>
+          <p className="mb-6 text-purple-700 text-center">
+            Sign in with your Google account to continue.
+          </p>
+          <button
+            onClick={signInWithGoogle}
+            className="flex items-center px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-700 text-white rounded-full shadow-lg font-semibold text-lg hover:from-purple-600 hover:to-purple-800 transition"
+          >
+            <img src="/google.png" alt="Google" className="mr-3 w-7 h-7" /> Sign
+            In with Google
+          </button>
+        </div>
       )}
     </div>
   );

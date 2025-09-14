@@ -2,7 +2,14 @@ import React, { useEffect, useState } from "react";
 import { supabase } from "@/utils/supabaseClient";
 import axios from "axios";
 import { API } from "@/utils/url";
-import { LogOut, Store, User } from "lucide-react";
+import {
+  LogOut,
+  Store,
+  User,
+  FileText,
+  ClipboardList,
+  BarChart2,
+} from "lucide-react";
 import Image from "next/image";
 
 export default function Sidebar() {
@@ -13,9 +20,21 @@ export default function Sidebar() {
   const fakeDepartments = Array.from({ length: 1 }, (_, i) => ({
     dept_name: `Merchant`,
     subheadings: [
-      { name: "Design", link: `/view-design` },
-      { name: "View PO", link: `/view-design/view-po` },
-      { name: "Reports", link: `/view-reports` },
+      {
+        name: "Design",
+        link: `/view-design`,
+        icon: <FileText className="inline-block mr-2" size={18} />,
+      },
+      {
+        name: "View PO",
+        link: `/view-design/view-po`,
+        icon: <ClipboardList className="inline-block mr-2" size={18} />,
+      },
+      {
+        name: "Reports",
+        link: `/view-reports`,
+        icon: <BarChart2 className="inline-block mr-2" size={18} />,
+      },
     ],
   }));
 
@@ -69,6 +88,13 @@ export default function Sidebar() {
 
   return (
     <aside className="w-68 h-screen border-r border-gray-300 bg-gray-50 flex flex-col items-center py-10 px-4 shadow-lg min-h-screen">
+      <Image
+        src={"/logo.png"}
+        alt="Logo"
+        width={1000}
+        height={40}
+        className="object-contain w-full mb-5 rounded-full "
+      />
       <div className="mb-8 text-center w-full">
         <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-purple-400 to-purple-600 p-1 mx-auto mb-3 flex items-center justify-center text-3xl text-white font-bold shadow-lg  border-white">
           <Image
@@ -112,8 +138,9 @@ export default function Sidebar() {
                       <a
                         key={subIdx}
                         href={sub.link}
-                        className="py-1 text-purple-700 hover:underline cursor-pointer block"
+                        className="py-1 px-2 text-purple-700 rounded flex items-center transition-colors duration-150 hover:bg-purple-200 hover:text-purple-900 cursor-pointer"
                       >
+                        {sub.icon}
                         {sub.name}
                       </a>
                     ))}

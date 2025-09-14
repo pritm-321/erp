@@ -19,6 +19,9 @@ export default function ViewDesign() {
   const [error, setError] = useState("");
   const [designs, setDesigns] = useState([]);
   const [expandedDesigns, setExpandedDesigns] = useState([]);
+  const [sortType, setSortType] = useState("");
+  const [searchParty, setSearchParty] = useState("");
+  const [searchDate, setSearchDate] = useState("");
 
   useEffect(() => {
     const fetchMerchantAndDesign = async () => {
@@ -114,7 +117,54 @@ export default function ViewDesign() {
     if (!grouped[key]) grouped[key] = [];
     grouped[key].push(d);
   });
-  const groupedEntries = Object.entries(grouped);
+  let groupedEntries = Object.entries(grouped);
+  console.log(JSON.stringify(groupedEntries, null, 2), "groupedEntries");
+
+  if (sortType === "name") {
+    groupedEntries = groupedEntries.sort((a, b) => {
+      // Use first design's party for each group
+      const nameA = a[1][0]?.party?.toLowerCase() || "";
+      const nameB = b[1][0]?.party?.toLowerCase() || "";
+      console.log(nameA, nameB, "names");
+
+      return nameA.localeCompare(nameB);
+    });
+  } else if (sortType === "date") {
+    groupedEntries = groupedEntries.sort((a, b) => {
+      // Use earliest delivery_date in each group
+      const getEarliestDate = (arr) => {
+        return arr.reduce((min, d) => {
+          const dt = new Date(d.delivery_date);
+          return !min || dt < min ? dt : min;
+        }, null);
+      };
+      const dateA = getEarliestDate(a[1]);
+      const dateB = getEarliestDate(b[1]);
+      return dateA - dateB;
+    });
+  }
+
+  // Filter by searchParty and searchDate
+  if (searchParty) {
+    groupedEntries = groupedEntries.filter(([key, group]) => {
+      const party = group[0]?.party?.toLowerCase() || "";
+      return party.includes(searchParty.toLowerCase());
+    });
+  }
+  if (searchDate) {
+    groupedEntries = groupedEntries.filter(([key, group]) => {
+      // Match if any design in group has delivery_date matching searchDate
+      return group.some((d) => {
+        const dDate = new Date(d.delivery_date);
+        const sDate = new Date(searchDate);
+        return (
+          dDate.getFullYear() === sDate.getFullYear() &&
+          dDate.getMonth() === sDate.getMonth() &&
+          dDate.getDate() === sDate.getDate()
+        );
+      });
+    });
+  }
 
   return (
     <div className="flex min-h-screen">
@@ -125,11 +175,44 @@ export default function ViewDesign() {
           <h1 className="text-3xl font-bold text-purple-900">
             Grouped Designs
           </h1>
+          <div className="flex gap-2 items-center">
+            <button
+              className="bg-purple-600 text-white px-6 py-2 rounded-lg shadow hover:bg-purple-700 transition font-semibold"
+              onClick={() => setCreateDesignModal(true)}
+            >
+              + Create Design
+            </button>
+          </div>
+        </div>
+        <div className="flex items-center gap-5 mb-6">
+          <input
+            type="text"
+            placeholder="Search by Party Name"
+            className="border border-purple-300 px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white"
+            value={searchParty}
+            onChange={(e) => setSearchParty(e.target.value)}
+          />
+          <input
+            type="date"
+            className="border border-purple-300 px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white"
+            value={searchDate}
+            onChange={(e) => setSearchDate(e.target.value)}
+          />
           <button
-            className="bg-purple-600 text-white px-6 py-2 rounded-lg shadow hover:bg-purple-700 transition font-semibold"
-            onClick={() => setCreateDesignModal(true)}
+            className={`bg-purple-500 text-white px-4 py-2 rounded-lg shadow hover:bg-purple-600 transition font-semibold ${
+              sortType === "name" ? "ring-2 ring-purple-700" : ""
+            }`}
+            onClick={() => setSortType("name")}
           >
-            + Create Design
+            Sort by Party Name
+          </button>
+          <button
+            className={`bg-purple-500 text-white px-4 py-2 rounded-lg shadow hover:bg-purple-600 transition font-semibold ${
+              sortType === "date" ? "ring-2 ring-purple-700" : ""
+            }`}
+            onClick={() => setSortType("date")}
+          >
+            Sort by Delivery Date
           </button>
         </div>
         {groupedEntries.length === 0 ? (

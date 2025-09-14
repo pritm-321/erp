@@ -131,9 +131,7 @@ export default function Dashboard() {
             <button
               key={idx}
               className="flex items-center gap-4 bg-white border border-purple-200 rounded-xl p-5 shadow-md hover:shadow-lg transition w-full text-left cursor-pointer"
-              onClick={() =>
-                (window.location.href = `/organization/${org.organization_id}`)
-              }
+              onClick={() => (window.location.href = `/view-design`)}
             >
               <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-purple-400 to-purple-600 flex items-center justify-center text-xl text-white font-bold shadow border-2 border-purple-100">
                 {org.organization_name
@@ -144,9 +142,9 @@ export default function Dashboard() {
                 <div className="font-semibold text-purple-900 text-lg">
                   {org.organization_name}
                 </div>
-                <div className="text-sm text-purple-700">
+                {/* <div className="text-sm text-purple-700">
                   ID: {org.organization_id}
-                </div>
+                </div> */}
                 <div className="text-xs text-gray-500 mt-1">
                   Joined: {org.joined_at}
                 </div>
