@@ -110,14 +110,14 @@ export default function Dashboard() {
   };
 
   return (
-    <section className="mb-8 p-6 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 shadow-lg h-screen">
+    <section className="mb-8 p-6 rounded-xl bg-gradient-to-br from-purple-50 to-purple-100 shadow-lg h-screen">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl font-bold text-blue-900">
+        <h2 className="text-2xl font-bold text-purple-900">
           Joined Organizations
         </h2>
         <button
           onClick={() => setShowJoinModal(true)}
-          className="bg-gradient-to-r from-blue-600 to-blue-500 text-white px-5 py-2 rounded-xl shadow hover:from-blue-700 hover:to-blue-600 font-semibold transition"
+          className="bg-gradient-to-r from-purple-600 to-purple-500 text-white px-5 py-2 rounded-xl shadow hover:from-purple-700 hover:to-purple-600 font-semibold transition"
         >
           + Join Organization
         </button>
@@ -130,21 +130,21 @@ export default function Dashboard() {
           {organizations.data.joined.map((org, idx) => (
             <button
               key={idx}
-              className="flex items-center gap-4 bg-white border border-blue-200 rounded-xl p-5 shadow-md hover:shadow-lg transition w-full text-left cursor-pointer"
+              className="flex items-center gap-4 bg-white border border-purple-200 rounded-xl p-5 shadow-md hover:shadow-lg transition w-full text-left cursor-pointer"
               onClick={() =>
                 (window.location.href = `/organization/${org.organization_id}`)
               }
             >
-              <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-blue-400 to-blue-600 flex items-center justify-center text-xl text-white font-bold shadow border-2 border-blue-100">
+              <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-purple-400 to-purple-600 flex items-center justify-center text-xl text-white font-bold shadow border-2 border-purple-100">
                 {org.organization_name
                   ? org.organization_name[0].toUpperCase()
                   : "O"}
               </div>
               <div className="flex-1">
-                <div className="font-semibold text-blue-900 text-lg">
+                <div className="font-semibold text-purple-900 text-lg">
                   {org.organization_name}
                 </div>
-                <div className="text-sm text-blue-700">
+                <div className="text-sm text-purple-700">
                   ID: {org.organization_id}
                 </div>
                 <div className="text-xs text-gray-500 mt-1">
@@ -160,15 +160,15 @@ export default function Dashboard() {
       {/* Join Organization Modal */}
       {showJoinModal && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md relative border border-blue-200">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md relative border border-purple-200">
             <button
-              className="absolute top-3 right-3 text-gray-400 hover:text-blue-700 text-2xl font-bold"
+              className="absolute top-3 right-3 text-gray-400 hover:text-purple-700 text-2xl font-bold"
               onClick={() => setShowJoinModal(false)}
               aria-label="Close"
             >
               &times;
             </button>
-            <h3 className="text-xl font-bold mb-6 text-blue-900 text-center">
+            <h3 className="text-xl font-bold mb-6 text-purple-900 text-center">
               Join Organization
             </h3>
             <form
@@ -208,12 +208,12 @@ export default function Dashboard() {
                 value={joinCode}
                 onChange={(e) => setJoinCode(e.target.value)}
                 placeholder="Enter join code"
-                className="border border-blue-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-lg"
+                className="border border-purple-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 text-lg"
                 required
               />
               <button
                 type="submit"
-                className="bg-gradient-to-r from-blue-600 to-blue-500 text-white px-4 py-2 rounded-lg shadow hover:from-blue-700 hover:to-blue-600 font-semibold transition"
+                className="bg-gradient-to-r from-purple-600 to-purple-500 text-white px-4 py-2 rounded-lg shadow hover:from-purple-700 hover:to-purple-600 font-semibold transition"
               >
                 Join
               </button>

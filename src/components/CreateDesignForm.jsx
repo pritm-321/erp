@@ -4,7 +4,7 @@ import { supabase } from "@/utils/supabaseClient";
 import axios from "axios";
 import { API } from "@/utils/url";
 
-export default function CreateDesign() {
+export default function CreateDesignForm() {
   // Design form state
   const [designForm, setDesignForm] = useState({
     design_name: "",
@@ -152,115 +152,170 @@ export default function CreateDesign() {
   }
 
   return (
-    <section className="mb-8 p-4 border rounded-lg max-w-7xl">
-      <h2 className="text-lg font-semibold mb-2">Create Design</h2>
+    <section className="mb-8 p-8 rounded-2xl max-w-3xl mx-auto ">
       <form
         onSubmit={handleDesignSubmit}
-        className="grid grid-cols-1 md:grid-cols-2 gap-4"
+        className="grid grid-cols-1 md:grid-cols-2 gap-6"
       >
-        {/* <select
-          name="design_name"
-          value={designForm.design_name}
-          onChange={handleDesignChange}
-          className="border px-2 py-1 rounded"
-          required
-        >
-          <option value="" disabled>
-            Select Design Name
-          </option>
-          {designNameOptions.map((name, idx) => (
-            <option key={idx} value={name}>
-              {name}
+        <div>
+          <label
+            htmlFor="design_name"
+            className="block font-medium mb-1 text-purple-800"
+          >
+            Design Name
+          </label>
+          <input
+            id="design_name"
+            name="design_name"
+            value={designForm.design_name}
+            onChange={handleDesignChange}
+            placeholder="Design Name"
+            type="text"
+            className="border border-purple-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white w-full"
+            required
+          />
+        </div>
+        <div>
+          <label
+            htmlFor="party"
+            className="block font-medium mb-1 text-purple-800"
+          >
+            Party
+          </label>
+          <select
+            id="party"
+            name="party"
+            value={designForm.party}
+            onChange={handleDesignChange}
+            className="border border-purple-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white w-full"
+            required
+          >
+            <option value="" disabled>
+              Select Party
             </option>
-          ))}
-        </select> */}
-        <input
-          name="design_name"
-          value={designForm.design_name}
-          onChange={handleDesignChange}
-          placeholder="Design Name"
-          type="text"
-          className="border px-2 py-1 rounded"
-          required
-        />
-        <select
-          name="party"
-          value={designForm.party}
-          onChange={handleDesignChange}
-          className="border px-2 py-1 rounded"
-          required
-        >
-          <option value="" disabled>
-            Select Party
-          </option>
-          {partyOptions.map((party, idx) => (
-            <option key={idx} value={party}>
-              {party}
+            {partyOptions.map((party, idx) => (
+              <option key={idx} value={party}>
+                {party}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label
+            htmlFor="quantity"
+            className="block font-medium mb-1 text-purple-800"
+          >
+            Quantity
+          </label>
+          <input
+            id="quantity"
+            name="quantity"
+            value={designForm.quantity}
+            onChange={handleDesignChange}
+            placeholder="Quantity"
+            type="number"
+            className="border border-purple-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white w-full"
+            required
+          />
+        </div>
+        <div>
+          <label
+            htmlFor="po"
+            className="block font-medium mb-1 text-purple-800"
+          >
+            PO
+          </label>
+          <input
+            id="po"
+            name="po"
+            value={designForm.po}
+            onChange={handleDesignChange}
+            placeholder="PO"
+            className="border border-purple-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white w-full"
+            required
+          />
+        </div>
+        <div>
+          <label
+            htmlFor="design_type_id"
+            className="block font-medium mb-1 text-purple-800"
+          >
+            Design Type
+          </label>
+          <select
+            id="design_type_id"
+            name="design_type_id"
+            value={designForm.design_type_id}
+            onChange={handleDesignChange}
+            className="border border-purple-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white w-full"
+            required
+          >
+            <option value="" disabled>
+              Select Design Type
             </option>
-          ))}
-        </select>
-        <input
-          name="quantity"
-          value={designForm.quantity}
-          onChange={handleDesignChange}
-          placeholder="Quantity"
-          type="number"
-          className="border px-2 py-1 rounded"
-          required
-        />
-        <input
-          name="po"
-          value={designForm.po}
-          onChange={handleDesignChange}
-          placeholder="PO"
-          className="border px-2 py-1 rounded"
-          required
-        />
-        <select
-          name="design_type_id"
-          value={designForm.design_type_id}
-          onChange={handleDesignChange}
-          className="border px-2 py-1 rounded"
-          required
-        >
-          <option value="" disabled>
-            Select Design Type
-          </option>
-          {designTypeOptions.map((type) => (
-            <option key={type.id} value={type.id}>
-              {type.name}
-            </option>
-          ))}
-        </select>
-        <input
-          name="mrp"
-          value={designForm.mrp}
-          onChange={handleDesignChange}
-          placeholder="MRP"
-          type="number"
-          step="0.01"
-          className="border px-2 py-1 rounded"
-          required
-        />
-        <input
-          name="rate"
-          value={designForm.rate}
-          onChange={handleDesignChange}
-          placeholder="Rate"
-          type="number"
-          step="0.01"
-          className="border px-2 py-1 rounded"
-          required
-        />
-        <input
-          name="delivery_date"
-          value={designForm.delivery_date}
-          onChange={handleDesignChange}
-          placeholder="Delivery Date"
-          type="date"
-          className="border px-2 py-1 rounded"
-          required
-        />
+            {designTypeOptions.map((type) => (
+              <option key={type.id} value={type.id}>
+                {type.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label
+            htmlFor="mrp"
+            className="block font-medium mb-1 text-purple-800"
+          >
+            MRP
+          </label>
+          <input
+            id="mrp"
+            name="mrp"
+            value={designForm.mrp}
+            onChange={handleDesignChange}
+            placeholder="MRP"
+            type="number"
+            step="0.01"
+            className="border border-purple-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white w-full"
+            required
+          />
+        </div>
+        <div>
+          <label
+            htmlFor="rate"
+            className="block font-medium mb-1 text-purple-800"
+          >
+            Rate
+          </label>
+          <input
+            id="rate"
+            name="rate"
+            value={designForm.rate}
+            onChange={handleDesignChange}
+            placeholder="Rate"
+            type="number"
+            step="0.01"
+            className="border border-purple-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white w-full"
+            required
+          />
+        </div>
+        <div>
+          <label
+            htmlFor="delivery_date"
+            className="block font-medium mb-1 text-purple-800"
+          >
+            Delivery Date
+          </label>
+          <input
+            id="delivery_date"
+            name="delivery_date"
+            value={designForm.delivery_date}
+            onChange={handleDesignChange}
+            placeholder="Delivery Date"
+            type="date"
+            className="border border-purple-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white w-full"
+            required
+          />
+        </div>
         {/* <input
           name="validation_type"
           value={designForm.validation_type}
@@ -300,12 +355,15 @@ export default function CreateDesign() {
         /> */}
         <button
           type="submit"
-          className="bg-green-600 text-white px-4 py-2 rounded col-span-1 md:col-span-2"
+          className="bg-gradient-to-br from-purple-400 to-purple-600 text-white px-6 py-3 rounded-xl shadow hover:from-purple-500 hover:to-purple-800 font-semibold transition col-span-1 md:col-span-2 mt-2"
         >
           Create Design
         </button>
       </form>
-      {designResult && <p className="mt-2 text-green-600">{designResult}</p>}
+      {designResult && (
+        <p className="mt-4 text-green-600 font-semibold">{designResult}</p>
+      )}
+      {error && <p className="mt-4 text-red-600 font-semibold">{error}</p>}
     </section>
   );
 }

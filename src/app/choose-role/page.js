@@ -26,7 +26,7 @@ export default function ChooseRole() {
       <div className="flex gap-8">
         <button
           onClick={() => handleSelect("Organization")}
-          className="px-6 py-3 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition"
+          className="px-6 py-3 bg-purple-600 text-white rounded-lg shadow hover:bg-purple-700 transition"
           disabled={loading}
         >
           Organization
