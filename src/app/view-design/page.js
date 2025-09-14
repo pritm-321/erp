@@ -223,7 +223,7 @@ export default function ViewDesign() {
               return (
                 <div
                   key={idx}
-                  className="p-6 rounded-xl shadow bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200"
+                  className="p-6 rounded-xl shadow bg-gray-50 border border-purple-200"
                 >
                   <div className="mb-2 text-lg font-semibold text-purple-800">
                     Party: <span className="font-bold">{party}</span>

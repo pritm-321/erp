@@ -52,53 +52,10 @@ export default function GroupDesignsPage() {
         setAccessToken(data?.session?.access_token || "");
       });
     }
-  }, []);
+  }, [accessToken, organizationId]);
 
   useEffect(() => {
-    // const fetchDesigns = async () => {
-    //   setLoading(true);
-    //   setError("");
-    //   try {
-    //     // Fetch all designs and filter by groupId
-    //     const res = await axios.get(
-    //       `${API}design/merchant/${localStorage.getItem(
-    //         "merchant_department_id"
-    //       )}`,
-    //       {
-    //         headers: {
-    //           Authorization: `Bearer ${accessToken}`,
-    //           "Organization-ID": organizationId,
-    //         },
-    //       }
-    //     );
-
-    //     // Group logic: filter designs by groupId
-    //     const allDesigns = res.data?.data?.designs || [];
-
-    //     const grouped = {};
-    //     allDesigns.forEach((d) => {
-    //       const key = [
-    //         d.party,
-    //         d.order_quantity,
-    //         d.design_type,
-    //         d.mrp,
-    //         d.rate,
-    //         d.delivery_date,
-    //       ].join("|");
-    //       if (!grouped[key]) grouped[key] = [];
-    //       grouped[key].push(d);
-    //     });
-    //     const groupedEntries = Object.entries(grouped);
-    //     console.log(groupedEntries, " grouped designs");
-    //     setDesigns(groupedEntries);
-    //   } catch (err) {
-    //     setError("Failed to fetch designs.");
-    //   } finally {
-    //     setLoading(false);
-    //   }
-    // };
     if (accessToken && organizationId && groupId) {
-      // fetchDesigns();
       // Fetch designs from localStorage for this group
       if (typeof window !== "undefined") {
         const allDesigns = JSON.parse(
@@ -170,21 +127,30 @@ export default function GroupDesignsPage() {
           "Organization-ID": organizationId,
         },
       });
-      console.log(res.data, " parts data");
+      // console.log(res.data, " parts data");
 
       setPartsDetails(res.data || {});
+
       setViewPartsModal({ open: true, designId });
+      setSizes(res.data.sizes);
+
+      setVariants(res.data.variants);
     } catch (err) {
       setPartsDetails([]);
       setViewPartsModal({ open: true, designId });
     }
   };
 
+  const handleOpenUploadModal = (designId) => {
+    setUploadModal({ open: true, designId });
+    handleViewParts(designId);
+  };
+
   return (
     <div className="flex min-h-screen">
       <Sidebar />
       <main className="flex-1 p-8 bg-white">
-        <h1 className="text-3xl font-bold mb-6 text-purple-900">
+        <h1 className="text-3xl font-bold mb-6 text-purple-950">
           Designs in Group
         </h1>
         {loading ? (
@@ -197,34 +163,34 @@ export default function GroupDesignsPage() {
           </div>
         ) : (
           <>
-            <div className="mb-6 p-4 rounded-xl bg-gradient-to-r from-purple-50 to-purple-100 border border-purple-200">
+            <div className="mb-6 p-4 rounded-xl bg-gray-50 border border-purple-200">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <span className="font-semibold text-purple-800">Party:</span>{" "}
+                  <span className="font-semibold text-purple-950">Party:</span>{" "}
                   <span className="font-bold">{groupInfo.party}</span>
                 </div>
                 <div>
-                  <span className="font-semibold text-purple-800">
+                  <span className="font-semibold text-purple-950">
                     Order Quantity:
                   </span>{" "}
                   <span className="font-bold">{groupInfo.order_quantity}</span>
                 </div>
                 <div>
-                  <span className="font-semibold text-purple-800">
+                  <span className="font-semibold text-purple-950">
                     Design Type:
                   </span>{" "}
                   <span className="font-bold">{groupInfo.design_type}</span>
                 </div>
                 <div>
-                  <span className="font-semibold text-purple-800">MRP:</span>{" "}
+                  <span className="font-semibold text-purple-950">MRP:</span>{" "}
                   <span className="font-bold">{groupInfo.mrp}</span>
                 </div>
                 <div>
-                  <span className="font-semibold text-purple-800">Rate:</span>{" "}
+                  <span className="font-semibold text-purple-950">Rate:</span>{" "}
                   <span className="font-bold">{groupInfo.rate}</span>
                 </div>
                 <div>
-                  <span className="font-semibold text-purple-800">
+                  <span className="font-semibold text-purple-950">
                     Delivery Date:
                   </span>{" "}
                   <span className="font-bold">{groupInfo.delivery_date}</span>
@@ -232,22 +198,22 @@ export default function GroupDesignsPage() {
               </div>
             </div>
             <div className="overflow-x-auto">
-              <table className="min-w-full bg-white border-gray-100 rounded-xl shadow">
-                <thead className="bg-gradient-to-r from-purple-100 to-purple-200">
+              <table className="min-w-full bg-white border border-purple-200 rounded-xl shadow">
+                <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-4 py-2 text-left text-purple-900 font-bold">
+                    <th className="px-4 py-2 text-left text-purple-950 font-bold">
                       Image
                     </th>
-                    <th className="px-4 py-2 text-left text-purple-900 font-bold">
+                    <th className="px-4 py-2 text-left text-purple-950 font-bold">
                       Design Name
                     </th>
-                    <th className="px-4 py-2 text-left text-purple-900 font-bold">
+                    <th className="px-4 py-2 text-left text-purple-950 font-bold">
                       Status
                     </th>
-                    <th className="px-4 py-2 text-left text-purple-900 font-bold">
+                    <th className="px-4 py-2 text-left text-purple-950 font-bold">
                       PO
                     </th>
-                    <th className="px-4 py-2 text-left text-purple-900 font-bold">
+                    <th className="px-4 py-2 text-left text-purple-950 font-bold">
                       Actions
                     </th>
                   </tr>
@@ -265,7 +231,7 @@ export default function GroupDesignsPage() {
                           className="w-16 h-16 object-cover rounded-xl border-2 border-purple-200"
                         />
                       </td>
-                      <td className="px-4 py-2 font-semibold text-purple-900">
+                      <td className="px-4 py-2 font-semibold text-purple-950">
                         {d.design_name}
                       </td>
                       <td className="px-4 py-2 text-purple-700">{d.status}</td>
@@ -280,12 +246,7 @@ export default function GroupDesignsPage() {
                           </button>
                           <button
                             className="bg-green-500 text-white px-4 py-2 rounded-lg shadow hover:bg-green-600 transition"
-                            onClick={() =>
-                              setUploadModal({
-                                open: true,
-                                designId: d.design_id,
-                              })
-                            }
+                            onClick={() => handleOpenUploadModal(d.design_id)}
                           >
                             Upload Parts
                           </button>
@@ -305,9 +266,9 @@ export default function GroupDesignsPage() {
       {/* View Parts Modal */}
       {viewPartsModal.open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-          <div className="bg-white rounded-lg shadow-lg p-6 max-w-xl w-full relative max-h-[90vh] overflow-y-auto">
+          <div className="bg-gray-50 rounded-2xl shadow-2xl p-8 max-w-2xl w-full relative">
             <button
-              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-xl"
+              className="absolute top-4 right-4 text-gray-400 hover:text-purple-700 text-2xl font-bold"
               onClick={() =>
                 setViewPartsModal({
                   open: false,
@@ -317,60 +278,135 @@ export default function GroupDesignsPage() {
             >
               &times;
             </button>
-            <h2 className="text-lg font-semibold mb-4">Parts Details</h2>
+            <h2 className="text-2xl font-bold mb-6 text-purple-950">
+              Parts Details
+            </h2>
             {partsDetails.fabric_requirements ? (
               <div className="text-gray-500">
                 No parts found for this design.
               </div>
             ) : (
-              <div className="space-y-4">
-                {partsDetails.sizes?.map((part, idx) => (
-                  <div key={idx} className="border rounded p-3 bg-gray-50">
-                    <div className="font-semibold">Part Size: {part.size}</div>
-                    <div className="ml-2">
-                      <div className="font-medium">
-                        Ratio Component : {part.ratio_component}
+              <div className="space-y-6">
+                {partsDetails.sizes?.length > 0 && (
+                  <div>
+                    <h3 className="text-lg font-bold text-purple-950 mb-2">
+                      Sizes
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* {partsDetails.sizes.map((part, idx) => ( */}
+                      <div className="border-2 border-purple-200 rounded-xl p-4 bg-white shadow">
+                        <div className="font-semibold text-purple-950">
+                          Part Size:{" "}
+                          <span className="font-medium">
+                            {partsDetails.sizes.map((part, idx) => (
+                              <span key={idx}>{part.size},</span>
+                            ))}
+                          </span>
+                        </div>
+                        <div className="mt-2 font-semibold text-purple-950">
+                          Ratio Component:{" "}
+                          <span className="font-medium">
+                            {partsDetails.sizes.map((part, idx) => (
+                              <span key={idx}>{part.ratio_component}:</span>
+                            ))}
+                          </span>
+                        </div>
                       </div>
+                      {/* ))} */}
                     </div>
                   </div>
-                ))}
-                {partsDetails.variants?.map((part, idx) => (
-                  <div key={idx} className="border rounded p-3 bg-gray-50">
-                    <div className="font-semibold">
-                      Part Variants:{" "}
-                      {part.part_name || part.name || part.part_id}
-                    </div>
-                    {part.fabrics && (
-                      <div className="ml-2">
-                        <div className="font-medium">Fabrics:</div>
-                        {part.fabrics.map((fab, fi) => (
-                          <div key={fi} className="ml-2">
-                            <div>
-                              Type: {fab.fabric_type_name || fab.fabric_type_id}
-                            </div>
-                            {fab.colors && (
-                              <div className="ml-2">
-                                <div className="font-medium">Colors:</div>
-                                {fab.colors.map((col, ci) => (
-                                  <div key={ci} className="ml-2 flex gap-2">
-                                    <div>ID: {col.color_id}</div>
-                                    <div>
-                                      Name: {col.color_name || col.name}
+                )}
+                {partsDetails.variants?.length > 0 && (
+                  <div className="max-h-[500px] overflow-y-auto">
+                    <h3 className="text-lg font-bold text-purple-950 mb-2">
+                      Variants
+                    </h3>
+                    <div className="space-y-4">
+                      {partsDetails.variants.map((part, idx) => (
+                        <div
+                          key={idx}
+                          className="border-2 border-purple-200 rounded-xl p-4 bg-white shadow"
+                        >
+                          <div className="font-semibold text-purple-950 mb-2">
+                            Variant:{" "}
+                            <span className="font-bold ">{part.variation}</span>
+                          </div>
+                          <div className="font-bold text-purple-950 mb-2">
+                            Part Variant:{" "}
+                            <span className="font-medium ">
+                              {part.part_name || part.name || part.part_id}
+                            </span>
+                          </div>
+                          {part.fabrics && (
+                            <div className="">
+                              <div className="font-bold text-purple-950 mb-1">
+                                Fabrics:
+                              </div>
+                              <div className="space-y-2">
+                                {part.fabrics.map((fab, fi) => (
+                                  <div
+                                    key={fi}
+                                    className="border border-purple-100 rounded-lg p-3 bg-gradient-to-br from-gray-50 to-white"
+                                  >
+                                    <div className="font-bold text-purple-950 mb-1">
+                                      Fabric Type:{" "}
+                                      <span className="font-medium">
+                                        {fab.fabric_type_name ||
+                                          fab.fabric_type_id}
+                                      </span>
                                     </div>
-                                    <div>
-                                      Base: {col.is_base ? "Yes" : "No"}
-                                    </div>
-                                    <div>Consumption: {col.consumption}</div>
+                                    {fab.colors && (
+                                      <div className="ml-2">
+                                        <div className="font-bold text-purple-950 mb-1">
+                                          Fabric Colors:
+                                        </div>
+                                        <div className="space-y-1">
+                                          <table className="w-full rounded-lg overflow-hidden">
+                                            <thead>
+                                              <tr className="text-left text-white border-b border-purple-200 bg-gradient-to-br from-purple-600 to-blue-400">
+                                                <th className="px-6 py-1">
+                                                  Name
+                                                </th>
+                                                <th className="px-6 py-1">
+                                                  Base
+                                                </th>
+                                                <th className="px-6 py-1">
+                                                  Consumption
+                                                </th>
+                                              </tr>
+                                            </thead>
+                                            <tbody>
+                                              {fab.colors.map((col, ci) => (
+                                                <tr
+                                                  key={ci}
+                                                  className="text-left text-purple-700 border-b border-purple-200"
+                                                >
+                                                  <td className="px-6 py-1">
+                                                    {col.color_name || col.name}
+                                                  </td>
+                                                  <td className="px-6 py-1">
+                                                    {col.is_base ? "Yes" : "No"}
+                                                  </td>
+                                                  <td className="px-6 py-1">
+                                                    {col.consumption}
+                                                  </td>
+                                                </tr>
+                                              ))}
+                                            </tbody>
+                                          </table>
+                                        </div>
+                                      </div>
+                                    )}
                                   </div>
                                 ))}
                               </div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    )}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                ))}
+                )}
               </div>
             )}
           </div>
@@ -409,6 +445,7 @@ export default function GroupDesignsPage() {
                   ...v,
                   variation: String(idx + 1),
                 }));
+                console.log({ sizes, variants: autoVariants });
                 try {
                   await axios.post(
                     `${API}so/update-data/${uploadModal.designId}`,
@@ -431,10 +468,10 @@ export default function GroupDesignsPage() {
                   setUploadLoading(false);
                 }
               }}
-              className="space-y-6"
+              className="space-y-6 max-h-[80vh] overflow-y-auto"
             >
               <div className="mb-4">
-                <label className="block font-bold text-xl mb-1 text-purple-800">
+                <label className="block font-bold text-xl mb-1 text-purple-950">
                   Sizes
                 </label>
                 {sizes.map((sz, i) => (
@@ -491,14 +528,14 @@ export default function GroupDesignsPage() {
                 </button>
               </div>
               <div className="mb-4 ">
-                <label className="block font-bold text-xl text-purple-800 mb-2">
+                <label className="block font-bold text-xl text-purple-950 mb-2">
                   Variants
                 </label>
-                <div className="space-y-6 max-h-[450px] overflow-y-auto">
+                <div className="space-y-6">
                   {variants.map((v, vi) => (
                     <div
                       key={vi}
-                      className="rounded-2xl border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-purple-100 p-6 shadow flex flex-col gap-4"
+                      className="rounded-2xl border-2 border-purple-200 bg-gray-50 p-4 shadow flex flex-col gap-2"
                     >
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-purple-700 font-bold text-lg">
