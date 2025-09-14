@@ -6,6 +6,7 @@ import { API } from "@/utils/url";
 import { Upload } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
 import CreateDesignForm from "@/components/CreateDesignForm";
+import { useRouter } from "next/navigation";
 
 export default function ViewDesign() {
   const [viewPartsModal, setViewPartsModal] = useState({
@@ -39,6 +40,7 @@ export default function ViewDesign() {
   const [accessToken, setAccessToken] = useState("");
 
   const [createDesignModal, setCreateDesignModal] = useState(false);
+  const router = useRouter();
 
   // Fetch dropdown options when modal opens
   useEffect(() => {
@@ -123,6 +125,12 @@ export default function ViewDesign() {
         // console.log(merchantRes.data.data.departments[0]);
 
         setMerchant(merchantRes.data);
+        if (typeof window !== "undefined") {
+          localStorage.setItem(
+            "merchant_department_id",
+            merchantRes.data?.data.departments[0]?.department_id || ""
+          );
+        }
         // console.log(merchantRes.data?.data.departments[0]?.department_id);
 
         // Then fetch design details
@@ -135,7 +143,7 @@ export default function ViewDesign() {
             },
           }
         );
-        console.log(res.data.data.designs);
+        // console.log(res.data.data.designs);
 
         setDesigns(res.data.data.designs); // Assuming we want the first design
       } catch (err) {
@@ -308,13 +316,15 @@ export default function ViewDesign() {
                     <button
                       className="px-4 py-2 bg-purple-600 text-white rounded-lg shadow hover:bg-purple-700 transition"
                       onClick={() => {
-                        if (expandedDesigns.includes(idx)) {
-                          setExpandedDesigns(
-                            expandedDesigns.filter((i) => i !== idx)
+                        // Store all designs in this group in localStorage
+                        if (typeof window !== "undefined") {
+                          localStorage.setItem(
+                            "selected_group_designs",
+                            JSON.stringify(group)
                           );
-                        } else {
-                          setExpandedDesigns([...expandedDesigns, idx]);
                         }
+                        // Redirect to group details page with groupId
+                        router.push(`/view-design/${encodeURIComponent(key)}`);
                       }}
                     >
                       {expandedDesigns.includes(idx)
