@@ -6,6 +6,7 @@ import axios, { all } from "axios";
 import { API } from "@/utils/url";
 import { supabase } from "@/utils/supabaseClient";
 import { Delete, DeleteIcon, Plus, Trash } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function GroupDesignsPage() {
   const searchParams = useSearchParams();
@@ -43,6 +44,7 @@ export default function GroupDesignsPage() {
       ],
     },
   ]);
+  const router = useRouter();
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -146,6 +148,13 @@ export default function GroupDesignsPage() {
     handleViewParts(designId);
   };
 
+  const handleViewFabricRequirementsNav = (designId) => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("fabric_requirements_design_id", String(designId));
+    }
+    router.push("/view-design/fabric-requirements");
+  };
+
   return (
     <div className="flex min-h-screen">
       <Sidebar />
@@ -197,8 +206,8 @@ export default function GroupDesignsPage() {
                 </div>
               </div>
             </div>
-            <div className="overflow-x-auto">
-              <table className="min-w-full bg-white border border-purple-200 rounded-xl shadow">
+            <div className="overflow-hidden rounded-xl border border-purple-200">
+              <table className="min-w-full bg-white  rounded-xl  shadow">
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-4 py-2 text-left text-purple-950 font-bold">
@@ -250,7 +259,12 @@ export default function GroupDesignsPage() {
                           >
                             Upload Parts
                           </button>
-                          <button className="bg-purple-600 text-white px-3 py-1 rounded shadow hover:bg-purple-700 transition text-sm">
+                          <button
+                            className="bg-purple-600 text-white px-3 py-1 rounded shadow hover:bg-purple-700 transition text-sm"
+                            onClick={() =>
+                              handleViewFabricRequirementsNav(d.design_id)
+                            }
+                          >
                             View Fabric Requirements
                           </button>
                         </div>

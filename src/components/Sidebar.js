@@ -14,7 +14,7 @@ export default function Sidebar() {
     dept_name: `Merchant`,
     subheadings: [
       { name: "Design", link: `/view-design` },
-      { name: "View PO", link: `/view-po` },
+      { name: "View PO", link: `/view-design/view-po` },
       { name: "Reports", link: `/view-reports` },
     ],
   }));
