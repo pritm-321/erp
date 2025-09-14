@@ -10,8 +10,8 @@ export default function Sidebar() {
   const [departments, setDepartments] = useState([]);
   const [openDeptIdx, setOpenDeptIdx] = useState(null);
 
-  const fakeDepartments = Array.from({ length: 6 }, (_, i) => ({
-    dept_name: `Department ${i + 1}`,
+  const fakeDepartments = Array.from({ length: 1 }, (_, i) => ({
+    dept_name: `Merchant`,
     subheadings: [
       { name: "Design", link: `/view-design` },
       { name: "View PO", link: `/view-po` },
