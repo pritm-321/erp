@@ -680,9 +680,21 @@ export default function GroupDesignsPage() {
                                       checked={!!c.is_base}
                                       onChange={(e) => {
                                         const newVariants = [...variants];
-                                        newVariants[vi].fabrics[fi].colors[
-                                          ci
-                                        ].is_base = e.target.checked;
+                                        // Set all colors in all fabrics of this variant to is_base: false except the selected one
+                                        newVariants[vi].fabrics.forEach(
+                                          (fabric, fabricIdx) => {
+                                            fabric.colors = fabric.colors.map(
+                                              (color, colorIdx) => ({
+                                                ...color,
+                                                is_base:
+                                                  fabricIdx === fi &&
+                                                  colorIdx === ci
+                                                    ? e.target.checked
+                                                    : false,
+                                              })
+                                            );
+                                          }
+                                        );
                                         setVariants(newVariants);
                                       }}
                                     />
