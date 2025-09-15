@@ -122,6 +122,7 @@ export default function GroupDesignsPage() {
       : {};
 
   const handleViewParts = async (designId) => {
+    setViewPartsModal({ open: true, designId });
     try {
       const res = await axios.get(`${API}so/design/${designId}/parts`, {
         headers: {
@@ -133,10 +134,12 @@ export default function GroupDesignsPage() {
 
       setPartsDetails(res.data || {});
 
-      setViewPartsModal({ open: true, designId });
-      setSizes(res.data.sizes);
+      // console.log(res.data);
 
-      setVariants(res.data.variants);
+      // console.log(res.data, res.data, " parts data");
+
+      setSizes(res.data.sizes || sizes);
+      setVariants(res.data.variants || variants);
     } catch (err) {
       setPartsDetails([]);
       setViewPartsModal({ open: true, designId });
@@ -459,7 +462,7 @@ export default function GroupDesignsPage() {
                   ...v,
                   variation: String(idx + 1),
                 }));
-                console.log({ sizes, variants: autoVariants });
+                // console.log(sizes, variants, "sizes, variants");
                 try {
                   await axios.post(
                     `${API}so/update-data/${uploadModal.designId}`,
@@ -480,6 +483,10 @@ export default function GroupDesignsPage() {
                   setUploadError("Failed to upload design data.");
                 } finally {
                   setUploadLoading(false);
+                  setViewPartsModal({
+                    open: false,
+                    designId: uploadModal.designId,
+                  });
                 }
               }}
               className="space-y-6 max-h-[80vh] overflow-y-auto"
@@ -546,7 +553,7 @@ export default function GroupDesignsPage() {
                   Variants
                 </label>
                 <div className="space-y-6">
-                  {variants.map((v, vi) => (
+                  {variants?.map((v, vi) => (
                     <div
                       key={vi}
                       className="rounded-2xl border-2 border-purple-200 bg-gray-50 p-4 shadow flex flex-col gap-2"
