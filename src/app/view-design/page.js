@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { supabase } from "@/utils/supabaseClient";
 import { API } from "@/utils/url";
-import { Upload } from "lucide-react";
+import { Upload, Search } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
 import CreateDesignForm from "@/components/CreateDesignForm";
 import { useRouter } from "next/navigation";
@@ -148,7 +148,18 @@ export default function ViewDesign() {
   if (searchParty) {
     groupedEntries = groupedEntries.filter(([key, group]) => {
       const party = group[0]?.party?.toLowerCase() || "";
-      return party.includes(searchParty.toLowerCase());
+      const designType = group[0]?.design_type?.toLowerCase() || "";
+      // Check if any design in group matches design_name
+      const hasDesignName = group.some((d) =>
+        d.design_name?.toLowerCase().includes(searchParty.toLowerCase())
+      );
+      // Check if input is a date (YYYY-MM-DD)
+
+      return (
+        party.includes(searchParty.toLowerCase()) ||
+        designType.includes(searchParty.toLowerCase()) ||
+        hasDesignName
+      );
     });
   }
   if (searchDate) {
@@ -185,15 +196,21 @@ export default function ViewDesign() {
           </div>
         </div>
         <div className="flex items-center gap-5 mb-6">
-          <input
-            type="text"
-            placeholder="Search by Party Name"
-            className="border border-purple-300 px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white"
-            value={searchParty}
-            onChange={(e) => setSearchParty(e.target.value)}
-          />
+          <div className="relative w-96">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-purple-400">
+              <Search size={20} />
+            </span>
+            <input
+              type="text"
+              placeholder="Search by Party Name / Design Type / Design Name / Delivery Date"
+              className="pl-10 w-96 border border-purple-300 px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white"
+              value={searchParty}
+              onChange={(e) => setSearchParty(e.target.value)}
+            />
+          </div>
           <input
             type="date"
+            placeholder="Search by Delivery Date"
             className="border border-purple-300 px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white"
             value={searchDate}
             onChange={(e) => setSearchDate(e.target.value)}
