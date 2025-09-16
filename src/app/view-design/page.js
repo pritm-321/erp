@@ -118,7 +118,7 @@ export default function ViewDesign() {
     grouped[key].push(d);
   });
   let groupedEntries = Object.entries(grouped);
-  console.log(JSON.stringify(groupedEntries, null, 2), "groupedEntries");
+  // console.log(JSON.stringify(groupedEntries, null, 2), "groupedEntries");
 
   if (sortType === "name") {
     groupedEntries = groupedEntries.sort((a, b) => {

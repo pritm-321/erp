@@ -4,17 +4,26 @@ import { supabase } from "@/utils/supabaseClient";
 import axios from "axios";
 import { API } from "@/utils/url";
 
-export default function CreateDesignForm() {
+export default function CreateDesignForm({ group, defaultValue }) {
   // Design form state
+  console.log(group, defaultValue, "props");
+
+  const formatDate = (date) => {
+    if (!date) return "";
+    const d = new Date(date);
+    if (isNaN(d.getTime())) return "";
+    return d.toISOString().slice(0, 10);
+  };
+
   const [designForm, setDesignForm] = useState({
     design_name: "",
-    party: "",
-    quantity: "",
+    party: group ? defaultValue?.party : "",
+    quantity: group ? defaultValue?.order_quantity : "",
     po: "",
-    design_type_id: "",
-    mrp: "",
-    rate: "",
-    delivery_date: "",
+    design_type_id: group ? defaultValue?.design_type_id : "",
+    mrp: group ? defaultValue?.mrp : "",
+    rate: group ? defaultValue?.rate : "",
+    delivery_date: group ? formatDate(defaultValue?.delivery_date) : "",
     validation_type: "",
     validation_value: "",
     max_valid_limit: "",
@@ -106,6 +115,8 @@ export default function CreateDesignForm() {
     e.preventDefault();
     setError("");
     setDesignResult("");
+    console.log(designForm, "form");
+
     try {
       const accessToken = await supabase.auth
         .getSession()
@@ -189,6 +200,7 @@ export default function CreateDesignForm() {
             onChange={handleDesignChange}
             className="border border-purple-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white w-full"
             required
+            disabled={group}
           >
             <option value="" disabled>
               Select Party
@@ -216,6 +228,7 @@ export default function CreateDesignForm() {
             type="number"
             className="border border-purple-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white w-full"
             required
+            disabled={group}
           />
         </div>
         <div>
@@ -249,6 +262,7 @@ export default function CreateDesignForm() {
             onChange={handleDesignChange}
             className="border border-purple-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white w-full"
             required
+            disabled={group}
           >
             <option value="" disabled>
               Select Design Type
@@ -277,6 +291,7 @@ export default function CreateDesignForm() {
             step="0.01"
             className="border border-purple-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white w-full"
             required
+            disabled={group}
           />
         </div>
         <div>
@@ -296,6 +311,7 @@ export default function CreateDesignForm() {
             step="0.01"
             className="border border-purple-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white w-full"
             required
+            disabled={group}
           />
         </div>
         <div>
@@ -314,6 +330,7 @@ export default function CreateDesignForm() {
             type="date"
             className="border border-purple-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white w-full"
             required
+            disabled={group}
           />
         </div>
         {/* <input
