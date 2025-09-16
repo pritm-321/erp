@@ -196,14 +196,14 @@ export default function ViewDesign() {
           </div>
         </div>
         <div className="flex items-center gap-5 mb-6">
-          <div className="relative w-96">
+          <div className="relative">
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-purple-400">
               <Search size={20} />
             </span>
             <input
               type="text"
-              placeholder="Search by Party Name / Design Type / Design Name / Delivery Date"
-              className="pl-10 w-96 border border-purple-300 px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white"
+              placeholder="Search by Party Name / Design Type / Design Name "
+              className="pl-10 w-[480px] border border-purple-300 px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white"
               value={searchParty}
               onChange={(e) => setSearchParty(e.target.value)}
             />
@@ -362,16 +362,16 @@ export default function ViewDesign() {
         {/* Create Design Modal */}
         {createDesignModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-            <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl shadow-2xl p-8 max-w-2xl w-full relative">
-              <button
-                className="absolute top-4 right-4 text-gray-400 hover:text-purple-700 text-2xl font-bold"
-                onClick={() => setCreateDesignModal(false)}
-              >
-                &times;
-              </button>
-              <h2 className="text-2xl font-bold mb-6 text-purple-900">
-                Create Design
-              </h2>
+            <div className="bg-gray-50 rounded-2xl shadow-2xl max-w-2xl w-full relative overflow-hidden">
+              <div className=" flex p-5 justify-between items-center bg-gradient-to-br from-purple-700 to-blue-400">
+                <h2 className="text-2xl font-bold text-white">Create Design</h2>
+                <button
+                  className="text-white hover:text-purple-700 text-2xl font-bold"
+                  onClick={() => setCreateDesignModal(false)}
+                >
+                  &times;
+                </button>
+              </div>
               <CreateDesignForm />
             </div>
           </div>
