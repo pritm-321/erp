@@ -12,7 +12,7 @@ import CreateDesignForm from "@/components/CreateDesignForm";
 export default function GroupDesignsPage() {
   const searchParams = useSearchParams();
   const groupId = decodeURIComponent(searchParams.get("groupId"));
-  const [designs, setDesigns] = useState([]);
+  const [designs, setDesigns] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [organizationId, setOrganizationId] = useState("");
@@ -65,14 +65,29 @@ export default function GroupDesignsPage() {
 
   useEffect(() => {
     if (accessToken && organizationId && groupId) {
+      async function fetchDesignsInGroup(groupId) {
+        try {
+          const { data } = await axios.get(
+            `${API}design/merchant/groups/${groupId}/designs`,
+            {
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+                "Organization-ID": organizationId,
+              },
+            }
+          );
+          // console.log(data, " designs in group");
+
+          setDesigns(data.data || {});
+        } catch (err) {
+          setError("Failed to fetch design details.");
+        }
+      }
+
       // Fetch designs from localStorage for this group
       if (typeof window !== "undefined") {
-        const allDesigns = JSON.parse(
-          localStorage.getItem("selected_group_designs") || "[]"
-        );
-        console.log(allDesigns);
-
-        setDesigns(allDesigns);
+        setLoading(true);
+        fetchDesignsInGroup(localStorage.getItem("group_id"));
         setLoading(false);
       }
     }
@@ -117,16 +132,27 @@ export default function GroupDesignsPage() {
     }
   }, [uploadModal.open, organizationId, accessToken]);
 
+  const formatToIST = (dateStr) => {
+    if (!dateStr) return "-";
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return dateStr;
+    return date.toLocaleDateString("en-IN", {
+      timeZone: "Asia/Kolkata",
+      year: "numeric",
+      month: "short",
+      day: "2-digit",
+    });
+  };
   // Extract common group fields from first design
   const groupInfo =
-    designs.length > 0
+    designs?.designs?.length > 0
       ? {
-          party: designs[0].party,
-          order_quantity: designs[0].order_quantity,
-          design_type: designs[0].design_type,
-          mrp: designs[0].mrp,
-          rate: designs[0].rate,
-          delivery_date: designs[0].delivery_date,
+          party: designs?.group_summary?.party,
+          order_quantity: designs?.group_summary?.total_quantity,
+          design_type: designs?.group_summary?.design_type,
+          mrp: designs?.group_summary?.mrp,
+          rate: designs?.group_summary?.rate,
+          delivery_date: formatToIST(designs?.designs?.[0]?.delivery_date),
         }
       : {};
 
@@ -165,19 +191,7 @@ export default function GroupDesignsPage() {
 
   const handleOpenCreateDesign = () => {
     // Get common fields from the first design in the group
-    if (designs.length > 0) {
-      const d = designs[0];
-      setDefaultDesignFields({
-        party: d.party,
-        order_quantity: d.order_quantity,
-        design_type_id: d.design_type_id,
-        mrp: d.mrp,
-        rate: d.rate,
-        delivery_date: d.delivery_date,
-      });
-    } else {
-      setDefaultDesignFields(null);
-    }
+
     setCreateDesignModal(true);
   };
 
@@ -200,7 +214,7 @@ export default function GroupDesignsPage() {
           <div className="p-4 text-gray-500">Loading...</div>
         ) : error ? (
           <div className="p-4 text-red-600">{error}</div>
-        ) : designs.length === 0 ? (
+        ) : designs?.designs?.length === 0 ? (
           <div className="p-4 text-gray-500">
             No designs found in this group.
           </div>
@@ -262,14 +276,14 @@ export default function GroupDesignsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {designs.map((d) => (
+                  {designs?.designs?.map((d) => (
                     <tr
                       key={d.design_id}
                       className="border-b border-gray-100 hover:bg-purple-50"
                     >
                       <td className="px-4 py-2">
                         <img
-                          src={d.image_url || "/default-design.png"}
+                          src={d.image.url || "/default-design.png"}
                           alt={d.design_name}
                           className="w-16 h-16 object-cover rounded-xl border-2 border-purple-200"
                         />
@@ -949,7 +963,7 @@ export default function GroupDesignsPage() {
                 &times;
               </button>
             </div>
-            <CreateDesignForm group defaultValue={defaultDesignFields} />
+            <CreateDesignForm onClose={setCreateDesignModal} />
           </div>
         </div>
       )}

@@ -5,8 +5,8 @@ import { supabase } from "@/utils/supabaseClient";
 import { API } from "@/utils/url";
 import { Upload, Search } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
-import CreateDesignForm from "@/components/CreateDesignForm";
 import { useRouter } from "next/navigation";
+import CreateDesignGroupForm from "@/components/CreateDesignGroupForm";
 
 export default function ViewDesign() {
   const [organizationId, setOrganizationId] = useState("");
@@ -24,7 +24,7 @@ export default function ViewDesign() {
   const [searchDate, setSearchDate] = useState("");
 
   useEffect(() => {
-    const fetchMerchantAndDesign = async () => {
+    const fetchMerchantAndDesign = async (page = 1) => {
       setError("");
       try {
         let organizationId = "";
@@ -55,8 +55,8 @@ export default function ViewDesign() {
         // console.log(merchantRes.data?.data.departments[0]?.department_id);
 
         // Then fetch design details
-        const res = await axios.get(
-          `${API}design/merchant/${merchantRes.data?.data.departments[0]?.department_id}`,
+        const { data } = await axios.get(
+          `${API}design/merchant/${merchantRes.data?.data.departments[0]?.department_id}/groups`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,
@@ -64,9 +64,9 @@ export default function ViewDesign() {
             },
           }
         );
-        // console.log(res.data.data.designs);
+        console.log(data, " designs");
 
-        setDesigns(res.data.data.designs); // Assuming we want the first design
+        setDesigns(data.data.groups); // Assuming we want the first design
       } catch (err) {
         setError("Failed to fetch merchant or design details.");
       }
@@ -104,27 +104,28 @@ export default function ViewDesign() {
   //   }
 
   // Group designs by specified fields
-  const grouped = {};
-  designs.forEach((d) => {
-    const key = [
-      d.party,
-      d.order_quantity,
-      d.design_type,
-      d.mrp,
-      d.rate,
-      d.delivery_date,
-    ].join("|");
-    if (!grouped[key]) grouped[key] = [];
-    grouped[key].push(d);
-  });
-  let groupedEntries = Object.entries(grouped);
-  // console.log(JSON.stringify(groupedEntries, null, 2), "groupedEntries");
+  // const grouped = {};
+  // designs.forEach((d) => {
+  //   const key = [
+  //     d.party,
+  //     d.order_quantity,
+  //     d.design_type,
+  //     d.mrp,
+  //     d.rate,
+  //     d.delivery_date,
+  //   ].join("|");
+  //   if (!grouped[key]) grouped[key] = [];
+  //   grouped[key].push(d);
+  // });
+  // let groupedEntries = designs.groups;
+  let groupedEntries = designs;
+  console.log(groupedEntries, "grouped entries");
 
   if (sortType === "name") {
     groupedEntries = groupedEntries.sort((a, b) => {
       // Use first design's party for each group
-      const nameA = a[1][0]?.party?.toLowerCase() || "";
-      const nameB = b[1][0]?.party?.toLowerCase() || "";
+      const nameA = a[0]?.party?.toLowerCase() || "";
+      const nameB = b[0]?.party?.toLowerCase() || "";
       console.log(nameA, nameB, "names");
 
       return nameA.localeCompare(nameB);
@@ -232,47 +233,47 @@ export default function ViewDesign() {
             Sort by Delivery Date
           </button>
         </div>
-        {groupedEntries.length === 0 ? (
+        {groupedEntries?.length === 0 ? (
           <div className="p-4 text-gray-500">
             No designs found or loading...
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {groupedEntries.map(([key, group], idx) => {
-              const [
-                party,
-                order_quantity,
-                design_type,
-                mrp,
-                rate,
-                delivery_date,
-              ] = key.split("|");
+            {groupedEntries?.map((g, idx) => {
+              // const [
+              //   party,
+              //   order_quantity,
+              //   design_type,
+              //   mrp,
+              //   rate,
+              //   delivery_date,
+              // ] = key.split("|");
               return (
                 <div
                   key={idx}
                   className="p-6 rounded-xl shadow bg-gray-50 border border-purple-200"
                 >
                   <div className="mb-2 text-lg font-semibold text-purple-800">
-                    Party: <span className="font-bold">{party}</span>
+                    Party: <span className="font-bold">{g.party}</span>
                   </div>
                   <div className="mb-2">
                     Order Quantity:{" "}
-                    <span className="font-bold">{order_quantity}</span>
+                    <span className="font-bold">{g.order_quantity}</span>
                   </div>
                   <div className="mb-2">
                     Design Type:{" "}
-                    <span className="font-bold">{design_type}</span>
+                    <span className="font-bold">{g.design_type}</span>
                   </div>
                   <div className="mb-2">
-                    MRP: <span className="font-bold">{mrp}</span>
+                    MRP: <span className="font-bold">{g.mrp}</span>
                   </div>
                   <div className="mb-2">
-                    Rate: <span className="font-bold">{rate}</span>
+                    Rate: <span className="font-bold">{g.rate}</span>
                   </div>
                   <div className="mb-2">
                     Delivery Date: {""}
                     <span className="font-bold">
-                      {formatToIST(delivery_date)}
+                      {formatToIST(g.delivery_date)}
                     </span>
                   </div>
                   <div className="mt-4 flex gap-3">
@@ -281,78 +282,17 @@ export default function ViewDesign() {
                       onClick={() => {
                         // Store all designs in this group in localStorage
                         if (typeof window !== "undefined") {
-                          localStorage.setItem(
-                            "selected_group_designs",
-                            JSON.stringify(group)
-                          );
+                          localStorage.setItem("group_id", g.group_id || "");
                         }
                         // Redirect to group details page with groupId
-                        router.push(`/view-design/${encodeURIComponent(key)}`);
+                        router.push(
+                          `/view-design/${encodeURIComponent(g.party)}`
+                        );
                       }}
                     >
-                      {expandedDesigns.includes(idx)
-                        ? "Hide Design Details"
-                        : "View Design Details"}
+                      View Designs
                     </button>
                   </div>
-                  {expandedDesigns.includes(idx) && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-                      <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-4xl w-full relative">
-                        <button
-                          className="absolute top-4 right-4 text-gray-400 hover:text-purple-700 text-2xl font-bold"
-                          onClick={() =>
-                            setExpandedDesigns(
-                              expandedDesigns.filter((i) => i !== idx)
-                            )
-                          }
-                        >
-                          &times;
-                        </button>
-                        <h2 className="text-2xl font-bold mb-6 text-purple-900">
-                          Designs in this group
-                        </h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                          {group.map((d) => (
-                            <div
-                              key={d.design_id}
-                              className="rounded-xl shadow p-6 flex flex-col items-center bg-gradient-to-br from-purple-100 to-purple-50"
-                            >
-                              <img
-                                src={d.image_url || "/default-design.png"}
-                                alt={d.design_name}
-                                className="w-28 h-28 object-cover rounded-xl mb-3 border-2 border-purple-200"
-                              />
-                              <div className="font-bold text-xl mb-2 text-purple-900">
-                                {d.design_name}
-                              </div>
-                              <div className="mb-1">
-                                Status:{" "}
-                                <span className="font-medium text-purple-700">
-                                  {d.status}
-                                </span>
-                              </div>
-                              <div className="mb-1">
-                                PO:{" "}
-                                <span className="font-medium text-purple-700">
-                                  {d.po}
-                                </span>
-                              </div>
-                              <div className="flex gap-2 mt-4">
-                                <button
-                                  className="bg-purple-600 text-white px-4 py-2 rounded-lg shadow hover:bg-purple-700 transition"
-                                  onClick={() =>
-                                    handleViewFabricRequirements(d.design_id)
-                                  }
-                                >
-                                  View Fabric Requirements
-                                </button>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  )}
                 </div>
               );
             })}
@@ -364,7 +304,9 @@ export default function ViewDesign() {
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
             <div className="bg-gray-50 rounded-2xl shadow-2xl max-w-2xl w-full relative overflow-hidden">
               <div className=" flex p-5 justify-between items-center bg-gradient-to-br from-purple-700 to-blue-400">
-                <h2 className="text-2xl font-bold text-white">Create Design</h2>
+                <h2 className="text-2xl font-bold text-white">
+                  Create Design Group
+                </h2>
                 <button
                   className="text-white hover:text-purple-700 text-2xl font-bold"
                   onClick={() => setCreateDesignModal(false)}
@@ -372,7 +314,7 @@ export default function ViewDesign() {
                   &times;
                 </button>
               </div>
-              <CreateDesignForm />
+              <CreateDesignGroupForm />
             </div>
           </div>
         )}
