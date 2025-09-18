@@ -283,7 +283,7 @@ export default function GroupDesignsPage() {
                     >
                       <td className="px-4 py-2">
                         <img
-                          src={d.image.url || "/default-design.png"}
+                          src={d?.image?.url || "/default-design.png"}
                           alt={d.design_name}
                           className="w-16 h-16 object-cover rounded-xl border-2 border-purple-200"
                         />
