@@ -17,6 +17,7 @@ export default function CreateDesignForm({ onClose }) {
 
   const fileInputRef = useRef(null);
   const [file, setFile] = useState(null);
+  const [fileName, setFileName] = useState("");
 
   useEffect(() => {
     const fetchDesignNameSuggestions = async () => {
@@ -51,6 +52,14 @@ export default function CreateDesignForm({ onClose }) {
   const handleDesignChange = (e) => {
     setDesignName(e.target.value);
   };
+  const handleFileChange = (e) => {
+    const selectedFile = e.target.files?.[0];
+    setFile(selectedFile);
+    if (selectedFile) {
+      // Set designName to current designName or file's original name, only once when file is uploaded
+      setDesignName(selectedFile.name);
+    }
+  };
   const handleDesignSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -74,7 +83,6 @@ export default function CreateDesignForm({ onClose }) {
       const accessToken = await supabase.auth
         .getSession()
         .then(({ data }) => data?.session?.access_token);
-      // Get organization_id from localStorage
       if (typeof window !== "undefined") {
         const orgs = JSON.parse(localStorage.getItem("organizations"));
         organizationId = orgs?.data?.joined?.[0]?.organization_id || "";
@@ -105,6 +113,25 @@ export default function CreateDesignForm({ onClose }) {
   return (
     <section className="mb-8 p-8 rounded-2xl max-w-3xl mx-auto ">
       <form onSubmit={handleDesignSubmit} className="grid grid-cols-1 gap-6">
+        <div className="flex flex-col">
+          <button
+            onClick={triggerImageUpload}
+            className="bg-purple-100 text-gray-900 hover:bg-gray-100 py-2 mb-2 flex justify-center items-center rounded-xl"
+          >
+            <Upload className="w-4 h-4 mr-1" />
+            Upload Image
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+            onChange={handleFileChange}
+            required
+            className="hidden"
+          />
+          {file ? file.name : "No Image file selected"}
+        </div>
+        <br />
         <div>
           <label
             htmlFor="design_name"
@@ -123,27 +150,7 @@ export default function CreateDesignForm({ onClose }) {
             required
           />
         </div>
-        <br />
 
-        <div className="flex flex-col">
-          <button
-            onClick={triggerImageUpload}
-            // disabled={uploadLoading}
-            className="bg-purple-100 text-gray-900 hover:bg-gray-100 py-2 mb-2 flex justify-center items-center rounded-xl"
-          >
-            <Upload className="w-4 h-4 mr-1" />
-            Upload Image
-          </button>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
-            onChange={(e) => setFile(e.target.files?.[0])}
-            required
-            className="hidden"
-          />
-          {file ? file.name : "No Image file selected"}
-        </div>
         <button
           type="submit"
           className="bg-gradient-to-br from-purple-400 to-purple-600 text-white px-6 py-3 rounded-xl shadow hover:from-purple-500 hover:to-purple-800 font-semibold transition col-span-1 md:col-span-2 mt-2"
