@@ -182,10 +182,10 @@ export default function GroupDesignsPage() {
     handleViewParts(designId);
   };
 
-  const handleViewFabricRequirementsNav = (designId) => {
-    if (typeof window !== "undefined") {
-      localStorage.setItem("fabric_requirements_design_id", String(designId));
-    }
+  const handleViewFabricRequirementsNav = () => {
+    // if (typeof window !== "undefined") {
+    //   localStorage.setItem("fabric_requirements_design_id", String(designId));
+    // }
     router.push("/view-design/fabric-requirements");
   };
 
@@ -203,12 +203,20 @@ export default function GroupDesignsPage() {
           <h1 className="text-3xl font-bold text-purple-950">
             Designs in Group
           </h1>
-          <button
-            className="bg-purple-600 text-white px-6 py-2 rounded-lg shadow hover:bg-purple-700 transition font-semibold"
-            onClick={handleOpenCreateDesign}
-          >
-            + Create Design
-          </button>
+          <div className="flex gap-4">
+            <button
+              className="bg-purple-600 text-white px-3 py-2 rounded shadow hover:bg-purple-700 transition text-sm"
+              onClick={() => handleViewFabricRequirementsNav()}
+            >
+              View Fabric Requirements
+            </button>
+            <button
+              className="bg-purple-600 text-white px-6 py-2 rounded-lg shadow hover:bg-purple-700 transition font-semibold"
+              onClick={handleOpenCreateDesign}
+            >
+              + Create Design
+            </button>
+          </div>
         </div>
         {loading ? (
           <div className="p-4 text-gray-500">Loading...</div>
@@ -306,14 +314,6 @@ export default function GroupDesignsPage() {
                             onClick={() => handleOpenUploadModal(d.design_id)}
                           >
                             Upload Parts
-                          </button>
-                          <button
-                            className="bg-purple-600 text-white px-3 py-1 rounded shadow hover:bg-purple-700 transition text-sm"
-                            onClick={() =>
-                              handleViewFabricRequirementsNav(d.design_id)
-                            }
-                          >
-                            View Fabric Requirements
                           </button>
                         </div>
                       </td>

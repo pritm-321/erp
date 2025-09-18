@@ -14,6 +14,7 @@ export default function FabricRequirementsPage() {
   const [organizationId, setOrganizationId] = useState("");
   const [accessToken, setAccessToken] = useState("");
   const [designId, setDesignId] = useState("");
+  const [selectedDesignIds, setSelectedDesignIds] = useState([]);
   // PO modal state
   const [poModal, setPoModal] = useState(false);
   const [vendors, setVendors] = useState([]);
@@ -41,17 +42,17 @@ export default function FabricRequirementsPage() {
       try {
         setLoading(true);
         setError("");
-        const designId =
-          typeof window !== "undefined"
-            ? localStorage.getItem("fabric_requirements_design_id")
-            : null;
-        if (!designId) {
-          setError("No design selected.");
-          setLoading(false);
-          return;
-        }
-        const res = await axios.get(
-          `${API}so/fabric-requirements/${designId}`,
+        // const designId =
+        //   typeof window !== "undefined"
+        //     ? localStorage.getItem("fabric_requirements_design_id")
+        //     : null;
+        // if (!designId) {
+        //   setError("No design selected.");
+        //   setLoading(false);
+        //   return;
+        // }
+        const { data } = await axios.get(
+          `${API}so/fabric-requirements/${localStorage.getItem("group_id")}`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,
@@ -59,7 +60,9 @@ export default function FabricRequirementsPage() {
             },
           }
         );
-        setRequirements(res.data?.fabric_requirements || []);
+        // console.log(data);
+
+        setRequirements(data?.designs || {});
       } catch (err) {
         setError("Failed to fetch fabric requirements.");
       } finally {
@@ -93,8 +96,8 @@ export default function FabricRequirementsPage() {
 
   const handleSubmitPO = async (e) => {
     e.preventDefault();
-    if (!designId) {
-      setPoError("No design selected for PO.");
+    if (selectedDesignIds.length === 0) {
+      setPoError("No designs selected for PO.");
       return;
     }
     setPoLoading(true);
@@ -102,8 +105,8 @@ export default function FabricRequirementsPage() {
     setPoSuccess("");
     try {
       const res = await axios.post(
-        `${API}so/create-po/${designId}`,
-        { vendor_id: selectedVendor },
+        `${API}so/create-po/${localStorage.getItem("group_id")}`,
+        { vendor_id: selectedVendor, design_ids: selectedDesignIds },
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -114,7 +117,7 @@ export default function FabricRequirementsPage() {
       if (typeof window !== "undefined") {
         localStorage.setItem(
           "last_generated_po",
-          JSON.stringify(res?.data || { design_id: designId })
+          JSON.stringify(res?.data || { design_ids: selectedDesignIds })
         );
       }
       router.push("/view-design/view-po");
@@ -126,13 +129,31 @@ export default function FabricRequirementsPage() {
     }
   };
 
+  // Add select all logic
+  const allDesignIds = requirements
+    ? requirements.map((req) => req.design_id)
+    : [];
+  const isAllSelected =
+    allDesignIds.length > 0 && selectedDesignIds.length === allDesignIds.length;
+
   return (
     <div className="flex min-h-screen">
       <Sidebar />
       <main className="flex-1 p-8 bg-white">
-        <h1 className="text-3xl font-bold mb-6 text-purple-950">
-          Fabric Requirements
-        </h1>
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-3xl font-bold text-purple-950">
+            Fabric Requirements
+          </h1>
+          {!loading && !error && requirements && requirements.length > 0 && (
+            <button
+              className=" px-6 py-3 bg-purple-600 text-white rounded-lg shadow hover:bg-purple-700 transition"
+              onClick={handleOpenPOModal}
+              disabled={selectedDesignIds.length === 0}
+            >
+              Generate PO
+            </button>
+          )}
+        </div>
         {loading ? (
           <div className="p-4 text-gray-500">Loading...</div>
         ) : error ? (
@@ -141,40 +162,91 @@ export default function FabricRequirementsPage() {
           <div className="p-4 text-gray-500">No data found.</div>
         ) : (
           <div className="space-y-4">
+            {!loading && !error && requirements && requirements.length > 0 && (
+              <div className="mb-4 flex items-center">
+                <input
+                  type="checkbox"
+                  checked={isAllSelected}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setSelectedDesignIds(allDesignIds);
+                    } else {
+                      setSelectedDesignIds([]);
+                    }
+                  }}
+                  className="mr-2"
+                />
+                <span className="font-semibold text-purple-900">
+                  Select All To Generate PO
+                </span>
+              </div>
+            )}
             {requirements.map((req, idx) => (
-              <div key={idx} className="rounded-xl p-4 bg-gray-50">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="text-purple-900">
-                    <span className="font-semibold">Color:</span>{" "}
-                    {req.color_name || req.color_id}
-                  </div>
-                  <div className="text-purple-900">
-                    <span className="font-semibold">Fabric Type:</span>{" "}
-                    {req.fabric_type_name || req.fabric_type_id}
-                  </div>
-                  <div className="text-purple-900">
-                    <span className="font-semibold">
-                      Consumption per Piece:
-                    </span>{" "}
-                    {req.consumption_per_piece}
-                  </div>
-                  <div className="text-purple-900">
-                    <span className="font-semibold">Total Required:</span>{" "}
-                    {req.total_required}
-                  </div>
+              <div
+                key={idx}
+                className="rounded-xl p-4 bg-gray-50 flex flex-col shadow"
+              >
+                <div className="flex gap-6 items-center mb-2">
+                  <input
+                    type="checkbox"
+                    checked={selectedDesignIds.includes(req.design_id)}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedDesignIds([
+                          ...selectedDesignIds,
+                          req.design_id,
+                        ]);
+                      } else {
+                        setSelectedDesignIds(
+                          selectedDesignIds.filter((id) => id !== req.design_id)
+                        );
+                      }
+                    }}
+                    className="mr-2"
+                  />
+                  <h2 className="text-xl font-semibold text-purple-900">
+                    Design Name : {req.design_name || `Design ${idx + 1}`}
+                  </h2>
+                  <h2 className="text-xl font-semibold text-purple-900">
+                    Quantity : {req.quantity || 0}
+                  </h2>
                 </div>
+                {req.fabric_requirements.length > 0 && (
+                  <table className="w-full rounded-lg overflow-hidden mt-2">
+                    <thead>
+                      <tr className="text-left text-white border-b border-purple-200 bg-gradient-to-br from-purple-600 to-blue-400">
+                        <th className="px-4 py-2">Fabric Type</th>
+                        <th className="px-4 py-2">Color</th>
+                        <th className="px-4 py-2">Consumption per Piece</th>
+                        <th className="px-4 py-2">Total Required</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {req.fabric_requirements.map((fr, fidx) => (
+                        <tr
+                          key={fidx}
+                          className="text-purple-900 border-b border-purple-100"
+                        >
+                          <td className="px-4 py-2">
+                            {fr.fabric_type_name || fr.fabric_type_id}
+                          </td>
+                          <td className="px-4 py-2">
+                            {fr.color_name || fr.color_id}
+                          </td>
+                          <td className="px-4 py-2">
+                            {fr.consumption_per_piece}
+                          </td>
+                          <td className="px-4 py-2">{fr.total_required}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
               </div>
             ))}
           </div>
         )}
-        {!loading && !error && requirements && requirements.length > 0 && (
-          <button
-            className="mt-6 px-6 py-3 bg-purple-600 text-white rounded-lg shadow hover:bg-purple-700 transition"
-            onClick={handleOpenPOModal}
-          >
-            Generate PO
-          </button>
-        )}
+
         {poModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
             <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full relative">
