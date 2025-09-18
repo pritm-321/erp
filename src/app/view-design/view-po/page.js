@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { API } from "@/utils/url";
 import { supabase } from "@/utils/supabaseClient";
+import { useRouter } from "next/navigation";
 
 export default function ViewPOPage() {
   // All POs state
@@ -17,6 +18,13 @@ export default function ViewPOPage() {
   const [poDetail, setPoDetail] = useState(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailError, setDetailError] = useState("");
+  const [poSummary, setPoSummary] = useState([]);
+  // Batch summary modal state
+  const [batchModalOpen, setBatchModalOpen] = useState(false);
+  const [batchSummary, setBatchSummary] = useState(null);
+  const [batchLoading, setBatchLoading] = useState(false);
+  const [batchError, setBatchError] = useState("");
+  const router = useRouter();
 
   const handleOpenPoDetail = async (poId) => {
     setDetailModalOpen(true);
@@ -39,6 +47,26 @@ export default function ViewPOPage() {
     }
   };
 
+  const handleOpenBatchSummary = async (batchId) => {
+    setBatchModalOpen(true);
+    setBatchSummary(null);
+    setBatchError("");
+    setBatchLoading(true);
+    try {
+      const res = await axios.get(`${API}so/po-summary/batch/${batchId}`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Organization-ID": organizationId,
+        },
+      });
+      setBatchSummary(res?.data?.data || null);
+    } catch (e) {
+      setBatchError("Failed to fetch batch summary.");
+    } finally {
+      setBatchLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (typeof window !== "undefined") {
       const orgs = JSON.parse(localStorage.getItem("organizations"));
@@ -50,29 +78,25 @@ export default function ViewPOPage() {
   }, []);
 
   useEffect(() => {
-    const fetchPOs = async () => {
+    const fetchPOSummary = async () => {
       try {
         setLoading(true);
         setError("");
-        const res = await axios.get(`${API}so/pos`, {
+        const groupId = localStorage.getItem("group_id") || "";
+        const res = await axios.get(`${API}so/po-summary/group/${groupId}`, {
           headers: {
             Authorization: `Bearer ${accessToken}`,
             "Organization-ID": organizationId,
           },
         });
-        const list =
-          res?.data?.purchase_orders ||
-          res?.data?.data?.purchase_orders ||
-          res?.data ||
-          [];
-        setPos(Array.isArray(list) ? list : []);
+        setPoSummary(res?.data?.data || []);
       } catch (err) {
-        setError("Failed to fetch POs.");
+        setError("Failed to fetch PO summary.");
       } finally {
         setLoading(false);
       }
     };
-    if (accessToken && organizationId) fetchPOs();
+    if (accessToken && organizationId) fetchPOSummary();
   }, [accessToken, organizationId]);
 
   return (
@@ -86,74 +110,83 @@ export default function ViewPOPage() {
           <div className="p-4 text-gray-500">Loading...</div>
         ) : error ? (
           <div className="p-4 text-red-600">{error}</div>
-        ) : pos.length === 0 ? (
-          <div className="p-4 text-gray-500">No POs found.</div>
+        ) : poSummary.length === 0 ? (
+          <div className="p-4 text-gray-500">No PO batches found.</div>
         ) : (
           <div className="overflow-hidden rounded-xl border border-purple-200">
-            <table className="min-w-full bg-white">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-4 py-2 text-left text-purple-950 font-bold">
-                    PO Number
-                  </th>
-                  <th className="px-4 py-2 text-left text-purple-950 font-bold">
-                    PO ID
-                  </th>
-                  <th className="px-4 py-2 text-left text-purple-950 font-bold">
-                    Vendor Name
-                  </th>
-                  <th className="px-4 py-2 text-left text-purple-950 font-bold">
-                    Design Name
-                  </th>
-                  <th className="px-4 py-2 text-left text-purple-950 font-bold">
-                    Status
-                  </th>
-                  <th className="px-4 py-2 text-left text-purple-950 font-bold">
-                    Order Date
-                  </th>
-                  <th className="px-4 py-2 text-left text-purple-950 font-bold">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {pos.map((po, idx) => (
-                  <tr
-                    key={po.po_id || idx}
-                    className="border-b border-gray-100 hover:bg-purple-50"
-                  >
-                    <td className="px-4 py-2 text-purple-900 font-semibold">
-                      {po.po_number || po.po_id || "-"}
-                    </td>
-                    <td className="px-4 py-2 text-purple-900">
-                      {po.po_id ?? "-"}
-                    </td>
-                    <td className="px-4 py-2 text-purple-900">
-                      {po.vendor?.vendor_name || po.vendor_name || "-"}
-                    </td>
-                    <td className="px-4 py-2 text-purple-900">
-                      {po.design?.design_name || po.design_name || "-"}
-                    </td>
-                    <td className="px-4 py-2 text-purple-700">
-                      {po.status || "-"}
-                    </td>
-                    <td className="px-4 py-2 text-purple-700">
-                      {po.order_date
-                        ? new Date(po.order_date).toLocaleString()
-                        : po.created_at || po.date || "-"}
-                    </td>
-                    <td className="px-4 py-2">
-                      <button
-                        className="px-3 py-1 bg-purple-600 text-white rounded shadow hover:bg-purple-700 text-sm"
-                        onClick={() => handleOpenPoDetail(po.po_id)}
+            {poSummary.map((batch, idx) => (
+              <div
+                key={batch.batch_id || idx}
+                className="border-b border-gray-100 p-5"
+              >
+                <div className="flex flex-col md:flex-row md:items-center gap-8">
+                  <span className="mb-4 py-2 text-purple-900 font-semibold">
+                    Batch Id : {batch.batch_id}
+                  </span>
+                  <span className="mb-4 py-2 text-purple-900 font-semibold">
+                    Created At : {batch.created_at}
+                  </span>
+
+                  <span className="mb-4 py-2 text-purple-900 font-semibold">
+                    Batch Description : {batch.description}
+                  </span>
+                </div>
+                <br />
+
+                <table className="min-w-full bg-white border border-purple-100 rounded">
+                  <thead>
+                    <tr className="text-left text-white border-b border-purple-200 bg-gradient-to-br from-purple-600 to-blue-400">
+                      <th className="px-2 py-1 text-left text-white font-bold">
+                        PO Number
+                      </th>
+                      <th className="px-2 py-1 text-left text-white font-bold">
+                        PO ID
+                      </th>
+                      <th className="px-2 py-1 text-left text-white font-bold">
+                        Design Name
+                      </th>
+                      <th className="px-2 py-1 text-left text-white font-bold">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {batch.purchase_orders.map((po, pi) => (
+                      <tr
+                        key={po.po_id || pi}
+                        className="border-b border-gray-100"
                       >
-                        View
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                        <td className="px-2 py-1 text-purple-900">
+                          {po.po_number}
+                        </td>
+                        <td className="px-2 py-1 text-purple-900">
+                          {po.po_id}
+                        </td>
+                        <td className="px-2 py-1 text-purple-900">
+                          {po.design_name}
+                        </td>
+                        <td className="px-2 py-1">
+                          <button
+                            className="px-2 py-1 bg-purple-600 text-white rounded shadow hover:bg-purple-700 text-xs mr-2"
+                            onClick={() =>
+                              router.push(`/view-design/view-po/${po.po_id}`)
+                            }
+                          >
+                            View PO
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                <button
+                  className="mt-2 px-3 py-1 bg-purple-600 text-white rounded shadow hover:bg-purple-700 text-xs"
+                  onClick={() => handleOpenBatchSummary(batch.batch_id)}
+                >
+                  View Batch Summary
+                </button>
+              </div>
+            ))}
           </div>
         )}
         {detailModalOpen && (
@@ -274,6 +307,90 @@ export default function ViewPOPage() {
                       {JSON.stringify(poDetail, null, 2)}
                     </pre>
                   </div> */}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+        {batchModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+            <div className="bg-white rounded-lg shadow-lg p-6 max-w-2xl w-full relative max-h-[90vh] overflow-y-auto">
+              <button
+                className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-xl"
+                onClick={() => setBatchModalOpen(false)}
+              >
+                &times;
+              </button>
+              <h2 className="text-xl font-bold mb-4 text-purple-900">
+                Batch Summary
+              </h2>
+              {batchLoading ? (
+                <div className="text-gray-500">Loading...</div>
+              ) : batchError ? (
+                <div className="text-red-600">{batchError}</div>
+              ) : !batchSummary ? (
+                <div className="text-gray-500">No summary available.</div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 rounded-xl p-4">
+                    <div className="text-purple-900">
+                      <span className="font-semibold">Batch ID:</span>{" "}
+                      {batchSummary.batch_id}
+                    </div>
+                    <div className="text-purple-900">
+                      <span className="font-semibold">Created At:</span>{" "}
+                      {batchSummary.created_at}
+                    </div>
+                    <div className="text-purple-900">
+                      <span className="font-semibold">Created By:</span>{" "}
+                      {batchSummary.created_by}
+                    </div>
+                    <div className="text-purple-900">
+                      <span className="font-semibold">Description:</span>{" "}
+                      {batchSummary.description}
+                    </div>
+                  </div>
+                  <h3 className="text-lg font-semibold text-purple-900 mb-2">
+                    Aggregated By Fabric
+                  </h3>
+                  <div className="overflow-hidden rounded-xl border border-purple-200">
+                    <table className="min-w-full bg-white">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-4 py-2 text-left text-purple-950 font-bold">
+                            Fabric Type ID
+                          </th>
+                          <th className="px-4 py-2 text-left text-purple-950 font-bold">
+                            Color ID
+                          </th>
+                          <th className="px-4 py-2 text-left text-purple-950 font-bold">
+                            Total Ordered
+                          </th>
+                          <th className="px-4 py-2 text-left text-purple-950 font-bold">
+                            Total Required
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {batchSummary.aggregated_by_fabric?.map((item, i) => (
+                          <tr key={i} className="border-b border-gray-100">
+                            <td className="px-4 py-2 text-purple-900">
+                              {item.fabric_type_id}
+                            </td>
+                            <td className="px-4 py-2 text-purple-900">
+                              {item.color_id}
+                            </td>
+                            <td className="px-4 py-2 text-purple-900">
+                              {item.total_ordered}
+                            </td>
+                            <td className="px-4 py-2 text-purple-900">
+                              {item.total_required}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               )}
             </div>

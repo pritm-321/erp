@@ -119,7 +119,16 @@ export default function ViewDesign() {
   // });
   // let groupedEntries = designs.groups;
   let groupedEntries = designs;
-  console.log(groupedEntries, "grouped entries");
+  // console.log(groupedEntries, "grouped entries");
+
+  // Initial sort by created_at descending
+  if (groupedEntries && Array.isArray(groupedEntries)) {
+    groupedEntries = groupedEntries.sort((a, b) => {
+      const dateA = new Date(a.created_at);
+      const dateB = new Date(b.created_at);
+      return dateB - dateA;
+    });
+  }
 
   if (sortType === "name") {
     groupedEntries = groupedEntries.sort((a, b) => {
@@ -133,38 +142,26 @@ export default function ViewDesign() {
   } else if (sortType === "date") {
     groupedEntries = groupedEntries.sort((a, b) => {
       // Use earliest delivery_date in each group
-      const getEarliestDate = (arr) => {
-        return arr.reduce((min, d) => {
-          const dt = new Date(d.delivery_date);
-          return !min || dt < min ? dt : min;
-        }, null);
-      };
-      const dateA = getEarliestDate(a[1]);
-      const dateB = getEarliestDate(b[1]);
-      return dateA - dateB;
+      const dateA = new Date(a.delivery_date);
+      const dateB = new Date(b.delivery_date);
+      return dateB - dateA;
     });
   }
 
   // Filter by searchParty and searchDate
+  let filteredEntries = groupedEntries;
   if (searchParty) {
-    groupedEntries = groupedEntries.filter(([key, group]) => {
-      const party = group[0]?.party?.toLowerCase() || "";
-      const designType = group[0]?.design_type?.toLowerCase() || "";
-      // Check if any design in group matches design_name
-      const hasDesignName = group.some((d) =>
-        d.design_name?.toLowerCase().includes(searchParty.toLowerCase())
-      );
-      // Check if input is a date (YYYY-MM-DD)
-
+    filteredEntries = filteredEntries.filter((g) => {
+      const party = g.party?.toLowerCase() || "";
+      const designType = g.design_type?.toLowerCase() || "";
       return (
         party.includes(searchParty.toLowerCase()) ||
-        designType.includes(searchParty.toLowerCase()) ||
-        hasDesignName
+        designType.includes(searchParty.toLowerCase())
       );
     });
   }
   if (searchDate) {
-    groupedEntries = groupedEntries.filter(([key, group]) => {
+    filteredEntries = filteredEntries.filter(([key, group]) => {
       // Match if any design in group has delivery_date matching searchDate
       return group.some((d) => {
         const dDate = new Date(d.delivery_date);
@@ -203,8 +200,8 @@ export default function ViewDesign() {
             </span>
             <input
               type="text"
-              placeholder="Search by Party Name / Design Type / Design Name "
-              className="pl-10 w-[480px] border border-purple-300 px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white"
+              placeholder="Search by Party Name / Design Type "
+              className="pl-10 w-[340px] border border-purple-300 px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white"
               value={searchParty}
               onChange={(e) => setSearchParty(e.target.value)}
             />
@@ -232,14 +229,22 @@ export default function ViewDesign() {
           >
             Sort by Delivery Date
           </button>
+          {/* <button
+            className={`bg-purple-500 text-white px-4 py-2 rounded-lg shadow hover:bg-purple-600 transition font-semibold ${
+              sortType === "date" ? "ring-2 ring-purple-700" : ""
+            }`}
+            onClick={() => setSortType("date")}
+          >
+            Sort by Created Date
+          </button> */}
         </div>
-        {groupedEntries?.length === 0 ? (
+        {filteredEntries?.length === 0 ? (
           <div className="p-4 text-gray-500">
             No designs found or loading...
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {groupedEntries?.map((g, idx) => {
+            {filteredEntries?.map((g, idx) => {
               // const [
               //   party,
               //   order_quantity,
@@ -258,7 +263,7 @@ export default function ViewDesign() {
                   </div>
                   <div className="mb-2">
                     Order Quantity:{" "}
-                    <span className="font-bold">{g.order_quantity}</span>
+                    <span className="font-bold">{g.quantity}</span>
                   </div>
                   <div className="mb-2">
                     Design Type:{" "}
@@ -269,6 +274,12 @@ export default function ViewDesign() {
                   </div>
                   <div className="mb-2">
                     Rate: <span className="font-bold">{g.rate}</span>
+                  </div>
+                  <div className="mb-2">
+                    Created Date: {""}
+                    <span className="font-bold">
+                      {formatToIST(g.created_at)}
+                    </span>
                   </div>
                   <div className="mb-2">
                     Delivery Date: {""}

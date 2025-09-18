@@ -23,7 +23,17 @@ export default function FabricRequirementsPage() {
   const [poError, setPoError] = useState("");
   const [poSuccess, setPoSuccess] = useState("");
   const router = useRouter();
-
+  const formatToIST = (dateStr) => {
+    if (!dateStr) return "-";
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return dateStr;
+    return date.toLocaleDateString("en-IN", {
+      timeZone: "Asia/Kolkata",
+      year: "numeric",
+      month: "short",
+      day: "2-digit",
+    });
+  };
   useEffect(() => {
     if (typeof window !== "undefined") {
       const orgs = JSON.parse(localStorage.getItem("organizations"));
@@ -93,6 +103,14 @@ export default function FabricRequirementsPage() {
       setPoLoading(false);
     }
   };
+  let sortedEntries = requirements;
+  if (sortedEntries && Array.isArray(sortedEntries)) {
+    sortedEntries = sortedEntries.sort((a, b) => {
+      const dateA = new Date(a.created_at);
+      const dateB = new Date(b.created_at);
+      return dateB - dateA;
+    });
+  }
 
   const handleSubmitPO = async (e) => {
     e.preventDefault();
@@ -130,8 +148,8 @@ export default function FabricRequirementsPage() {
   };
 
   // Add select all logic
-  const allDesignIds = requirements
-    ? requirements.map((req) => req.design_id)
+  const allDesignIds = sortedEntries
+    ? sortedEntries.map((req) => req.design_id)
     : [];
   const isAllSelected =
     allDesignIds.length > 0 && selectedDesignIds.length === allDesignIds.length;
@@ -181,7 +199,7 @@ export default function FabricRequirementsPage() {
                 </span>
               </div>
             )}
-            {requirements.map((req, idx) => (
+            {sortedEntries.map((req, idx) => (
               <div
                 key={idx}
                 className="rounded-xl p-4 bg-gray-50 flex flex-col shadow"
@@ -209,6 +227,9 @@ export default function FabricRequirementsPage() {
                   </h2>
                   <h2 className="text-xl font-semibold text-purple-900">
                     Quantity : {req.quantity || 0}
+                  </h2>
+                  <h2 className="text-xl font-semibold text-purple-900">
+                    Created Date : {formatToIST(req.created_at)}
                   </h2>
                 </div>
                 {req.fabric_requirements.length > 0 && (
