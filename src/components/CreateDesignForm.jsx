@@ -57,7 +57,9 @@ export default function CreateDesignForm({ onClose }) {
     setFile(selectedFile);
     if (selectedFile) {
       // Set designName to current designName or file's original name, only once when file is uploaded
-      setDesignName(selectedFile.name);
+      setDesignName(
+        selectedFile.name.slice(0, selectedFile.name.lastIndexOf("."))
+      );
     }
   };
   const handleDesignSubmit = async (e) => {

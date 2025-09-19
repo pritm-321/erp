@@ -275,9 +275,9 @@ export default function GroupDesignsPage() {
                     <th className="px-4 py-2 text-left text-purple-950 font-bold">
                       Status
                     </th>
-                    <th className="px-4 py-2 text-left text-purple-950 font-bold">
+                    {/* <th className="px-4 py-2 text-left text-purple-950 font-bold">
                       PO
-                    </th>
+                    </th> */}
                     <th className="px-4 py-2 text-left text-purple-950 font-bold">
                       Actions
                     </th>
@@ -300,7 +300,7 @@ export default function GroupDesignsPage() {
                         {d.design_name}
                       </td>
                       <td className="px-4 py-2 text-purple-700">{d.status}</td>
-                      <td className="px-4 py-2 text-purple-700">{d.po}</td>
+                      {/* <td className="px-4 py-2 text-purple-700">{d.po}</td> */}
                       <td className="px-4 py-2">
                         <div className="flex gap-2">
                           <button

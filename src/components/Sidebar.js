@@ -25,11 +25,11 @@ export default function Sidebar() {
         link: `/view-design`,
         icon: <FileText className="inline-block mr-2" size={18} />,
       },
-      {
-        name: "View PO",
-        link: `/view-design/view-po`,
-        icon: <ClipboardList className="inline-block mr-2" size={18} />,
-      },
+      // {
+      //   name: "View PO",
+      //   link: `/view-design/view-po`,
+      //   icon: <ClipboardList className="inline-block mr-2" size={18} />,
+      // },
       {
         name: "Reports",
         link: `/view-reports`,
@@ -73,7 +73,7 @@ export default function Sidebar() {
           "Organization-ID": organizationId,
         },
       });
-      console.log(res.data);
+      // console.log(res.data);
       setDepartments(res.data?.departments || []);
     } catch (err) {
       setDepartments([]);
