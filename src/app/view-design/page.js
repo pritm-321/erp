@@ -15,6 +15,7 @@ export default function ViewDesign() {
   const [createDesignModal, setCreateDesignModal] = useState(false);
   const router = useRouter();
 
+  const [loading, setLoading] = useState(false);
   const [merchant, setMerchant] = useState(null);
   const [error, setError] = useState("");
   const [designs, setDesigns] = useState([]);
@@ -22,10 +23,12 @@ export default function ViewDesign() {
   const [sortType, setSortType] = useState("");
   const [searchParty, setSearchParty] = useState("");
   const [searchDate, setSearchDate] = useState("");
+  const [groupCreated, setGroupCreated] = useState(false);
 
   useEffect(() => {
     const fetchMerchantAndDesign = async (page = 1) => {
       setError("");
+      setLoading(true);
       try {
         let organizationId = "";
         if (typeof window !== "undefined") {
@@ -64,15 +67,17 @@ export default function ViewDesign() {
             },
           }
         );
-        console.log(data, " designs");
+        // console.log(data, " designs");
 
         setDesigns(data.data.groups); // Assuming we want the first design
+        setLoading(false);
       } catch (err) {
+        setLoading(false);
         setError("Failed to fetch merchant or design details.");
       }
     };
     fetchMerchantAndDesign();
-  }, []);
+  }, [groupCreated]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -238,10 +243,10 @@ export default function ViewDesign() {
             Sort by Created Date
           </button> */}
         </div>
-        {filteredEntries?.length === 0 ? (
-          <div className="p-4 text-gray-500">
-            No designs found or loading...
-          </div>
+        {loading ? (
+          <div className="p-4 text-gray-500">Loading...</div>
+        ) : filteredEntries?.length === 0 ? (
+          <div className="p-4 text-gray-500">No designs found</div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {filteredEntries?.map((g, idx) => {
@@ -327,6 +332,10 @@ export default function ViewDesign() {
               </div>
               <CreateDesignGroupForm
                 onClose={() => setCreateDesignModal(false)}
+                onSuccess={() => {
+                  setCreateDesignModal(false);
+                  setGroupCreated((prev) => !prev);
+                }}
               />
             </div>
           </div>

@@ -5,7 +5,7 @@ import axios from "axios";
 import { API } from "@/utils/url";
 import { Upload } from "lucide-react";
 
-export default function CreateDesignForm({ onClose }) {
+export default function CreateDesignForm({ onClose, onSuccess }) {
   const [loading, setLoading] = useState(false);
 
   const [designName, setDesignName] = useState("");
@@ -103,6 +103,7 @@ export default function CreateDesignForm({ onClose }) {
       setDesignResult("Design created successfully!");
       setLoading(false);
       if (onClose) onClose();
+      if (onSuccess) onSuccess();
     } catch (err) {
       setError("Failed to create design.");
       console.log(err);

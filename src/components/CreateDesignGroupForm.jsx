@@ -7,6 +7,7 @@ import { API } from "@/utils/url";
 export default function CreateDesignGroupForm({
   onClose,
   group,
+  onSuccess,
   defaultValue,
 }) {
   // Design form state
@@ -170,6 +171,7 @@ export default function CreateDesignGroupForm({
 
       setLoading(false);
       if (onClose) onClose();
+      if (onSuccess) onSuccess();
     } catch (err) {
       setError("Failed to create design.");
       setLoading(false);

@@ -13,7 +13,7 @@ export default function GroupDesignsPage() {
   const searchParams = useSearchParams();
   const groupId = decodeURIComponent(searchParams.get("groupId"));
   const [designs, setDesigns] = useState({});
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [organizationId, setOrganizationId] = useState("");
   const [accessToken, setAccessToken] = useState("");
@@ -52,6 +52,8 @@ export default function GroupDesignsPage() {
   const [createDesignModal, setCreateDesignModal] = useState(false);
   const [defaultDesignFields, setDefaultDesignFields] = useState(null);
   const router = useRouter();
+  const [groupCreated, setGroupCreated] = useState(false);
+  const [designCreated, setDesignCreated] = useState(false);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -91,7 +93,7 @@ export default function GroupDesignsPage() {
         setLoading(false);
       }
     }
-  }, [accessToken, organizationId, groupId]);
+  }, [accessToken, organizationId, groupId, designCreated]);
 
   // Fetch dropdown options when modal opens
   useEffect(() => {
@@ -969,7 +971,13 @@ export default function GroupDesignsPage() {
                 &times;
               </button>
             </div>
-            <CreateDesignForm onClose={() => setCreateDesignModal(false)} />
+            <CreateDesignForm
+              onClose={() => setCreateDesignModal(false)}
+              onSuccess={() => {
+                setCreateDesignModal(false);
+                setDesignCreated((prev) => !prev);
+              }}
+            />
           </div>
         </div>
       )}
