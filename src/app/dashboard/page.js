@@ -4,6 +4,7 @@ import { supabase } from "@/utils/supabaseClient";
 import axios from "axios";
 import { API } from "@/utils/url";
 import Sidebar from "@/components/Sidebar";
+import { LogOut } from "lucide-react";
 
 export default function Dashboard() {
   const [joinCode, setJoinCode] = useState("");
@@ -115,12 +116,21 @@ export default function Dashboard() {
         <h2 className="text-2xl font-bold text-purple-900">
           Joined Organizations
         </h2>
-        <button
-          onClick={() => setShowJoinModal(true)}
-          className="bg-gradient-to-r from-purple-600 to-purple-500 text-white px-5 py-2 rounded-xl shadow hover:from-purple-700 hover:to-purple-600 font-semibold transition"
-        >
-          + Join Organization
-        </button>
+        <div className="flex flex-row gap-4">
+          <button
+            onClick={() => setShowJoinModal(true)}
+            className="bg-gradient-to-r w-full from-purple-600 to-purple-500 text-white px-5 py-2 rounded-xl shadow hover:from-purple-700 hover:to-purple-600 font-semibold transition"
+          >
+            + Join Organization
+          </button>
+          <button
+            onClick={signOut}
+            className=" w-full flex justify-center items-center bg-gradient-to-r from-red-500 to-red-600 text-white px-4 py-2 rounded-lg shadow hover:from-red-600 hover:to-red-700 font-semibold transition"
+          >
+            <LogOut className="mr-2" />
+            Sign Out
+          </button>
+        </div>
       </div>
       {organizations &&
       organizations.data &&
