@@ -5,6 +5,7 @@ import axios from "axios";
 import { API } from "@/utils/url";
 import { useRouter, useParams } from "next/navigation";
 import { supabase } from "@/utils/supabaseClient";
+import Image from "next/image";
 
 export default function ViewPOByIdPage() {
   const router = useRouter();
@@ -36,9 +37,9 @@ export default function ViewPOByIdPage() {
             "Organization-ID": organizationId,
           },
         });
-        console.log(data);
+        console.log(data.data);
 
-        setPoDetail(data || null);
+        setPoDetail(data.data || null);
       } catch (err) {
         setError("Failed to fetch PO details.");
         console.log(err);
@@ -62,36 +63,44 @@ export default function ViewPOByIdPage() {
           <div className="p-4 text-gray-500">No details available.</div>
         ) : (
           <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-gray-50 rounded-xl p-4">
-              <div className="text-purple-900">
+            <div className="flex flex-row gap-10 w-full">
+              <Image
+                src={poDetail.design_image || ""}
+                alt="Design Image"
+                width={500}
+                height={500}
+                className="w-48 h-48 object-cover rounded-lg shadow-lg border border-purple-200"
+              />
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 rounded-xl p-4">
+                {/* <div className="text-purple-900">
                 <span className="font-semibold">PO Number:</span>{" "}
                 {poDetail.po_number || "-"}
               </div>
               <div className="text-purple-900">
-                <span className="font-semibold">PO ID:</span>{" "}
+                <span className=    "font-semibold">PO ID:</span>{" "}
                 {poDetail.po_id || "-"}
-              </div>
-              <div className="text-purple-900">
-                <span className="font-semibold">Status:</span>{" "}
-                {poDetail.status || "-"}
-              </div>
-              <div className="text-purple-900">
-                <span className="font-semibold">Vendor:</span>{" "}
-                {poDetail.vendor?.name || poDetail.vendor_name || "-"}
-              </div>
-              <div className="text-purple-900">
-                <span className="font-semibold">Design:</span>{" "}
-                {poDetail.design?.name || poDetail.design_name || "-"}
-              </div>
-              <div className="text-purple-900">
-                <span className="font-semibold">Design Quantity:</span>{" "}
-                {poDetail.design?.quantity || "-"}
-              </div>
-              <div className="text-purple-900">
-                <span className="font-semibold">Order Date:</span>{" "}
-                {poDetail.order_date
-                  ? new Date(poDetail.order_date).toLocaleString()
-                  : poDetail.created_at || poDetail.date || "-"}
+              </div> */}
+
+                <div className="text-purple-900">
+                  <span className="font-semibold">Status:</span>{" "}
+                  {poDetail.status || "-"}
+                </div>
+                <div className="text-purple-900">
+                  <span className="font-semibold">Vendor:</span>{" "}
+                  {poDetail.vendor?.name || poDetail.vendor_name || "-"}
+                </div>
+                <div className="text-purple-900">
+                  <span className="font-semibold">Design Name:</span>{" "}
+                  {poDetail.design?.name || poDetail.design_name || "-"}
+                </div>
+
+                <div className="text-purple-900">
+                  <span className="font-semibold">Order Date:</span>{" "}
+                  {poDetail.order_date
+                    ? new Date(poDetail.order_date).toLocaleString()
+                    : poDetail.created_at || poDetail.date || "-"}
+                </div>
               </div>
             </div>
             {Array.isArray(poDetail.items) && poDetail.items.length > 0 && (
@@ -106,11 +115,18 @@ export default function ViewPOByIdPage() {
                         <th className="px-4 py-2 text-left text-purple-950 font-bold">
                           Fabric Name
                         </th>
-                        <th className="px-4 py-2 text-left text-purple-950 font-bold">
-                          Qty
-                        </th>
+
                         <th className="px-4 py-2 text-left text-purple-950 font-bold">
                           Color Name
+                        </th>
+                        <th className="px-4 py-2 text-left text-purple-950 font-bold">
+                          Moq
+                        </th>
+                        <th className="px-4 py-2 text-left text-purple-950 font-bold">
+                          Ordered Qty
+                        </th>
+                        <th className="px-4 py-2 text-left text-purple-950 font-bold">
+                          Required Qty
                         </th>
                       </tr>
                     </thead>
@@ -123,11 +139,18 @@ export default function ViewPOByIdPage() {
                               li.description ||
                               "-"}
                           </td>
-                          <td className="px-4 py-2 text-purple-900">
-                            {li.required_qty || li.qty || "-"}
-                          </td>
+
                           <td className="px-4 py-2 text-purple-900">
                             {li.color_name || "-"}
+                          </td>
+                          <td className="px-4 py-2 text-purple-900">
+                            {li.moq || li.qty || "-"}
+                          </td>
+                          <td className="px-4 py-2 text-purple-900">
+                            {li.ordered_qty || li.qty || "-"}
+                          </td>
+                          <td className="px-4 py-2 text-purple-900">
+                            {li.required_qty || li.qty || "-"}
                           </td>
                         </tr>
                       ))}

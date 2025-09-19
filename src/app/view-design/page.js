@@ -325,7 +325,9 @@ export default function ViewDesign() {
                   &times;
                 </button>
               </div>
-              <CreateDesignGroupForm />
+              <CreateDesignGroupForm
+                onClose={() => setCreateDesignModal(false)}
+              />
             </div>
           </div>
         )}

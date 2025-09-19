@@ -4,7 +4,11 @@ import { supabase } from "@/utils/supabaseClient";
 import axios from "axios";
 import { API } from "@/utils/url";
 
-export default function CreateDesignGroupForm({ group, defaultValue }) {
+export default function CreateDesignGroupForm({
+  onClose,
+  group,
+  defaultValue,
+}) {
   // Design form state
 
   const formatDate = (date) => {
@@ -163,7 +167,9 @@ export default function CreateDesignGroupForm({ group, defaultValue }) {
         },
       });
       setDesignResult(data.message || "Design created successfully.");
+
       setLoading(false);
+      if (onClose) onClose();
     } catch (err) {
       setError("Failed to create design.");
       setLoading(false);

@@ -206,6 +206,12 @@ export default function GroupDesignsPage() {
           <div className="flex gap-4">
             <button
               className="bg-purple-600 text-white px-3 py-2 rounded shadow hover:bg-purple-700 transition text-sm"
+              onClick={() => router.push("/view-design/view-po")}
+            >
+              View PO
+            </button>
+            <button
+              className="bg-purple-600 text-white px-3 py-2 rounded shadow hover:bg-purple-700 transition text-sm"
               onClick={() => handleViewFabricRequirementsNav()}
             >
               View Fabric Requirements
@@ -963,7 +969,7 @@ export default function GroupDesignsPage() {
                 &times;
               </button>
             </div>
-            <CreateDesignForm onClose={setCreateDesignModal} />
+            <CreateDesignForm onClose={() => setCreateDesignModal(false)} />
           </div>
         </div>
       )}

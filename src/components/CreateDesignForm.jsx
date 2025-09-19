@@ -102,6 +102,7 @@ export default function CreateDesignForm({ onClose }) {
       });
       setDesignResult("Design created successfully!");
       setLoading(false);
+      if (onClose) onClose();
     } catch (err) {
       setError("Failed to create design.");
       console.log(err);

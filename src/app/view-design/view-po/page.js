@@ -46,6 +46,17 @@ export default function ViewPOPage() {
       setDetailLoading(false);
     }
   };
+  const formatToIST = (dateStr) => {
+    if (!dateStr) return "-";
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return dateStr;
+    return date.toLocaleDateString("en-IN", {
+      timeZone: "Asia/Kolkata",
+      year: "numeric",
+      month: "short",
+      day: "2-digit",
+    });
+  };
 
   const handleOpenBatchSummary = async (batchId) => {
     setBatchModalOpen(true);
@@ -121,10 +132,10 @@ export default function ViewPOPage() {
               >
                 <div className="flex flex-col md:flex-row md:items-center gap-8">
                   <span className="mb-4 py-2 text-purple-900 font-semibold">
-                    Batch Id : {batch.batch_id}
+                    Batch Sl No. : {idx + 1}
                   </span>
                   <span className="mb-4 py-2 text-purple-900 font-semibold">
-                    Created At : {batch.created_at}
+                    Created At : {formatToIST(batch.created_at)}
                   </span>
 
                   <span className="mb-4 py-2 text-purple-900 font-semibold">
@@ -136,14 +147,23 @@ export default function ViewPOPage() {
                 <table className="min-w-full bg-white border border-purple-100 rounded">
                   <thead>
                     <tr className="text-left text-white border-b border-purple-200 bg-gradient-to-br from-purple-600 to-blue-400">
-                      <th className="px-2 py-1 text-left text-white font-bold">
+                      {/* <th className="px-2 py-1 text-left text-white font-bold">
                         PO Number
                       </th>
                       <th className="px-2 py-1 text-left text-white font-bold">
                         PO ID
+                      </th> */}
+                      <th className="px-2 py-1 text-left text-white font-bold">
+                        Sl No.
                       </th>
                       <th className="px-2 py-1 text-left text-white font-bold">
                         Design Name
+                      </th>
+                      <th className="px-2 py-1 text-left text-white font-bold">
+                        Vendor Name
+                      </th>
+                      <th className="px-2 py-1 text-left text-white font-bold">
+                        Stauts
                       </th>
                       <th className="px-2 py-1 text-left text-white font-bold">
                         Actions
@@ -156,14 +176,23 @@ export default function ViewPOPage() {
                         key={po.po_id || pi}
                         className="border-b border-gray-100"
                       >
-                        <td className="px-2 py-1 text-purple-900">
+                        {/* <td className="px-2 py-1 text-purple-900">
                           {po.po_number}
                         </td>
                         <td className="px-2 py-1 text-purple-900">
                           {po.po_id}
-                        </td>
+                        </td> */}
+                        <td className="px-2 py-1 text-purple-900">{pi + 1}</td>
                         <td className="px-2 py-1 text-purple-900">
                           {po.design_name}
+                        </td>
+                        <td className="px-2 py-1 text-purple-900">
+                          {po.vendor_name ||
+                            (po.vendor && po.vendor.name) ||
+                            "-"}
+                        </td>
+                        <td className="px-2 py-1 text-purple-900">
+                          {po.status || "-"}
                         </td>
                         <td className="px-2 py-1">
                           <button
@@ -333,18 +362,18 @@ export default function ViewPOPage() {
               ) : (
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 rounded-xl p-4">
-                    <div className="text-purple-900">
-                      <span className="font-semibold">Batch ID:</span>{" "}
+                    {/* <div className="text-purple-900">
+                      <span className="font-semibold">Batch :</span>{" "}
                       {batchSummary.batch_id}
-                    </div>
+                    </div> */}
                     <div className="text-purple-900">
                       <span className="font-semibold">Created At:</span>{" "}
                       {batchSummary.created_at}
                     </div>
-                    <div className="text-purple-900">
+                    {/* <div className="text-purple-900">
                       <span className="font-semibold">Created By:</span>{" "}
                       {batchSummary.created_by}
-                    </div>
+                    </div> */}
                     <div className="text-purple-900">
                       <span className="font-semibold">Description:</span>{" "}
                       {batchSummary.description}
@@ -358,10 +387,10 @@ export default function ViewPOPage() {
                       <thead className="bg-gray-50">
                         <tr>
                           <th className="px-4 py-2 text-left text-purple-950 font-bold">
-                            Fabric Type ID
+                            Fabric Name
                           </th>
                           <th className="px-4 py-2 text-left text-purple-950 font-bold">
-                            Color ID
+                            Color Name
                           </th>
                           <th className="px-4 py-2 text-left text-purple-950 font-bold">
                             Total Ordered
@@ -375,10 +404,10 @@ export default function ViewPOPage() {
                         {batchSummary.aggregated_by_fabric?.map((item, i) => (
                           <tr key={i} className="border-b border-gray-100">
                             <td className="px-4 py-2 text-purple-900">
-                              {item.fabric_type_id}
+                              {item.fabric_type_name}
                             </td>
                             <td className="px-4 py-2 text-purple-900">
-                              {item.color_id}
+                              {item.color_name}
                             </td>
                             <td className="px-4 py-2 text-purple-900">
                               {item.total_ordered}
