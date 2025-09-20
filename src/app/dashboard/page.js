@@ -1,10 +1,11 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import { supabase } from "@/utils/supabaseClient";
 import axios from "axios";
 import { API } from "@/utils/url";
 import Sidebar from "@/components/Sidebar";
 import { LogOut } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function Dashboard() {
   const [joinCode, setJoinCode] = useState("");
@@ -15,6 +16,7 @@ export default function Dashboard() {
   const [error, setError] = useState("");
   const [user, setUser] = useState(null);
   const [showJoinModal, setShowJoinModal] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     const getSession = async () => {
@@ -65,6 +67,13 @@ export default function Dashboard() {
       setJoinResult(res.data.message || "Joined successfully!");
     } catch (err) {
       setError("Failed to join organization.");
+    }
+  };
+
+  const handleOrganizationIdChange = (id) => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("organizationId", id);
+      router.push("/view-design");
     }
   };
 
@@ -141,7 +150,7 @@ export default function Dashboard() {
             <button
               key={idx}
               className="flex items-center gap-4 bg-white border border-purple-200 rounded-xl p-5 shadow-md hover:shadow-lg transition w-full text-left cursor-pointer"
-              onClick={() => (window.location.href = `/view-design`)}
+              onClick={() => handleOrganizationIdChange(org.organization_id)}
             >
               <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-purple-400 to-purple-600 flex items-center justify-center text-xl text-white font-bold shadow border-2 border-purple-100">
                 {org.organization_name

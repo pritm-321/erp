@@ -80,8 +80,8 @@ export default function ViewPOPage() {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const orgs = JSON.parse(localStorage.getItem("organizations"));
-      setOrganizationId(orgs?.data?.joined?.[0]?.organization_id || "");
+      const orgs = localStorage.getItem("organizationId");
+      setOrganizationId(orgs || "");
       supabase.auth.getSession().then(({ data }) => {
         setAccessToken(data?.session?.access_token || "");
       });

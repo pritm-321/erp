@@ -53,8 +53,8 @@ export default function CreateDesignGroupForm({
   useEffect(() => {
     const fetchPartySuggestions = async () => {
       if (typeof window !== "undefined") {
-        const orgs = JSON.parse(localStorage.getItem("organizations"));
-        organizationId = orgs?.data?.joined?.[0]?.organization_id || "";
+        const orgs = localStorage.getItem("organizationId");
+        organizationId = orgs || "";
       }
       try {
         const accessToken = await supabase.auth
@@ -73,8 +73,8 @@ export default function CreateDesignGroupForm({
     };
     const fetchDesignTypeSuggestions = async () => {
       if (typeof window !== "undefined") {
-        const orgs = JSON.parse(localStorage.getItem("organizations"));
-        organizationId = orgs?.data?.joined?.[0]?.organization_id || "";
+        const orgs = localStorage.getItem("organizationId");
+        organizationId = orgs || "";
       }
       try {
         const accessToken = await supabase.auth
@@ -93,8 +93,8 @@ export default function CreateDesignGroupForm({
     };
     const fetchDesignNameSuggestions = async () => {
       if (typeof window !== "undefined") {
-        const orgs = JSON.parse(localStorage.getItem("organizations"));
-        organizationId = orgs?.data?.joined?.[0]?.organization_id || "";
+        const orgs = localStorage.getItem("organizationId");
+        organizationId = orgs || "";
       }
       try {
         const accessToken = await supabase.auth
@@ -157,8 +157,8 @@ export default function CreateDesignGroupForm({
       };
       // Get organization_id from localStorage
       if (typeof window !== "undefined") {
-        const orgs = JSON.parse(localStorage.getItem("organizations"));
-        organizationId = orgs?.data?.joined?.[0]?.organization_id || "";
+        const orgs = localStorage.getItem("organizationId");
+        organizationId = orgs || "";
       }
 
       const { data } = await axios.post(`${API}so/design-group`, payload, {

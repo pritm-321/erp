@@ -61,8 +61,8 @@ export default function Sidebar() {
     try {
       let organizationId = "";
       if (typeof window !== "undefined") {
-        const orgs = JSON.parse(localStorage.getItem("organizations"));
-        organizationId = orgs?.data?.joined?.[0]?.organization_id || "";
+        const orgs = localStorage.getItem("organizationId");
+        organizationId = orgs || "";
       }
       const accessToken = await supabase.auth
         .getSession()

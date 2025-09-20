@@ -17,8 +17,7 @@ export default function Profile() {
       try {
         let organizationId = "";
         if (typeof window !== "undefined") {
-          const orgs = JSON.parse(localStorage.getItem("organizations"));
-          organizationId = orgs?.data?.joined?.[0]?.organization_id || "";
+          organizationId = localStorage.getItem("organizationId");
         }
         const accessToken = await supabase.auth
           .getSession()

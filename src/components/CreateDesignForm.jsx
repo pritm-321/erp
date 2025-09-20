@@ -22,8 +22,8 @@ export default function CreateDesignForm({ onClose, onSuccess }) {
   useEffect(() => {
     const fetchDesignNameSuggestions = async () => {
       if (typeof window !== "undefined") {
-        const orgs = JSON.parse(localStorage.getItem("organizations"));
-        organizationId = orgs?.data?.joined?.[0]?.organization_id || "";
+        const orgs = localStorage.getItem("organizationId");
+        organizationId = orgs || "";
       }
       try {
         const accessToken = await supabase.auth
@@ -86,8 +86,8 @@ export default function CreateDesignForm({ onClose, onSuccess }) {
         .getSession()
         .then(({ data }) => data?.session?.access_token);
       if (typeof window !== "undefined") {
-        const orgs = JSON.parse(localStorage.getItem("organizations"));
-        organizationId = orgs?.data?.joined?.[0]?.organization_id || "";
+        const orgs = localStorage.getItem("organizationId");
+        organizationId = orgs || "";
       }
       const formData = new FormData();
       formData.append("design_name", designName);
