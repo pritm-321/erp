@@ -42,6 +42,8 @@ export default function GroupDesignsPage() {
           fabrics: [
             {
               fabric_type_id: "",
+              dia: "",
+              gsm: "",
               colors: [{ color_id: "", is_base: false, consumption: "" }],
             },
           ],
@@ -428,6 +430,18 @@ export default function GroupDesignsPage() {
                                               fab.fabric_type_id}
                                           </span>
                                         </div>
+                                        <div className="font-bold text-purple-950 mb-1">
+                                          DIA:{" "}
+                                          <span className="font-medium">
+                                            {fab.dia || "N/A"}
+                                          </span>
+                                        </div>
+                                        <div className="font-bold text-purple-950 mb-1">
+                                          GSM:{" "}
+                                          <span className="font-medium">
+                                            {fab.gsm || "N/A"}
+                                          </span>
+                                        </div>
                                         {fab.colors && (
                                           <div className="ml-2">
                                             <div className="font-bold text-purple-950 mb-1">
@@ -557,7 +571,7 @@ export default function GroupDesignsPage() {
                   Sizes
                 </label>
                 {sizes.map((sz, i) => (
-                  <div key={i} className="flex gap-2 mb-2">
+                  <div key={i} className="flex gap-2 mb-2 ml-1">
                     <input
                       type="text"
                       placeholder="Size"
@@ -573,7 +587,7 @@ export default function GroupDesignsPage() {
                       type="number"
                       placeholder="Ratio Component"
                       className="border border-purple-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white "
-                      value={sz.ratio_component}
+                      value={sz.ratio_component || 1}
                       onChange={(e) => {
                         const newSizes = [...sizes];
                         newSizes[i].ratio_component = e.target.value;
@@ -739,6 +753,42 @@ export default function GroupDesignsPage() {
                                       ))}
                                     </select>
                                   </div>
+                                  <div className="flex flex-col">
+                                    <label className="text-purple-700 font-medium mb-1">
+                                      DIA
+                                    </label>
+                                    <input
+                                      type="number"
+                                      placeholder="DIA"
+                                      className="border border-purple-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white min-w-[100px]"
+                                      value={f.dia || ""}
+                                      onChange={(e) => {
+                                        const newGroups = [...variantGroups];
+                                        newGroups[vgi].parts[pi].fabrics[
+                                          fi
+                                        ].dia = e.target.value;
+                                        setVariantGroups(newGroups);
+                                      }}
+                                    />
+                                  </div>
+                                  <div className="flex flex-col">
+                                    <label className="text-purple-700 font-medium mb-1">
+                                      GSM
+                                    </label>
+                                    <input
+                                      type="number"
+                                      placeholder="GSM"
+                                      className="border border-purple-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white min-w-[100px]"
+                                      value={f.gsm || ""}
+                                      onChange={(e) => {
+                                        const newGroups = [...variantGroups];
+                                        newGroups[vgi].parts[pi].fabrics[
+                                          fi
+                                        ].gsm = e.target.value;
+                                        setVariantGroups(newGroups);
+                                      }}
+                                    />
+                                  </div>
                                 </div>
                                 <div className="flex flex-col gap-2 mt-2">
                                   <label className="text-purple-700 font-medium mb-1">
@@ -809,7 +859,7 @@ export default function GroupDesignsPage() {
                                       <input
                                         type="number"
                                         placeholder="Consumption"
-                                        className="border border-purple-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white w-24"
+                                        className="border border-purple-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white w-50"
                                         value={c.consumption}
                                         onChange={(e) => {
                                           const newGroups = [...variantGroups];
@@ -819,6 +869,7 @@ export default function GroupDesignsPage() {
                                             e.target.value;
                                           setVariantGroups(newGroups);
                                         }}
+                                        required
                                       />
                                       <button
                                         type="button"
@@ -868,6 +919,8 @@ export default function GroupDesignsPage() {
                                 const newGroups = [...variantGroups];
                                 newGroups[vgi].parts[pi].fabrics.push({
                                   fabric_type_id: "",
+                                  dia: "",
+                                  gsm: "",
                                   colors: [
                                     {
                                       color_id: "",
@@ -895,6 +948,8 @@ export default function GroupDesignsPage() {
                             fabrics: [
                               {
                                 fabric_type_id: "",
+                                dia: "",
+                                gsm: "",
                                 colors: [
                                   {
                                     color_id: "",
@@ -927,6 +982,8 @@ export default function GroupDesignsPage() {
                               fabrics: [
                                 {
                                   fabric_type_id: "",
+                                  dia: "",
+                                  gsm: "",
                                   colors: [
                                     {
                                       color_id: "",
