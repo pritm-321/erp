@@ -618,7 +618,7 @@ export default function GroupDesignsPage() {
                       ...sizes,
                       {
                         size: "",
-                        ratio_component: "",
+                        ratio_component: 1,
                       },
                     ])
                   }
