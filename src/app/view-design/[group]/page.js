@@ -32,7 +32,7 @@ export default function GroupDesignsPage() {
   const [fabricTypeOptions, setFabricTypeOptions] = useState([]);
   const [partOptions, setPartOptions] = useState([]);
   const [partsDetails, setPartsDetails] = useState([]);
-  const [sizes, setSizes] = useState([{ size: "", ratio_component: "" }]);
+  const [sizes, setSizes] = useState([{ size: "", ratio_component: 1 }]);
   const [variantGroups, setVariantGroups] = useState([
     {
       variation: "",
@@ -42,9 +42,9 @@ export default function GroupDesignsPage() {
           fabrics: [
             {
               fabric_type_id: "",
-              dia: "",
-              gsm: "",
-              colors: [{ color_id: "", is_base: false, consumption: "" }],
+              dia: 0,
+              gsm: 0,
+              colors: [{ color_id: "", is_base: false, consumption: 0 }],
             },
           ],
         },
@@ -587,7 +587,11 @@ export default function GroupDesignsPage() {
                       type="number"
                       placeholder="Ratio Component"
                       className="border border-purple-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white "
-                      value={sz.ratio_component || 1}
+                      value={sz.ratio_component}
+                      min="0"
+                      onInput={(e) => {
+                        if (e.target.value < 0) e.target.value = 0;
+                      }}
                       onChange={(e) => {
                         const newSizes = [...sizes];
                         newSizes[i].ratio_component = e.target.value;
@@ -762,6 +766,11 @@ export default function GroupDesignsPage() {
                                       placeholder="DIA"
                                       className="border border-purple-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white min-w-[100px]"
                                       value={f.dia || ""}
+                                      min="0"
+                                      onInput={(e) => {
+                                        if (e.target.value < 0)
+                                          e.target.value = 0;
+                                      }}
                                       onChange={(e) => {
                                         const newGroups = [...variantGroups];
                                         newGroups[vgi].parts[pi].fabrics[
@@ -780,6 +789,11 @@ export default function GroupDesignsPage() {
                                       placeholder="GSM"
                                       className="border border-purple-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white min-w-[100px]"
                                       value={f.gsm || ""}
+                                      min="0"
+                                      onInput={(e) => {
+                                        if (e.target.value < 0)
+                                          e.target.value = 0;
+                                      }}
                                       onChange={(e) => {
                                         const newGroups = [...variantGroups];
                                         newGroups[vgi].parts[pi].fabrics[
@@ -861,6 +875,11 @@ export default function GroupDesignsPage() {
                                         placeholder="Consumption"
                                         className="border border-purple-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white w-50"
                                         value={c.consumption}
+                                        min="0"
+                                        onInput={(e) => {
+                                          if (e.target.value < 0)
+                                            e.target.value = 0;
+                                        }}
                                         onChange={(e) => {
                                           const newGroups = [...variantGroups];
                                           newGroups[vgi].parts[pi].fabrics[
