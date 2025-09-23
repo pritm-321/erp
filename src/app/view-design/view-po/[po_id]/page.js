@@ -37,7 +37,7 @@ export default function ViewPOByIdPage() {
             "Organization-ID": organizationId,
           },
         });
-        console.log(data.data);
+        // console.log(data.data);
 
         setPoDetail(data.data || null);
       } catch (err) {
@@ -120,6 +120,12 @@ export default function ViewPOByIdPage() {
                           Color Name
                         </th>
                         <th className="px-4 py-2 text-left text-purple-950 font-bold">
+                          GSM
+                        </th>
+                        <th className="px-4 py-2 text-left text-purple-950 font-bold">
+                          DIA
+                        </th>
+                        <th className="px-4 py-2 text-left text-purple-950 font-bold">
                           Moq
                         </th>
                         <th className="px-4 py-2 text-left text-purple-950 font-bold">
@@ -144,7 +150,13 @@ export default function ViewPOByIdPage() {
                             {li.color_name || "-"}
                           </td>
                           <td className="px-4 py-2 text-purple-900">
-                            {li.moq || li.qty || "-"}
+                            {li.gsm || "-"}
+                          </td>
+                          <td className="px-4 py-2 text-purple-900">
+                            {li.dia || "-"}
+                          </td>
+                          <td className="px-4 py-2 text-purple-900">
+                            {li.moq || li.moq || "-"}
                           </td>
                           <td className="px-4 py-2 text-purple-900">
                             {li.ordered_qty || li.qty || "-"}

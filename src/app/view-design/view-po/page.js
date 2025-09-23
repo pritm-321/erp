@@ -393,6 +393,12 @@ export default function ViewPOPage() {
                             Color Name
                           </th>
                           <th className="px-4 py-2 text-left text-purple-950 font-bold">
+                            GSM
+                          </th>
+                          <th className="px-4 py-2 text-left text-purple-950 font-bold">
+                            DIA
+                          </th>
+                          <th className="px-4 py-2 text-left text-purple-950 font-bold">
                             Total Ordered
                           </th>
                           <th className="px-4 py-2 text-left text-purple-950 font-bold">
@@ -408,6 +414,12 @@ export default function ViewPOPage() {
                             </td>
                             <td className="px-4 py-2 text-purple-900">
                               {item.color_name}
+                            </td>
+                            <td className="px-4 py-2 text-purple-900">
+                              {item.gsm}
+                            </td>
+                            <td className="px-4 py-2 text-purple-900">
+                              {item.dia}
                             </td>
                             <td className="px-4 py-2 text-purple-900">
                               {item.total_ordered}

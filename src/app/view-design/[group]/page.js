@@ -42,9 +42,9 @@ export default function GroupDesignsPage() {
           fabrics: [
             {
               fabric_type_id: "",
-              dia: 0,
+              dia: 0.0,
               gsm: 0,
-              colors: [{ color_id: "", is_base: false, consumption: 0 }],
+              colors: [{ color_id: "", is_base: false, consumption: 0.0 }],
             },
           ],
         },
@@ -759,29 +759,6 @@ export default function GroupDesignsPage() {
                                   </div>
                                   <div className="flex flex-col">
                                     <label className="text-purple-700 font-medium mb-1">
-                                      DIA
-                                    </label>
-                                    <input
-                                      type="number"
-                                      placeholder="DIA"
-                                      className="border border-purple-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white min-w-[100px]"
-                                      value={f.dia || ""}
-                                      min="0"
-                                      onInput={(e) => {
-                                        if (e.target.value < 0)
-                                          e.target.value = 0;
-                                      }}
-                                      onChange={(e) => {
-                                        const newGroups = [...variantGroups];
-                                        newGroups[vgi].parts[pi].fabrics[
-                                          fi
-                                        ].dia = e.target.value;
-                                        setVariantGroups(newGroups);
-                                      }}
-                                    />
-                                  </div>
-                                  <div className="flex flex-col">
-                                    <label className="text-purple-700 font-medium mb-1">
                                       GSM
                                     </label>
                                     <input
@@ -799,6 +776,30 @@ export default function GroupDesignsPage() {
                                         newGroups[vgi].parts[pi].fabrics[
                                           fi
                                         ].gsm = e.target.value;
+                                        setVariantGroups(newGroups);
+                                      }}
+                                    />
+                                  </div>
+                                  <div className="flex flex-col">
+                                    <label className="text-purple-700 font-medium mb-1">
+                                      DIA
+                                    </label>
+                                    <input
+                                      type="number"
+                                      step="0.01"
+                                      placeholder="DIA"
+                                      className="border border-purple-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white min-w-[100px]"
+                                      value={f.dia || ""}
+                                      min="0"
+                                      onInput={(e) => {
+                                        if (e.target.value < 0)
+                                          e.target.value = 0;
+                                      }}
+                                      onChange={(e) => {
+                                        const newGroups = [...variantGroups];
+                                        newGroups[vgi].parts[pi].fabrics[
+                                          fi
+                                        ].dia = parseFloat(e.target.value) || 0;
                                         setVariantGroups(newGroups);
                                       }}
                                     />
@@ -872,6 +873,7 @@ export default function GroupDesignsPage() {
                                       </label>
                                       <input
                                         type="number"
+                                        step="0.01"
                                         placeholder="Consumption"
                                         className="border border-purple-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white w-50"
                                         value={c.consumption}
@@ -885,7 +887,7 @@ export default function GroupDesignsPage() {
                                           newGroups[vgi].parts[pi].fabrics[
                                             fi
                                           ].colors[ci].consumption =
-                                            e.target.value;
+                                            parseFloat(e.target.value) || 0;
                                           setVariantGroups(newGroups);
                                         }}
                                         required
@@ -920,7 +922,7 @@ export default function GroupDesignsPage() {
                                       ].colors.push({
                                         color_id: "",
                                         is_base: false,
-                                        consumption: "",
+                                        consumption: 0.0,
                                       });
                                       setVariantGroups(newGroups);
                                     }}
@@ -938,13 +940,13 @@ export default function GroupDesignsPage() {
                                 const newGroups = [...variantGroups];
                                 newGroups[vgi].parts[pi].fabrics.push({
                                   fabric_type_id: "",
-                                  dia: "",
-                                  gsm: "",
+                                  dia: 0.0,
+                                  gsm: 0,
                                   colors: [
                                     {
                                       color_id: "",
                                       is_base: false,
-                                      consumption: "",
+                                      consumption: 0.0,
                                     },
                                   ],
                                 });
@@ -967,13 +969,13 @@ export default function GroupDesignsPage() {
                             fabrics: [
                               {
                                 fabric_type_id: "",
-                                dia: "",
-                                gsm: "",
+                                dia: 0.0,
+                                gsm: 0,
                                 colors: [
                                   {
                                     color_id: "",
                                     is_base: false,
-                                    consumption: "",
+                                    consumption: 0.0,
                                   },
                                 ],
                               },
@@ -1001,13 +1003,13 @@ export default function GroupDesignsPage() {
                               fabrics: [
                                 {
                                   fabric_type_id: "",
-                                  dia: "",
-                                  gsm: "",
+                                  dia: 0.0,
+                                  gsm: 0,
                                   colors: [
                                     {
                                       color_id: "",
                                       is_base: false,
-                                      consumption: "",
+                                      consumption: 0.0,
                                     },
                                   ],
                                 },
