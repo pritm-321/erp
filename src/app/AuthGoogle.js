@@ -82,15 +82,15 @@ export default function AuthGoogle() {
     <div className="relative flex min-h-screen items-center justify-center">
       {/* Decorative background icons */}
       <Package
-        className="absolute top-10 left-10 text-blue-200 opacity-30"
+        className="absolute top-10 left-10 text-foreground opacity-30"
         size={120}
       />
       <Store
-        className="absolute bottom-20 -right-20 text-blue-200 opacity-20"
+        className="absolute bottom-20 -right-20 text-foreground opacity-20"
         size={160}
       />
       <Store
-        className="absolute top-60 -left-72 text-blue-200 opacity-20"
+        className="absolute top-60 -left-72 text-foreground opacity-20"
         size={160}
       />
       <ClipboardList
