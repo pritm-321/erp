@@ -3,7 +3,15 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { supabase } from "@/utils/supabaseClient";
 import { API } from "@/utils/url";
-import { Upload, Search } from "lucide-react";
+import {
+  Upload,
+  Search,
+  EyeClosed,
+  Eye,
+  Shirt,
+  ArrowDown01,
+  ArrowDownAZ,
+} from "lucide-react";
 import Sidebar from "@/components/Sidebar";
 import { useRouter } from "next/navigation";
 import CreateDesignGroupForm from "@/components/CreateDesignGroupForm";
@@ -32,7 +40,8 @@ export default function ViewDesign() {
       try {
         let organizationId = "";
         if (typeof window !== "undefined") {
-          organizationId = localStorage.getItem("organizationId");
+          const orgs = JSON.parse(localStorage.getItem("organizations"));
+          organizationId = orgs?.data?.joined?.[0]?.organization_id || "";
         }
 
         const accessToken = await supabase.auth
@@ -80,8 +89,8 @@ export default function ViewDesign() {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const orgs = localStorage.getItem("organizationId");
-      setOrganizationId(orgs || "");
+      const orgs = JSON.parse(localStorage.getItem("organizations"));
+      setOrganizationId(orgs?.data?.joined?.[0]?.organization_id || "");
       supabase.auth.getSession().then(({ data }) => {
         setAccessToken(data?.session?.access_token || "");
       });
@@ -104,7 +113,7 @@ export default function ViewDesign() {
     return <div className="text-red-600 p-4">{error}</div>;
   }
   //   if (!design) {
-  //     return <div className="p-4">Loading...</div>;
+  //     return <div className="p-4"><div className="border-y-2 rounded-full w-16 h-16 animate-spin" /></div>;
   //   }
 
   // Group designs by specified fields
@@ -139,7 +148,7 @@ export default function ViewDesign() {
       // Use first design's party for each group
       const nameA = a[0]?.party?.toLowerCase() || "";
       const nameB = b[0]?.party?.toLowerCase() || "";
-      console.log(nameA, nameB, "names");
+      // console.log(nameA, nameB, "names");
 
       return nameA.localeCompare(nameB);
     });
@@ -148,7 +157,7 @@ export default function ViewDesign() {
       // Use earliest delivery_date in each group
       const dateA = new Date(a.delivery_date);
       const dateB = new Date(b.delivery_date);
-      return dateB - dateA;
+      return dateA - dateB;
     });
   }
 
@@ -183,14 +192,14 @@ export default function ViewDesign() {
     <div className="flex min-h-screen">
       <Sidebar />
 
-      <div className="w-full mx-auto p-8  bg-white h-screen overflow-y-scroll">
+      <div className="w-full mx-auto p-8 h-screen overflow-y-scroll">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold text-purple-900">
+          <h1 className="text-3xl font-bold text-foreground">
             Grouped Designs
           </h1>
           <div className="flex gap-2 items-center">
             <button
-              className="bg-purple-600 text-white px-6 py-2 rounded-lg shadow hover:bg-purple-700 transition font-semibold"
+              className="bg-foreground text-white px-6 py-2 rounded-lg shadow hover:bg-foreground-700 transition font-semibold hover:translate-x-2 hover:-translate-y-1"
               onClick={() => setCreateDesignModal(true)}
             >
               + Create Design
@@ -199,13 +208,13 @@ export default function ViewDesign() {
         </div>
         <div className="flex items-center gap-5 mb-6">
           <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-purple-400">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-400">
               <Search size={20} />
             </span>
             <input
               type="text"
               placeholder="Search by Party Name / Design Type "
-              className="pl-10 w-[340px] border border-purple-300 px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white"
+              className="pl-10 w-[340px] border border-blue-300 px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white"
               value={searchParty}
               onChange={(e) => setSearchParty(e.target.value)}
             />
@@ -213,29 +222,27 @@ export default function ViewDesign() {
           <input
             type="date"
             placeholder="Search by Delivery Date"
-            className="border border-purple-300 px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white"
+            className="border border-blue-300 px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white"
             value={searchDate}
             onChange={(e) => setSearchDate(e.target.value)}
           />
           <button
-            className={`bg-purple-500 text-white px-4 py-2 rounded-lg shadow hover:bg-purple-600 transition font-semibold ${
-              sortType === "name" ? "ring-2 ring-purple-700" : ""
-            }`}
+            className={`bg-foreground text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700 transition font-semibold flex items-center gap-2`}
             onClick={() => setSortType("name")}
           >
+            <ArrowDownAZ />
             Sort by Party Name
           </button>
           <button
-            className={`bg-purple-500 text-white px-4 py-2 rounded-lg shadow hover:bg-purple-600 transition font-semibold ${
-              sortType === "date" ? "ring-2 ring-purple-700" : ""
-            }`}
+            className={`bg-foreground text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700 transition font-semibold flex items-center gap-2`}
             onClick={() => setSortType("date")}
           >
+            <ArrowDown01 />
             Sort by Delivery Date
           </button>
           {/* <button
-            className={`bg-purple-500 text-white px-4 py-2 rounded-lg shadow hover:bg-purple-600 transition font-semibold ${
-              sortType === "date" ? "ring-2 ring-purple-700" : ""
+            className={`bg-foreground-500 text-white px-4 py-2 rounded-lg shadow hover:bg-foreground transition font-semibold ${
+              sortType === "date" ? "ring-2 ring-blue-700" : ""
             }`}
             onClick={() => setSortType("date")}
           >
@@ -243,7 +250,9 @@ export default function ViewDesign() {
           </button> */}
         </div>
         {loading ? (
-          <div className="p-4 text-gray-500">Loading...</div>
+          <div className="p-4 text-gray-500">
+            <div className="border-y-2 rounded-full w-16 h-16 animate-spin" />
+          </div>
         ) : filteredEntries?.length === 0 ? (
           <div className="p-4 text-gray-500">No designs found</div>
         ) : (
@@ -260,9 +269,13 @@ export default function ViewDesign() {
               return (
                 <div
                   key={idx}
-                  className="p-6 rounded-xl shadow bg-gray-50 border border-purple-200"
+                  className="p-6 rounded-xl shadow bg-gray-50 border border-blue-200 relative"
                 >
-                  <div className="mb-2 text-lg font-semibold text-purple-800">
+                  <Shirt
+                    className="text-gray-500 mb-4 absolute -rotate-45 top-5 right-4 opacity-15"
+                    size={100}
+                  />
+                  <div className="mb-2 text-lg font-semibold text-foreground">
                     Party: <span className="font-bold">{g.party}</span>
                   </div>
                   <div className="mb-2">
@@ -293,7 +306,7 @@ export default function ViewDesign() {
                   </div>
                   <div className="mt-4 flex gap-3">
                     <button
-                      className="px-4 py-2 bg-purple-600 text-white rounded-lg shadow hover:bg-purple-700 transition"
+                      className="px-4 py-2 bg-foreground text-white rounded-lg shadow hover:bg-blue-700 hover:translate-x-2 hover:-translate-y-1 transition flex items-center gap-2"
                       onClick={() => {
                         // Store all designs in this group in localStorage
                         if (typeof window !== "undefined") {
@@ -305,7 +318,7 @@ export default function ViewDesign() {
                         );
                       }}
                     >
-                      View Designs
+                      <Eye /> View Designs
                     </button>
                   </div>
                 </div>
@@ -318,12 +331,12 @@ export default function ViewDesign() {
         {createDesignModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
             <div className="bg-gray-50 rounded-2xl shadow-2xl max-w-2xl w-full relative overflow-hidden">
-              <div className=" flex p-5 justify-between items-center bg-gradient-to-br from-purple-700 to-blue-400">
+              <div className=" flex p-5 justify-between items-center bg-foreground">
                 <h2 className="text-2xl font-bold text-white">
                   Create Design Group
                 </h2>
                 <button
-                  className="text-white hover:text-purple-700 text-2xl font-bold"
+                  className="text-white hover:text-blue-700 text-2xl font-bold"
                   onClick={() => setCreateDesignModal(false)}
                 >
                   &times;

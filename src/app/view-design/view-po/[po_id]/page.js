@@ -53,10 +53,12 @@ export default function ViewPOByIdPage() {
   return (
     <div className="flex min-h-screen">
       <Sidebar />
-      <main className="flex-1 p-8 bg-white">
-        <h1 className="text-3xl font-bold mb-6 text-purple-950">PO Details</h1>
+      <main className="flex-1 p-8">
+        <h1 className="text-3xl font-bold mb-6 text-blue-950">PO Details</h1>
         {loading ? (
-          <div className="p-4 text-gray-500">Loading...</div>
+          <div className="p-4 text-gray-500">
+            <div className="border-y-2 rounded-full w-16 h-16 animate-spin" />
+          </div>
         ) : error ? (
           <div className="p-4 text-red-600">{error}</div>
         ) : !poDetail ? (
@@ -69,33 +71,33 @@ export default function ViewPOByIdPage() {
                 alt="Design Image"
                 width={500}
                 height={500}
-                className="w-48 h-48 object-cover rounded-lg shadow-lg border border-purple-200"
+                className="w-48 h-48 object-cover rounded-lg shadow-lg border border-blue-200"
               />
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 rounded-xl p-4">
-                {/* <div className="text-purple-900">
+                {/* <div className="text-foreground">
                 <span className="font-semibold">PO Number:</span>{" "}
                 {poDetail.po_number || "-"}
               </div>
-              <div className="text-purple-900">
+              <div className="text-foreground">
                 <span className=    "font-semibold">PO ID:</span>{" "}
                 {poDetail.po_id || "-"}
               </div> */}
 
-                <div className="text-purple-900">
+                <div className="text-foreground">
                   <span className="font-semibold">Status:</span>{" "}
                   {poDetail.status || "-"}
                 </div>
-                <div className="text-purple-900">
+                <div className="text-foreground">
                   <span className="font-semibold">Vendor:</span>{" "}
                   {poDetail.vendor?.name || poDetail.vendor_name || "-"}
                 </div>
-                <div className="text-purple-900">
+                <div className="text-foreground">
                   <span className="font-semibold">Design Name:</span>{" "}
                   {poDetail.design?.name || poDetail.design_name || "-"}
                 </div>
 
-                <div className="text-purple-900">
+                <div className="text-foreground">
                   <span className="font-semibold">Order Date:</span>{" "}
                   {poDetail.order_date
                     ? new Date(poDetail.order_date).toLocaleString()
@@ -105,33 +107,33 @@ export default function ViewPOByIdPage() {
             </div>
             {Array.isArray(poDetail.items) && poDetail.items.length > 0 && (
               <div>
-                <h3 className="text-lg font-semibold text-purple-900 mb-2">
+                <h3 className="text-lg font-semibold text-foreground mb-2">
                   Line Items
                 </h3>
-                <div className="overflow-hidden rounded-xl border border-purple-200">
+                <div className="overflow-hidden rounded-xl border border-blue-200">
                   <table className="min-w-full bg-white">
                     <thead className="bg-gray-50">
-                      <tr className="text-left text-white border-b border-purple-200 bg-gradient-to-br from-purple-600 to-blue-400">
-                        <th className="px-4 py-2 text-left text-purple-950 font-bold">
+                      <tr className="text-left text-white border-b border-blue-200 bg-gradient-to-br from-blue-600 to-blue-400">
+                        <th className="px-4 py-2 text-left text-blue-950 font-bold">
                           Fabric Name
                         </th>
 
-                        <th className="px-4 py-2 text-left text-purple-950 font-bold">
+                        <th className="px-4 py-2 text-left text-blue-950 font-bold">
                           Color Name
                         </th>
-                        <th className="px-4 py-2 text-left text-purple-950 font-bold">
+                        <th className="px-4 py-2 text-left text-blue-950 font-bold">
                           GSM
                         </th>
-                        <th className="px-4 py-2 text-left text-purple-950 font-bold">
+                        <th className="px-4 py-2 text-left text-blue-950 font-bold">
                           DIA
                         </th>
-                        <th className="px-4 py-2 text-left text-purple-950 font-bold">
+                        <th className="px-4 py-2 text-left text-blue-950 font-bold">
                           Moq
                         </th>
-                        <th className="px-4 py-2 text-left text-purple-950 font-bold">
+                        <th className="px-4 py-2 text-left text-blue-950 font-bold">
                           Ordered Qty
                         </th>
-                        <th className="px-4 py-2 text-left text-purple-950 font-bold">
+                        <th className="px-4 py-2 text-left text-blue-950 font-bold">
                           Required Qty
                         </th>
                       </tr>
@@ -139,29 +141,29 @@ export default function ViewPOByIdPage() {
                     <tbody>
                       {poDetail.items.map((li, i) => (
                         <tr key={i} className="border-b border-gray-100">
-                          <td className="px-4 py-2 text-purple-900">
+                          <td className="px-4 py-2 text-foreground">
                             {li.fabric_type_name ||
                               li.name ||
                               li.description ||
                               "-"}
                           </td>
 
-                          <td className="px-4 py-2 text-purple-900">
+                          <td className="px-4 py-2 text-foreground">
                             {li.color_name || "-"}
                           </td>
-                          <td className="px-4 py-2 text-purple-900">
+                          <td className="px-4 py-2 text-foreground">
                             {li.gsm || "-"}
                           </td>
-                          <td className="px-4 py-2 text-purple-900">
+                          <td className="px-4 py-2 text-foreground">
                             {li.dia || "-"}
                           </td>
-                          <td className="px-4 py-2 text-purple-900">
+                          <td className="px-4 py-2 text-foreground">
                             {li.moq || li.moq || "-"}
                           </td>
-                          <td className="px-4 py-2 text-purple-900">
+                          <td className="px-4 py-2 text-foreground">
                             {li.ordered_qty || li.qty || "-"}
                           </td>
-                          <td className="px-4 py-2 text-purple-900">
+                          <td className="px-4 py-2 text-foreground">
                             {li.required_qty || li.qty || "-"}
                           </td>
                         </tr>

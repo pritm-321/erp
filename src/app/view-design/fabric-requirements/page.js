@@ -6,6 +6,7 @@ import axios from "axios";
 import { API } from "@/utils/url";
 import { supabase } from "@/utils/supabaseClient";
 import { useRouter } from "next/navigation";
+import { Folder } from "lucide-react";
 
 export default function FabricRequirementsPage() {
   const [requirements, setRequirements] = useState(null);
@@ -157,23 +158,26 @@ export default function FabricRequirementsPage() {
   return (
     <div className="flex min-h-screen">
       <Sidebar />
-      <main className="flex-1 p-8 bg-white">
+      <main className="flex-1 p-8">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold text-purple-950">
+          <h1 className="text-3xl font-bold text-blue-950">
             Fabric Requirements
           </h1>
           {!loading && !error && requirements && requirements.length > 0 && (
             <button
-              className=" px-6 py-3 bg-purple-600 text-white rounded-lg shadow hover:bg-purple-700 transition"
+              className=" px-6 py-3 bg-foreground text-white rounded-lg shadow hover:bg-blue-700 transition flex items-center gap-2"
               onClick={handleOpenPOModal}
               disabled={selectedDesignIds.length === 0}
             >
+              <Folder size={20} />
               Generate PO
             </button>
           )}
         </div>
         {loading ? (
-          <div className="p-4 text-gray-500">Loading...</div>
+          <div className="p-4 text-gray-500">
+            <div className="border-y-2 rounded-full w-16 h-16 animate-spin" />
+          </div>
         ) : error ? (
           <div className="p-4 text-red-600">{error}</div>
         ) : !requirements || requirements.length === 0 ? (
@@ -194,7 +198,7 @@ export default function FabricRequirementsPage() {
                   }}
                   className="mr-2"
                 />
-                <span className="font-semibold text-purple-900">
+                <span className="font-semibold text-foreground">
                   Select All To Generate PO
                 </span>
               </div>
@@ -222,20 +226,20 @@ export default function FabricRequirementsPage() {
                     }}
                     className="mr-2"
                   />
-                  <h2 className="text-xl font-semibold text-purple-900">
+                  <h2 className="text-xl font-semibold text-foreground">
                     Design Name : {req.design_name || `Design ${idx + 1}`}
                   </h2>
-                  <h2 className="text-xl font-semibold text-purple-900">
+                  <h2 className="text-xl font-semibold text-foreground">
                     Quantity : {req.quantity || 0}
                   </h2>
-                  <h2 className="text-xl font-semibold text-purple-900">
+                  <h2 className="text-xl font-semibold text-foreground">
                     Created Date : {formatToIST(req.created_at)}
                   </h2>
                 </div>
                 {req.fabric_requirements.length > 0 && (
                   <table className="w-full rounded-lg overflow-hidden mt-2">
                     <thead>
-                      <tr className="text-left text-white border-b border-purple-200 bg-gradient-to-br from-purple-600 to-blue-400">
+                      <tr className="text-left text-white border-b border-blue-200 bg-foreground">
                         <th className="px-4 py-2">Fabric Type</th>
                         <th className="px-4 py-2">Color</th>
                         <th className="px-4 py-2">Consumption per Piece</th>
@@ -246,7 +250,7 @@ export default function FabricRequirementsPage() {
                       {req.fabric_requirements.map((fr, fidx) => (
                         <tr
                           key={fidx}
-                          className="text-purple-900 border-b border-purple-100"
+                          className="text-foreground border-b border-blue-100"
                         >
                           <td className="px-4 py-2">
                             {fr.fabric_type_name || fr.fabric_type_id}
@@ -299,7 +303,7 @@ export default function FabricRequirementsPage() {
                 </select>
                 <button
                   type="submit"
-                  className="bg-purple-600 text-white px-4 py-2 rounded w-full"
+                  className="bg-foreground text-white px-4 py-2 rounded w-full"
                   disabled={poLoading}
                 >
                   {poLoading ? "Generating..." : "Submit"}

@@ -43,24 +43,24 @@ export default function Profile() {
     <div className="flex min-h-screen">
       <Sidebar />
       <main className="flex-1 max-w-2xl mx-auto py-10">
-        <h1 className="text-2xl font-bold mb-8 text-purple-900">
+        <h1 className="text-2xl font-bold mb-8 text-foreground">
           Profile Info
         </h1>
         {loading ? (
-          <div className="text-center text-purple-600">Loading profile...</div>
+          <div className="text-center text-blue-600">Loading profile...</div>
         ) : error ? (
           <div className="text-center text-red-600">{error}</div>
         ) : profile ? (
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center gap-4 mb-6">
-              <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-purple-400 to-purple-600 flex items-center justify-center text-3xl text-white font-bold shadow-lg border-4 border-white">
+              <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-blue-400 to-blue-600 flex items-center justify-center text-3xl text-white font-bold shadow-lg border-4 border-white">
                 {profile.name ? profile.name[0].toUpperCase() : "U"}
               </div>
               <div>
-                <div className="text-xl font-semibold text-purple-900">
+                <div className="text-xl font-semibold text-foreground">
                   {profile.name}
                 </div>
-                <div className="text-sm text-purple-600">
+                <div className="text-sm text-blue-600">
                   {profile.role} @ {profile.organization}
                 </div>
                 <div className="text-xs text-gray-500 mt-1">
@@ -71,19 +71,19 @@ export default function Profile() {
                 </div>
               </div>
             </div>
-            <h2 className="text-lg font-bold text-purple-800 mb-2">
+            <h2 className="text-lg font-bold text-blue-800 mb-2">
               Departments
             </h2>
             <div className="grid gap-4">
               {profile.department.map((dept, idx) => (
-                <div key={idx} className="border rounded-lg p-4 bg-purple-50">
-                  <div className="font-semibold text-purple-900">
+                <div key={idx} className="border rounded-lg p-4 bg-blue-50">
+                  <div className="font-semibold text-foreground">
                     {dept.dept_name}
                   </div>
-                  <div className="text-sm text-purple-700">
+                  <div className="text-sm text-blue-700">
                     {dept.description}
                   </div>
-                  <div className="text-xs text-purple-500 mt-1">
+                  <div className="text-xs text-blue-500 mt-1">
                     Type: {dept.type}
                   </div>
                 </div>

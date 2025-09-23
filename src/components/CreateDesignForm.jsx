@@ -120,7 +120,7 @@ export default function CreateDesignForm({ onClose, onSuccess }) {
         <div className="flex flex-col">
           <button
             onClick={triggerImageUpload}
-            className="bg-purple-100 text-gray-900 hover:bg-gray-100 py-2 mb-2 flex justify-center items-center rounded-xl"
+            className="bg-blue-100 text-gray-900 hover:bg-gray-100 py-2 mb-2 flex justify-center items-center rounded-xl"
           >
             <Upload className="w-4 h-4 mr-1" />
             Upload Image
@@ -139,7 +139,7 @@ export default function CreateDesignForm({ onClose, onSuccess }) {
         <div>
           <label
             htmlFor="design_name"
-            className="block font-medium mb-1 text-purple-800"
+            className="block font-medium mb-1 text-blue-800"
           >
             Design Name
           </label>
@@ -150,14 +150,14 @@ export default function CreateDesignForm({ onClose, onSuccess }) {
             onChange={handleDesignChange}
             placeholder="Design Name"
             type="text"
-            className="border border-purple-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white w-full"
+            className="border border-blue-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white w-full"
             required
           />
         </div>
 
         <button
           type="submit"
-          className="bg-gradient-to-br from-purple-400 to-purple-600 text-white px-6 py-3 rounded-xl shadow hover:from-purple-500 hover:to-purple-800 font-semibold transition col-span-1 md:col-span-2 mt-2"
+          className="bg-foreground text-white px-6 py-3 rounded-xl shadow hover:bg-blue-700 font-semibold transition col-span-1 md:col-span-2 mt-2"
         >
           {loading ? "Creating Design ..." : "Create Design"}
         </button>

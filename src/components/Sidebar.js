@@ -96,7 +96,7 @@ export default function Sidebar() {
         className="object-contain w-full mb-5 rounded-full "
       />
       <div className="mb-8 text-center w-full">
-        <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-purple-400 to-purple-600 p-1 mx-auto mb-3 flex items-center justify-center text-3xl text-white font-bold shadow-lg  border-white">
+        <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-blue-400 to-blue-600 p-1 mx-auto mb-3 flex items-center justify-center text-3xl text-white font-bold shadow-lg  border-white">
           <Image
             src={user?.identities[0]?.identity_data.avatar_url || "/logo.png"}
             alt="Logo"
@@ -105,16 +105,16 @@ export default function Sidebar() {
             className="object-contain w-full h-full rounded-full "
           />
         </div>
-        <div className="font-semibold text-lg text-purple-900">
+        <div className="font-semibold text-lg text-foreground">
           {user?.identities[0]?.identity_data.name || "User"}
         </div>
-        {/* <div className="text-xs text-purple-600 mt-1">
+        {/* <div className="text-xs text-blue-600 mt-1">
           {user?.role ? user.role : "Employee"}
         </div> */}
       </div>
       <nav className="flex flex-col gap-4 w-full mb-8">
         <div className="mb-4">
-          <span className=" text-purple-900 font-semibold mb-2 text-2xl flex items-center">
+          <span className=" text-foreground font-semibold mb-2 text-2xl flex items-center">
             <Store className="inline-block mr-2" size={25} />
             Departments
           </span>
@@ -122,23 +122,23 @@ export default function Sidebar() {
             {fakeDepartments.map((dept, idx) => (
               <div key={idx} className=" rounded-lg ">
                 <button
-                  className={`w-full text-left px-4 py-2 font-semibold text-purple-800 bg-purple-100 rounded-lg transition flex justify-between items-center`}
+                  className={`w-full text-left px-4 py-2 font-semibold text-blue-800 bg-blue-100 rounded-lg transition flex justify-between items-center`}
                   onClick={() =>
                     setOpenDeptIdx(openDeptIdx === idx ? null : idx)
                   }
                 >
                   {dept.dept_name}
-                  <span className="ml-2 text-xs text-purple-500">
+                  <span className="ml-2 text-xs text-blue-500">
                     {openDeptIdx === idx ? "▲" : "▼"}
                   </span>
                 </button>
                 {openDeptIdx === idx && (
-                  <div className="pl-6 pb-2 pt-1 bg-purple-50">
+                  <div className="pl-6 pb-2 pt-1 bg-blue-50">
                     {dept.subheadings.map((sub, subIdx) => (
                       <a
                         key={subIdx}
                         href={sub.link}
-                        className="py-1 px-2 text-purple-700 rounded flex items-center transition-colors duration-150 hover:bg-purple-200 hover:text-purple-900 cursor-pointer"
+                        className="py-1 px-2 text-blue-700 rounded flex items-center transition-colors duration-150 hover:bg-blue-200 hover:text-foreground cursor-pointer"
                       >
                         {sub.icon}
                         {sub.name}
@@ -153,19 +153,19 @@ export default function Sidebar() {
 
         {/* <a
           href="/dashboard"
-          className="px-4 py-2 rounded-lg bg-white hover:bg-purple-200 text-purple-700 font-medium transition shadow text-center"
+          className="px-4 py-2 rounded-lg bg-white hover:bg-blue-200 text-blue-700 font-medium transition shadow text-center"
         >
           Dashboard
         </a>
         <a
           href="/view-design"
-          className="px-4 py-2 rounded-lg bg-white hover:bg-purple-200 text-purple-700 font-medium transition shadow text-center"
+          className="px-4 py-2 rounded-lg bg-white hover:bg-blue-200 text-blue-700 font-medium transition shadow text-center"
         >
           View Designs
         </a>
         <a
           href="/create-design"
-          className="px-4 py-2 rounded-lg bg-white hover:bg-purple-200 text-purple-700 font-medium transition shadow text-center"
+          className="px-4 py-2 rounded-lg bg-white hover:bg-blue-200 text-blue-700 font-medium transition shadow text-center"
         >
           Create Design
         </a>
@@ -174,7 +174,7 @@ export default function Sidebar() {
       <div className="mt-auto w-full">
         <a
           href="/profile"
-          className="w-full flex px-4 py-2 rounded-lg bg-white hover:bg-purple-200 text-purple-700 font-medium transition shadow text-center mb-5"
+          className="w-full flex px-4 py-2 rounded-lg bg-white hover:bg-blue-200 text-blue-700 font-medium transition shadow text-center mb-5"
         >
           <User className="mr-2" />
           View Profile

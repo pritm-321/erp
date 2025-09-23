@@ -190,7 +190,7 @@ export default function CreateDesignGroupForm({
         {/* <div>
           <label
             htmlFor="design_name"
-            className="block font-medium mb-1 text-purple-800"
+            className="block font-medium mb-1 text-blue-800"
           >
             Design Name
           </label>
@@ -201,14 +201,14 @@ export default function CreateDesignGroupForm({
             onChange={handleDesignChange}
             placeholder="Design Name"
             type="text"
-            className="border border-purple-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white w-full"
+            className="border border-blue-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white w-full"
             required
           />
         </div> */}
         <div>
           <label
             htmlFor="party"
-            className="block font-medium mb-1 text-purple-800"
+            className="block font-medium mb-1 text-blue-800"
           >
             Party
           </label>
@@ -217,7 +217,7 @@ export default function CreateDesignGroupForm({
             name="party"
             value={designForm.party}
             onChange={handleDesignChange}
-            className="border border-purple-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white w-full"
+            className="border border-blue-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white w-full"
             required
             disabled={group}
           >
@@ -234,7 +234,7 @@ export default function CreateDesignGroupForm({
         <div>
           <label
             htmlFor="quantity"
-            className="block font-medium mb-1 text-purple-800"
+            className="block font-medium mb-1 text-blue-800"
           >
             Quantity
           </label>
@@ -245,7 +245,7 @@ export default function CreateDesignGroupForm({
             onChange={handleDesignChange}
             placeholder="Quantity"
             type="number"
-            className="border border-purple-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white w-full"
+            className="border border-blue-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white w-full"
             required
             disabled={group}
           />
@@ -253,7 +253,7 @@ export default function CreateDesignGroupForm({
         {/* <div>
           <label
             htmlFor="po"
-            className="block font-medium mb-1 text-purple-800"
+            className="block font-medium mb-1 text-blue-800"
           >
             PO
           </label>
@@ -263,14 +263,14 @@ export default function CreateDesignGroupForm({
             value={designForm.po}
             onChange={handleDesignChange}
             placeholder="PO"
-            className="border border-purple-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white w-full"
+            className="border border-blue-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white w-full"
             required
           />
         </div> */}
         <div>
           <label
             htmlFor="design_type_id"
-            className="block font-medium mb-1 text-purple-800"
+            className="block font-medium mb-1 text-blue-800"
           >
             Design Type
           </label>
@@ -279,7 +279,7 @@ export default function CreateDesignGroupForm({
             name="design_type_id"
             value={designForm.design_type_id}
             onChange={handleDesignChange}
-            className="border border-purple-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white w-full"
+            className="border border-blue-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white w-full"
             required
             disabled={group}
           >
@@ -294,10 +294,7 @@ export default function CreateDesignGroupForm({
           </select>
         </div>
         <div>
-          <label
-            htmlFor="mrp"
-            className="block font-medium mb-1 text-purple-800"
-          >
+          <label htmlFor="mrp" className="block font-medium mb-1 text-blue-800">
             MRP
           </label>
           <input
@@ -308,7 +305,7 @@ export default function CreateDesignGroupForm({
             placeholder="MRP"
             type="number"
             step="0.01"
-            className="border border-purple-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white w-full"
+            className="border border-blue-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white w-full"
             required
             disabled={group}
           />
@@ -316,7 +313,7 @@ export default function CreateDesignGroupForm({
         <div>
           <label
             htmlFor="rate"
-            className="block font-medium mb-1 text-purple-800"
+            className="block font-medium mb-1 text-blue-800"
           >
             Rate
           </label>
@@ -328,7 +325,7 @@ export default function CreateDesignGroupForm({
             placeholder="Rate"
             type="number"
             step="0.01"
-            className="border border-purple-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white w-full"
+            className="border border-blue-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white w-full"
             required
             disabled={group}
           />
@@ -336,7 +333,7 @@ export default function CreateDesignGroupForm({
         <div>
           <label
             htmlFor="delivery_date"
-            className="block font-medium mb-1 text-purple-800"
+            className="block font-medium mb-1 text-blue-800"
           >
             Delivery Date
           </label>
@@ -347,7 +344,7 @@ export default function CreateDesignGroupForm({
             onChange={handleDesignChange}
             placeholder="Delivery Date"
             type="date"
-            className="border border-purple-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white w-full"
+            className="border border-blue-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white w-full"
             required
             disabled={group}
           />
@@ -391,7 +388,7 @@ export default function CreateDesignGroupForm({
         /> */}
         <button
           type="submit"
-          className="bg-gradient-to-br from-purple-400 to-purple-600 text-white px-6 py-3 rounded-xl shadow hover:from-purple-500 hover:to-purple-800 font-semibold transition col-span-1 md:col-span-2 mt-2"
+          className="bg-foreground text-white px-6 py-3 rounded-xl shadow hover:bg-blue-700 font-semibold transition col-span-1 md:col-span-2 mt-2"
         >
           {loading ? "Creating Group ..." : "Create Group"}
         </button>

@@ -82,32 +82,32 @@ export default function AuthGoogle() {
     <div className="relative flex min-h-screen items-center justify-center">
       {/* Decorative background icons */}
       <Package
-        className="absolute top-10 left-10 text-purple-200 opacity-30"
+        className="absolute top-10 left-10 text-blue-200 opacity-30"
         size={120}
       />
       <Store
-        className="absolute bottom-20 -right-20 text-purple-200 opacity-20"
+        className="absolute bottom-20 -right-20 text-blue-200 opacity-20"
         size={160}
       />
       <Store
-        className="absolute top-60 -left-72 text-purple-200 opacity-20"
+        className="absolute top-60 -left-72 text-blue-200 opacity-20"
         size={160}
       />
       <ClipboardList
-        className="absolute bottom-60 -left-24 text-purple-300 opacity-20"
+        className="absolute bottom-60 -left-24 text-blue-300 opacity-20"
         size={100}
       />
       <ClipboardList
-        className="absolute top-36 -right-36 text-purple-300 opacity-20"
+        className="absolute top-36 -right-36 text-blue-300 opacity-20"
         size={130}
       />
       <Package
-        className="absolute bottom-10 -left-96 text-purple-300 opacity-10"
+        className="absolute bottom-10 -left-96 text-blue-300 opacity-10"
         size={180}
       />
       {user ? (
         <div className="bg-white rounded-xl shadow-lg p-8 flex flex-col items-center relative z-10">
-          <p className="mb-4 text-lg text-purple-900">
+          <p className="mb-4 text-lg text-foreground">
             Signed in as {user.email}
           </p>
           <button
@@ -126,15 +126,15 @@ export default function AuthGoogle() {
             height={40}
             className="object-contain w-full mb-5 rounded-full "
           />
-          <h1 className="text-3xl font-bold text-purple-900 mb-4">
+          <h1 className="text-3xl font-bold text-foreground mb-4">
             Welcome to Quiktrack
           </h1>
-          <p className="mb-6 text-purple-700 text-center">
+          <p className="mb-6 text-blue-700 text-center">
             Sign in with your Google account to continue.
           </p>
           <button
             onClick={signInWithGoogle}
-            className="flex items-center px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-700 text-white rounded-full shadow-lg font-semibold text-lg hover:from-purple-600 hover:to-purple-800 transition"
+            className="flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-full shadow-lg font-semibold text-lg hover:from-blue-600 hover:to-blue-800 transition"
           >
             <img src="/google.png" alt="Google" className="mr-3 w-7 h-7" /> Sign
             In with Google
