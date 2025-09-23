@@ -147,6 +147,18 @@ export default function GroupDesignsPage() {
       day: "2-digit",
     });
   };
+
+  let groupedEntries = designs?.designs;
+  // console.log(groupedEntries, "grouped entries");
+
+  // Initial sort by created_at descending
+  if (groupedEntries && Array.isArray(groupedEntries)) {
+    groupedEntries = groupedEntries.sort((a, b) => {
+      const dateA = new Date(a.created_at);
+      const dateB = new Date(b.created_at);
+      return dateB - dateA;
+    });
+  }
   // Extract common group fields from first design
   const groupInfo =
     designs?.designs?.length > 0
@@ -297,7 +309,7 @@ export default function GroupDesignsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {designs?.designs?.map((d) => (
+                  {groupedEntries?.map((d) => (
                     <tr
                       key={d.design_id}
                       className="border-b border-gray-100 hover:bg-blue-50"
