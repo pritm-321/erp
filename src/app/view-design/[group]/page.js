@@ -5,7 +5,15 @@ import { useEffect, useState } from "react";
 import axios, { all } from "axios";
 import { API } from "@/utils/url";
 import { supabase } from "@/utils/supabaseClient";
-import { Delete, DeleteIcon, Eye, Plus, Trash, Upload } from "lucide-react";
+import {
+  Delete,
+  DeleteIcon,
+  Eye,
+  Plus,
+  Trash,
+  Upload,
+  PackagePlus,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import CreateDesignForm from "@/components/CreateDesignForm";
 
@@ -22,6 +30,14 @@ export default function GroupDesignsPage() {
     designId: null,
   });
   const [uploadModal, setUploadModal] = useState({
+    open: false,
+    designId: null,
+  });
+  const [accessoriesModal, setAccessoriesModal] = useState({
+    open: false,
+    designId: null,
+  });
+  const [viewAccessoriesModal, setViewAccessoriesModal] = useState({
     open: false,
     designId: null,
   });
@@ -56,6 +72,30 @@ export default function GroupDesignsPage() {
   const router = useRouter();
   const [groupCreated, setGroupCreated] = useState(false);
   const [designCreated, setDesignCreated] = useState(false);
+  const [accessories, setAccessories] = useState([
+    {
+      accessory_id: "1",
+      brand_id: "1",
+      color_id: "",
+      size_id: "1",
+      unit_id: "1",
+      rate_per_unit: "0",
+      required_qty: "0",
+      remarks: "",
+    },
+  ]);
+  const [accessoryOptions, setAccessoryOptions] = useState([]);
+  const [brandOptions, setBrandOptions] = useState([]);
+  const [colorAccessoryOptions, setColorAccessoryOptions] = useState([]);
+  const [sizeOptions, setSizeOptions] = useState([]);
+  const [unitOptions, setUnitOptions] = useState([]);
+  const [accessoriesLoading, setAccessoriesLoading] = useState(false);
+  const [accessoriesError, setAccessoriesError] = useState("");
+  const [accessoriesSuccess, setAccessoriesSuccess] = useState("");
+  const [existingAccessories, setExistingAccessories] = useState([]);
+  const [viewAccessoriesLoading, setViewAccessoriesLoading] = useState(false);
+  const [viewAccessoriesError, setViewAccessoriesError] = useState("");
+  const [viewAccessories, setViewAccessories] = useState([]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -136,6 +176,90 @@ export default function GroupDesignsPage() {
     }
   }, [uploadModal.open, organizationId, accessToken]);
 
+  // Fetch dropdown options for accessories modal and existing accessories
+  useEffect(() => {
+    if (accessoriesModal.open) {
+      const fetchAccessoryDropdowns = async () => {
+        try {
+          const [
+            // accessoryRes,
+            // brandRes,
+            colorRes,
+            // sizeRes,
+            // unitRes
+          ] = await Promise.all([
+            // axios.get(`${API}so/accessory-suggestions`, {
+            //   headers: {
+            //     Authorization: `Bearer ${accessToken}`,
+            //     "Organization-ID": organizationId,
+            //   },
+            // }),
+            // axios.get(`${API}so/brand-suggestions`, {
+            //   headers: {
+            //     Authorization: `Bearer ${accessToken}`,
+            //     "Organization-ID": organizationId,
+            //   },
+            // }),
+            axios.get(`${API}so/color-suggestions`, {
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+                "Organization-ID": organizationId,
+              },
+            }),
+            // axios.get(`${API}so/size-suggestions`, {
+            //   headers: {
+            //     Authorization: `Bearer ${accessToken}`,
+            //     "Organization-ID": organizationId,
+            //   },
+            // }),
+            // axios.get(`${API}so/unit-suggestions`, {
+            //   headers: {
+            //     Authorization: `Bearer ${accessToken}`,
+            //     "Organization-ID": organizationId,
+            //   },
+            // }),
+          ]);
+          // setAccessoryOptions(accessoryRes.data?.data || []);
+          // setBrandOptions(brandRes.data?.data || []);
+          setColorAccessoryOptions(colorRes.data?.data || []);
+          // setSizeOptions(sizeRes.data?.data || []);
+          // setUnitOptions(unitRes.data?.data || []);
+        } catch (err) {
+          setAccessoryOptions([]);
+          setBrandOptions([]);
+          setColorAccessoryOptions([]);
+          setSizeOptions([]);
+          setUnitOptions([]);
+        }
+      };
+
+      // const fetchExistingAccessories = async () => {
+      //   try {
+      //     const res = await axios.get(
+      //       `${API}so/view-accessories/${accessoriesModal.designId}`,
+      //       {
+      //         headers: {
+      //           Authorization: `Bearer ${accessToken}`,
+      //           "Organization-ID": organizationId,
+      //         },
+      //       }
+      //     );
+      //     setExistingAccessories(res.data?.accessories || []);
+      //   } catch (err) {
+      //     setExistingAccessories([]);
+      //   }
+      // };
+
+      fetchAccessoryDropdowns();
+      // fetchExistingAccessories();
+    }
+  }, [
+    accessoriesModal.open,
+    accessToken,
+    organizationId,
+    accessoriesModal.designId,
+  ]);
+
   const formatToIST = (dateStr) => {
     if (!dateStr) return "-";
     const date = new Date(dateStr);
@@ -196,6 +320,44 @@ export default function GroupDesignsPage() {
   const handleOpenUploadModal = (designId) => {
     setUploadModal({ open: true, designId });
     handleViewParts(designId);
+  };
+
+  const handleOpenAccessoriesModal = (designId) => {
+    setAccessoriesModal({ open: true, designId });
+    // setAccessories([
+    //   {
+    //     accessory_id: "",
+    //     brand_id: "",
+    //     color_id: "",
+    //     size_id: "",
+    //     unit_id: "",
+    //     rate_per_unit: "",
+    //     required_qty: "",
+    //     remarks: "",
+    //   },
+    // ]);
+    setAccessoriesError("");
+    setAccessoriesSuccess("");
+  };
+
+  const handleOpenViewAccessoriesModal = async (designId) => {
+    setViewAccessoriesModal({ open: true, designId });
+    setViewAccessoriesLoading(true);
+    setViewAccessoriesError("");
+    try {
+      const res = await axios.get(`${API}so/view-accessories/${designId}`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Organization-ID": organizationId,
+        },
+      });
+      setViewAccessories(res.data?.data?.accessories || []);
+    } catch (err) {
+      setViewAccessories([]);
+      setViewAccessoriesError("Failed to fetch accessories.");
+    } finally {
+      setViewAccessoriesLoading(false);
+    }
   };
 
   const handleViewFabricRequirementsNav = () => {
@@ -341,6 +503,24 @@ export default function GroupDesignsPage() {
                           >
                             <Upload size={16} />
                             Upload Parts
+                          </button>
+                          <button
+                            className="bg-yellow-500 text-white px-4 py-2 rounded-lg shadow hover:bg-yellow-600 transition flex items-center gap-2"
+                            onClick={() =>
+                              handleOpenAccessoriesModal(d.design_id)
+                            }
+                          >
+                            <PackagePlus size={16} />
+                            Upload Trims
+                          </button>
+                          <button
+                            className="bg-blue-500 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700 transition flex items-center gap-2"
+                            onClick={() =>
+                              handleOpenViewAccessoriesModal(d.design_id)
+                            }
+                          >
+                            <Eye size={16} />
+                            View Trims
                           </button>
                         </div>
                       </td>
@@ -1053,6 +1233,296 @@ export default function GroupDesignsPage() {
           </div>
         </div>
       )}
+      {/* Trims Modal */}
+      {accessoriesModal.open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+          <div className="bg-white rounded-lg shadow-lg p-6 max-w-3xl w-full relative max-h-[95vh] overflow-y-auto">
+            <button
+              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-xl"
+              onClick={() =>
+                setAccessoriesModal({
+                  open: false,
+                  designId: null,
+                })
+              }
+            >
+              &times;
+            </button>
+            <h2 className="text-lg font-semibold mb-4">Upload Trims</h2>
+            {/* ...existing code for error/success and form... */}
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                setAccessoriesLoading(true);
+                setAccessoriesError("");
+                setAccessoriesSuccess("");
+                // Convert all fields except remarks to numbers
+                const payloadAccessories = accessories.map((acc) => ({
+                  accessory_id: Number(acc.accessory_id),
+                  brand_id: Number(acc.brand_id),
+                  color_id: Number(acc.color_id),
+                  size_id: Number(acc.size_id),
+                  unit_id: Number(acc.unit_id),
+                  rate_per_unit: Number(acc.rate_per_unit),
+                  required_qty: Number(acc.required_qty),
+                  remarks: acc.remarks,
+                }));
+                try {
+                  await axios.post(
+                    `${API}so/update-accessories/${accessoriesModal.designId}`,
+                    { accessories: payloadAccessories },
+                    {
+                      headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                        "Organization-ID": organizationId,
+                      },
+                    }
+                  );
+                  setAccessoriesSuccess("Trims uploaded successfully!");
+                  setAccessoriesModal({
+                    open: false,
+                    designId: null,
+                  });
+                } catch (err) {
+                  setAccessoriesError("Failed to upload trims.");
+                } finally {
+                  setAccessoriesLoading(false);
+                }
+              }}
+              className="space-y-6 max-h-[80vh] overflow-y-auto"
+            >
+              {accessories.map((acc, i) => (
+                <div
+                  key={i}
+                  className="border border-blue-300 rounded-xl p-4 mb-4 bg-gray-50"
+                >
+                  <div className="flex flex-wrap gap-4 mb-2">
+                    <div className="flex flex-col">
+                      <label className="text-foreground font-medium mb-1">
+                        Accessory
+                      </label>
+                      <select
+                        className="border border-blue-300 px-4 py-2 rounded-lg bg-white min-w-[150px]"
+                        value={acc.accessory_id}
+                        onChange={(e) => {
+                          const newAcc = [...accessories];
+                          newAcc[i].accessory_id = e.target.value;
+                          setAccessories(newAcc);
+                        }}
+                        // required
+                      >
+                        <option value="">Select Accessory</option>
+                        {accessoryOptions.map((a) => (
+                          <option
+                            key={a.id || a.accessory_id}
+                            value={a.id || a.accessory_id}
+                          >
+                            {a.name || a.accessory_name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="flex flex-col">
+                      <label className="text-foreground font-medium mb-1">
+                        Brand
+                      </label>
+                      <select
+                        className="border border-blue-300 px-4 py-2 rounded-lg bg-white min-w-[150px]"
+                        value={acc.brand_id}
+                        onChange={(e) => {
+                          const newAcc = [...accessories];
+                          newAcc[i].brand_id = e.target.value;
+                          setAccessories(newAcc);
+                        }}
+                        // required
+                      >
+                        <option value="">Select Brand</option>
+                        {brandOptions.map((b) => (
+                          <option
+                            key={b.id || b.brand_id}
+                            value={b.id || b.brand_id}
+                          >
+                            {b.name || b.brand_name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="flex flex-col">
+                      <label className="text-foreground font-medium mb-1">
+                        Color
+                      </label>
+                      <select
+                        className="border border-blue-300 px-4 py-2 rounded-lg bg-white min-w-[120px]"
+                        value={acc.color_id}
+                        onChange={(e) => {
+                          const newAcc = [...accessories];
+                          newAcc[i].color_id = e.target.value;
+                          setAccessories(newAcc);
+                        }}
+                        required
+                      >
+                        <option value="">Select Color</option>
+                        {colorAccessoryOptions.map((col) => (
+                          <option
+                            key={col.id || col.color_id}
+                            value={col.id || col.color_id}
+                          >
+                            {col.name || col.color_name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="flex flex-col">
+                      <label className="text-foreground font-medium mb-1">
+                        Size
+                      </label>
+                      <select
+                        className="border border-blue-300 px-4 py-2 rounded-lg bg-white min-w-[100px]"
+                        value={acc.size_id}
+                        onChange={(e) => {
+                          const newAcc = [...accessories];
+                          newAcc[i].size_id = e.target.value;
+                          setAccessories(newAcc);
+                        }}
+                        // required
+                      >
+                        <option value="">Select Size</option>
+                        {sizeOptions.map((sz) => (
+                          <option
+                            key={sz.id || sz.size_id}
+                            value={sz.id || sz.size_id}
+                          >
+                            {sz.name || sz.size_name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="flex flex-col">
+                      <label className="text-foreground font-medium mb-1">
+                        Unit
+                      </label>
+                      <select
+                        className="border border-blue-300 px-4 py-2 rounded-lg bg-white min-w-[100px]"
+                        value={acc.unit_id}
+                        onChange={(e) => {
+                          const newAcc = [...accessories];
+                          newAcc[i].unit_id = e.target.value;
+                          setAccessories(newAcc);
+                        }}
+                        // required
+                      >
+                        <option value="">Select Unit</option>
+                        {unitOptions.map((u) => (
+                          <option
+                            key={u.id || u.unit_id}
+                            value={u.id || u.unit_id}
+                          >
+                            {u.name || u.unit_name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-4 mb-2">
+                    <div className="flex flex-col">
+                      <label className="text-foreground font-medium mb-1">
+                        Rate Per Unit
+                      </label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        className="border border-blue-300 px-4 py-2 rounded-lg bg-white min-w-[100px]"
+                        value={acc.rate_per_unit}
+                        onChange={(e) => {
+                          const newAcc = [...accessories];
+                          newAcc[i].rate_per_unit = e.target.value;
+                          setAccessories(newAcc);
+                        }}
+                        // required
+                      />
+                    </div>
+                    <div className="flex flex-col">
+                      <label className="text-foreground font-medium mb-1">
+                        Required Qty
+                      </label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        className="border border-blue-300 px-4 py-2 rounded-lg bg-white min-w-[100px]"
+                        value={acc.required_qty}
+                        onChange={(e) => {
+                          const newAcc = [...accessories];
+                          newAcc[i].required_qty = e.target.value;
+                          setAccessories(newAcc);
+                        }}
+                        required
+                      />
+                    </div>
+                    <div className="flex flex-col flex-1">
+                      <label className="text-foreground font-medium mb-1">
+                        Remarks
+                      </label>
+                      <input
+                        type="text"
+                        className="border border-blue-300 px-4 py-2 rounded-lg bg-white"
+                        value={acc.remarks}
+                        onChange={(e) => {
+                          const newAcc = [...accessories];
+                          newAcc[i].remarks = e.target.value;
+                          setAccessories(newAcc);
+                        }}
+                        placeholder="Remarks"
+                      />
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    className="text-red-500 font-semibold px-2 py-1 rounded hover:bg-red-50"
+                    onClick={() =>
+                      setAccessories(accessories.filter((_, idx) => idx !== i))
+                    }
+                    disabled={accessories.length === 1}
+                  >
+                    <Trash className="inline-block mr-1" />
+                    Remove Accessory
+                  </button>
+                </div>
+              ))}
+              <button
+                type="button"
+                className="text-foreground font-semibold"
+                onClick={() =>
+                  setAccessories([
+                    ...accessories,
+                    {
+                      accessory_id: "",
+                      brand_id: "",
+                      color_id: "",
+                      size_id: "",
+                      unit_id: "",
+                      rate_per_unit: "",
+                      required_qty: "",
+                      remarks: "",
+                    },
+                  ])
+                }
+              >
+                <Plus className="inline-block mr-1" />
+                Add Accessory
+              </button>
+              <button
+                type="submit"
+                className="bg-foreground text-white px-6 py-3 rounded-xl shadow hover:bg-foreground font-semibold transition w-full mt-2"
+                disabled={accessoriesLoading}
+              >
+                {accessoriesLoading ? "Uploading..." : "Submit"}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
       {/* Create Design Modal */}
       {createDesignModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
@@ -1073,6 +1543,72 @@ export default function GroupDesignsPage() {
                 setDesignCreated((prev) => !prev);
               }}
             />
+          </div>
+        </div>
+      )}
+      {viewAccessoriesModal.open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+          <div className="bg-white rounded-lg shadow-lg p-6 max-w-3xl w-full relative max-h-[95vh] overflow-y-auto">
+            <button
+              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-xl"
+              onClick={() =>
+                setViewAccessoriesModal({
+                  open: false,
+                  designId: null,
+                })
+              }
+            >
+              &times;
+            </button>
+            <h2 className="text-lg font-semibold mb-4">Trims</h2>
+            {viewAccessoriesLoading ? (
+              <div className="text-gray-500">Loading...</div>
+            ) : viewAccessoriesError ? (
+              <div className="text-red-600 mb-2">{viewAccessoriesError}</div>
+            ) : viewAccessories.length === 0 ? (
+              <div className="text-gray-500">
+                No trims found for this design.
+              </div>
+            ) : (
+              <table className="min-w-full rounded-xl mb-2">
+                <thead>
+                  <tr className="text-left bg-foreground text-white">
+                    <th className="px-2 py-1">Trim</th>
+                    <th className="px-2 py-1">Brand</th>
+                    <th className="px-2 py-1">Color</th>
+                    <th className="px-2 py-1">Size</th>
+                    <th className="px-2 py-1">Unit</th>
+                    <th className="px-2 py-1">Rate/Unit</th>
+                    <th className="px-2 py-1">Qty</th>
+                    <th className="px-2 py-1">Remarks</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {viewAccessories.map((acc, idx) => (
+                    <tr key={idx} className="border-b border-blue-300">
+                      <td className="px-2 py-1">
+                        {acc.accessory_name || acc.accessory_id}
+                      </td>
+                      <td className="px-2 py-1">
+                        {acc.brand_name || acc.brand_id}
+                      </td>
+                      <td className="px-2 py-1">
+                        {acc.color_name || acc.color_id}
+                      </td>
+                      <td className="px-2 py-1">
+                        {acc.size_name || acc.size_id}
+                      </td>
+                      <td className="px-2 py-1">
+                        {acc.unit_name || acc.unit_id}
+                      </td>
+                      <td className="px-2 py-1">{acc.rate_per_unit}</td>
+                      <td className="px-2 py-1">{acc.required_qty}</td>
+                      <td className="px-2 py-1">{acc.remarks || "-"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
         </div>
       )}
