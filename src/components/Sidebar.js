@@ -25,11 +25,11 @@ export default function Sidebar() {
         link: `/view-design`,
         icon: <FileText className="inline-block mr-2" size={18} />,
       },
-      // {
-      //   name: "View PO",
-      //   link: `/view-design/view-po`,
-      //   icon: <ClipboardList className="inline-block mr-2" size={18} />,
-      // },
+      {
+        name: "Generate Open PO",
+        link: `/generate-open-po`,
+        icon: <ClipboardList className="inline-block mr-2" size={18} />,
+      },
       {
         name: "Reports",
         link: `/view-reports`,

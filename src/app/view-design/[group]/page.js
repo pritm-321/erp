@@ -182,36 +182,36 @@ export default function GroupDesignsPage() {
       const fetchAccessoryDropdowns = async () => {
         try {
           const [
-            // accessoryRes,
-            // brandRes,
+            accessoryRes,
+            brandRes,
             colorRes,
-            // sizeRes,
+            sizeRes,
             // unitRes
           ] = await Promise.all([
-            // axios.get(`${API}so/accessory-suggestions`, {
-            //   headers: {
-            //     Authorization: `Bearer ${accessToken}`,
-            //     "Organization-ID": organizationId,
-            //   },
-            // }),
-            // axios.get(`${API}so/brand-suggestions`, {
-            //   headers: {
-            //     Authorization: `Bearer ${accessToken}`,
-            //     "Organization-ID": organizationId,
-            //   },
-            // }),
+            axios.get(`${API}so/accessory-suggestions`, {
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+                "Organization-ID": organizationId,
+              },
+            }),
+            axios.get(`${API}so/brand-suggestions`, {
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+                "Organization-ID": organizationId,
+              },
+            }),
             axios.get(`${API}so/color-suggestions`, {
               headers: {
                 Authorization: `Bearer ${accessToken}`,
                 "Organization-ID": organizationId,
               },
             }),
-            // axios.get(`${API}so/size-suggestions`, {
-            //   headers: {
-            //     Authorization: `Bearer ${accessToken}`,
-            //     "Organization-ID": organizationId,
-            //   },
-            // }),
+            axios.get(`${API}so/size-suggestions`, {
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+                "Organization-ID": organizationId,
+              },
+            }),
             // axios.get(`${API}so/unit-suggestions`, {
             //   headers: {
             //     Authorization: `Bearer ${accessToken}`,
@@ -219,10 +219,10 @@ export default function GroupDesignsPage() {
             //   },
             // }),
           ]);
-          // setAccessoryOptions(accessoryRes.data?.data || []);
-          // setBrandOptions(brandRes.data?.data || []);
+          setAccessoryOptions(accessoryRes.data?.data || []);
+          setBrandOptions(brandRes.data?.data || []);
           setColorAccessoryOptions(colorRes.data?.data || []);
-          // setSizeOptions(sizeRes.data?.data || []);
+          setSizeOptions(sizeRes.data?.data || []);
           // setUnitOptions(unitRes.data?.data || []);
         } catch (err) {
           setAccessoryOptions([]);
@@ -305,7 +305,7 @@ export default function GroupDesignsPage() {
           "Organization-ID": organizationId,
         },
       });
-      console.log(res.data, " parts data");
+      // console.log(res.data, " parts data");
 
       setPartsDetails(res.data || {});
 
