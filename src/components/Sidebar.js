@@ -26,8 +26,8 @@ export default function Sidebar() {
         icon: <FileText className="inline-block mr-2" size={18} />,
       },
       {
-        name: "Generate Open PO",
-        link: `/generate-open-po`,
+        name: "Open PO",
+        link: `/view-open-po`,
         icon: <ClipboardList className="inline-block mr-2" size={18} />,
       },
       {
