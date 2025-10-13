@@ -128,7 +128,7 @@ export default function ViewPOPage() {
           <div className="p-4 text-gray-500">No PO batches found.</div>
         ) : (
           <div className="overflow-hidden rounded-xl border border-blue-200 bg-gray-50 shadow">
-            {poSummary.map((batch, idx) => (
+            {poSummary?.map((batch, idx) => (
               <div
                 key={batch.batch_id || idx}
                 className="border-b border-gray-100 p-5"
@@ -138,11 +138,11 @@ export default function ViewPOPage() {
                     Batch Sl No. : {idx + 1}
                   </span>
                   <span className="mb-4 py-2 text-foreground font-semibold">
-                    Created At : {formatToIST(batch.created_at)}
+                    Created At : {formatToIST(batch?.order_date)}
                   </span>
 
                   <span className="mb-4 py-2 text-foreground font-semibold">
-                    Batch Description : {batch.description}
+                    Batch Description : {batch?.description}
                   </span>
                 </div>
                 <br />
@@ -174,7 +174,7 @@ export default function ViewPOPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {batch.purchase_orders.map((po, pi) => (
+                    {batch?.designs?.map((po, pi) => (
                       <tr
                         key={po.po_id || pi}
                         className="border-b border-gray-100"
@@ -190,18 +190,18 @@ export default function ViewPOPage() {
                           {po.design_name}
                         </td>
                         <td className="px-2 py-1 text-foreground">
-                          {po.vendor_name ||
+                          {batch.vendor.vendor_name ||
                             (po.vendor && po.vendor.name) ||
                             "-"}
                         </td>
                         <td className="px-2 py-1 text-foreground">
-                          {po.status || "-"}
+                          {batch.status || "-"}
                         </td>
                         <td className="px-2 py-1">
                           <button
                             className="px-5 py-2 bg-foreground text-white rounded shadow hover:bg-blue-700 mr-2 flex items-center gap-2"
                             onClick={() =>
-                              router.push(`/view-design/view-po/${po.po_id}`)
+                              router.push(`/view-design/view-po/${batch.po_id}`)
                             }
                           >
                             <Eye size={16} />
@@ -212,13 +212,13 @@ export default function ViewPOPage() {
                     ))}
                   </tbody>
                 </table>
-                <button
+                {/* <button
                   className="mt-5 px-6 py-1 bg-foreground rounded-lg text-white shadow hover:bg-blue-700 flex items-center gap-2"
                   onClick={() => handleOpenBatchSummary(batch.batch_id)}
                 >
                   <Eye size={16} />
                   View Batch Summary
-                </button>
+                </button> */}
               </div>
             ))}
           </div>

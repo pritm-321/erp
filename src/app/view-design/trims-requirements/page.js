@@ -111,7 +111,7 @@ export default function TrimsRequirementsPage() {
     setPoSuccess("");
     try {
       const res = await axios.post(
-        `${API}so/create-po/${localStorage.getItem("group_id")}`,
+        `${API}so/create-trims-po/${localStorage.getItem("group_id")}`,
         { vendor_id: selectedVendor, design_ids: selectedDesignIds },
         {
           headers: {

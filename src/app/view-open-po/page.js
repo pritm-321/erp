@@ -236,6 +236,7 @@ export default function OpenPOPage() {
                     <th className="px-2 py-1">Rate/Unit</th>
                     <th className="px-2 py-1">Required Qty</th>
                     <th className="px-2 py-1">Ordered Qty</th>
+                    <th className="px-2 py-1">Total Cost</th>
                     <th className="px-2 py-1">Notes</th>
                   </tr>
                 </thead>
@@ -255,6 +256,7 @@ export default function OpenPOPage() {
                       <td className="px-2 py-1">{ai.rate_per_unit}</td>
                       <td className="px-2 py-1">{ai.required_qty}</td>
                       <td className="px-2 py-1">{ai.ordered_qty}</td>
+                      <td className="px-2 py-1">{ai.total_cost}</td>
                       <td className="px-2 py-1">{ai.notes || "-"}</td>
                     </tr>
                   ))}
