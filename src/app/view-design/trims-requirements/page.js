@@ -1,4 +1,4 @@
-// filepath: /Users/pritamdas/Projects/Ujjwal/erp/src/app/view-design/fabric-requirements/page.js
+// filepath: /Users/pritamdas/Projects/Ujjwal/erp/src/app/view-design/trims-requirements/page.js
 "use client";
 import { useEffect, useState } from "react";
 import Sidebar from "@/components/Sidebar";
@@ -8,7 +8,7 @@ import { supabase } from "@/utils/supabaseClient";
 import { useRouter } from "next/navigation";
 import { Folder } from "lucide-react";
 
-export default function FabricRequirementsPage() {
+export default function TrimsRequirementsPage() {
   const [requirements, setRequirements] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -42,9 +42,6 @@ export default function FabricRequirementsPage() {
       supabase.auth.getSession().then(({ data }) => {
         setAccessToken(data?.session?.access_token || "");
       });
-      // read design id for PO generation/navigation
-      const dId = localStorage.getItem("fabric_requirements_design_id") || "";
-      setDesignId(dId);
     }
   }, []);
 
@@ -54,7 +51,7 @@ export default function FabricRequirementsPage() {
         setLoading(true);
         setError("");
         const { data } = await axios.get(
-          `${API}so/fabric-requirements/${localStorage.getItem("group_id")}`,
+          `${API}so/trims-requirements/${localStorage.getItem("group_id")}`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,
@@ -62,11 +59,10 @@ export default function FabricRequirementsPage() {
             },
           }
         );
-        // console.log(data);
-
+        // Response: { designs: [...] }
         setRequirements(data?.designs || {});
       } catch (err) {
-        setError("Failed to fetch fabric requirements.");
+        setError("Failed to fetch trims requirements.");
       } finally {
         setLoading(false);
       }
@@ -152,7 +148,7 @@ export default function FabricRequirementsPage() {
       <main className="flex-1 p-8">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-3xl font-bold text-blue-950">
-            Fabric Requirements
+            Trims Requirements
           </h1>
           {!loading && !error && requirements && requirements.length > 0 && (
             <button
@@ -227,37 +223,52 @@ export default function FabricRequirementsPage() {
                     Created Date : {formatToIST(req.created_at)}
                   </h2>
                 </div>
-                {req.fabric_requirements.length > 0 && (
-                  <table className="w-full rounded-lg overflow-hidden mt-2">
-                    <thead>
-                      <tr className="text-left text-white border-b border-blue-200 bg-foreground">
-                        <th className="px-4 py-2">Fabric Type</th>
-                        <th className="px-4 py-2">Color</th>
-                        <th className="px-4 py-2">Consumption per Piece</th>
-                        <th className="px-4 py-2">Total Required</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {req.fabric_requirements.map((fr, fidx) => (
-                        <tr
-                          key={fidx}
-                          className="text-foreground border-b border-blue-100"
-                        >
-                          <td className="px-4 py-2">
-                            {fr.fabric_type_name || fr.fabric_type_id}
-                          </td>
-                          <td className="px-4 py-2">
-                            {fr.color_name || fr.color_id}
-                          </td>
-                          <td className="px-4 py-2">
-                            {fr.consumption_per_piece}
-                          </td>
-                          <td className="px-4 py-2">{fr.total_required}</td>
+                {req.accessory_requirements &&
+                  req.accessory_requirements.length > 0 && (
+                    <table className="w-full rounded-lg overflow-hidden mt-2">
+                      <thead>
+                        <tr className="text-left text-white border-b border-blue-200 bg-foreground">
+                          <th className="px-4 py-2">Trim</th>
+                          <th className="px-4 py-2">Brand</th>
+                          <th className="px-4 py-2">Color</th>
+                          <th className="px-4 py-2">Size</th>
+                          <th className="px-4 py-2">Unit</th>
+                          <th className="px-4 py-2">Rate/Unit</th>
+                          <th className="px-4 py-2">Required Qty</th>
+                          <th className="px-4 py-2">Total Cost</th>
+                          <th className="px-4 py-2">Remarks</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                )}
+                      </thead>
+                      <tbody>
+                        {req.accessory_requirements.map((acc, ai) => (
+                          <tr
+                            key={ai}
+                            className="text-foreground border-b border-blue-100"
+                          >
+                            <td className="px-4 py-2">
+                              {acc.accessory_name || acc.accessory_id}
+                            </td>
+                            <td className="px-4 py-2">
+                              {acc.brand_name || acc.brand_id}
+                            </td>
+                            <td className="px-4 py-2">
+                              {acc.color_name || acc.color_id}
+                            </td>
+                            <td className="px-4 py-2">
+                              {acc.size_label || acc.size_id}
+                            </td>
+                            <td className="px-4 py-2">
+                              {acc.unit_name || acc.unit_id}
+                            </td>
+                            <td className="px-4 py-2">{acc.rate_per_unit}</td>
+                            <td className="px-4 py-2">{acc.required_qty}</td>
+                            <td className="px-4 py-2">{acc.total_cost}</td>
+                            <td className="px-4 py-2">{acc.remarks || "-"}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
               </div>
             ))}
           </div>

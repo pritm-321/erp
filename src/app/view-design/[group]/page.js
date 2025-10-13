@@ -402,7 +402,14 @@ export default function GroupDesignsPage() {
               onClick={() => handleViewFabricRequirementsNav()}
             >
               <Eye size={20} />
-              View Fabric Requirements
+              Fabric Requirements
+            </button>
+            <button
+              className="bg-foreground text-white px-6 py-2 rounded-lg shadow hover:bg-blue-700 transition flex items-center gap-2"
+              onClick={() => router.push("/view-design/trims-requirements")}
+            >
+              <Eye size={20} />
+              Trims Requirements
             </button>
             <button
               className="bg-foreground text-white px-6 py-2 rounded-lg shadow hover:bg-blue-700 transition font-semibold flex items-center gap-2"

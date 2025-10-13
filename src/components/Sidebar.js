@@ -9,6 +9,7 @@ import {
   FileText,
   ClipboardList,
   BarChart2,
+  ShoppingBag,
 } from "lucide-react";
 import Image from "next/image";
 
@@ -21,14 +22,19 @@ export default function Sidebar() {
     dept_name: `Merchant`,
     subheadings: [
       {
-        name: "Design",
+        name: "View Design",
         link: `/view-design`,
         icon: <FileText className="inline-block mr-2" size={18} />,
       },
       {
-        name: "Open PO",
+        name: "View Organization PO",
+        link: `/all-po`,
+        icon: <ShoppingBag className="inline-block mr-2" size={18} />,
+      },
+      {
+        name: "View Open PO",
         link: `/view-open-po`,
-        icon: <ClipboardList className="inline-block mr-2" size={18} />,
+        icon: <ShoppingBag className="inline-block mr-2" size={18} />,
       },
       {
         name: "Reports",
