@@ -60,7 +60,17 @@ export default function GroupDesignsPage() {
               fabric_type_id: "",
               dia: 0.0,
               gsm: 0,
-              colors: [{ color_id: "", is_base: false, consumption: 0.0 }],
+              colors: [
+                {
+                  color_id: "",
+                  is_base: false,
+                  consumption: 0.0,
+                  rate_info: {
+                    rate: 0.0,
+                    unit_id: 1,
+                  },
+                },
+              ],
             },
           ],
         },
@@ -657,6 +667,12 @@ export default function GroupDesignsPage() {
                                                     <th className="px-6 py-1">
                                                       Consumption
                                                     </th>
+                                                    <th className="px-6 py-1">
+                                                      Rate
+                                                    </th>
+                                                    <th className="px-6 py-1">
+                                                      Unit
+                                                    </th>
                                                   </tr>
                                                 </thead>
                                                 <tbody>
@@ -676,6 +692,29 @@ export default function GroupDesignsPage() {
                                                       </td>
                                                       <td className="px-6 py-1">
                                                         {col.consumption}
+                                                      </td>
+                                                      <td className="px-6 py-1">
+                                                        {col.rate_info?.rate ??
+                                                          "-"}
+                                                      </td>
+                                                      <td className="px-6 py-1">
+                                                        {unitOptions.find(
+                                                          (u) =>
+                                                            (u.id ||
+                                                              u.unit_id) ===
+                                                            col.rate_info
+                                                              ?.unit_id
+                                                        )?.name ||
+                                                          unitOptions.find(
+                                                            (u) =>
+                                                              (u.id ||
+                                                                u.unit_id) ===
+                                                              col.rate_info
+                                                                ?.unit_id
+                                                          )?.unit_name ||
+                                                          col.rate_info
+                                                            ?.unit_id ||
+                                                          "-"}
                                                       </td>
                                                     </tr>
                                                   ))}
@@ -1089,6 +1128,53 @@ export default function GroupDesignsPage() {
                                         }}
                                         required
                                       />
+                                      {/* Add rate_info fields */}
+                                      <input
+                                        type="number"
+                                        step="0.01"
+                                        placeholder="Rate"
+                                        className="border border-blue-300 px-4 py-2 rounded-lg bg-white w-32"
+                                        value={c.rate_info?.rate || 0}
+                                        min="0"
+                                        onChange={(e) => {
+                                          const newGroups = [...variantGroups];
+                                          newGroups[vgi].parts[pi].fabrics[
+                                            fi
+                                          ].colors[ci].rate_info = {
+                                            ...newGroups[vgi].parts[pi].fabrics[
+                                              fi
+                                            ].colors[ci].rate_info,
+                                            rate: Number(e.target.value),
+                                          };
+                                          setVariantGroups(newGroups);
+                                        }}
+                                      />
+                                      <select
+                                        className="border border-blue-300 px-4 py-2 rounded-lg bg-white w-32"
+                                        value={c.rate_info?.unit_id || 0}
+                                        onChange={(e) => {
+                                          const newGroups = [...variantGroups];
+                                          newGroups[vgi].parts[pi].fabrics[
+                                            fi
+                                          ].colors[ci].rate_info = {
+                                            ...newGroups[vgi].parts[pi].fabrics[
+                                              fi
+                                            ].colors[ci].rate_info,
+                                            unit_id: Number(e.target.value),
+                                          };
+                                          setVariantGroups(newGroups);
+                                        }}
+                                      >
+                                        <option value={0}>Select Unit</option>
+                                        {unitOptions.map((u) => (
+                                          <option
+                                            key={u.id || u.unit_id}
+                                            value={u.id || u.unit_id}
+                                          >
+                                            {u.name || u.unit_name}
+                                          </option>
+                                        ))}
+                                      </select>
                                       <button
                                         type="button"
                                         className="text-red-500 font-semibold px-2 py-1 rounded hover:bg-red-50"
