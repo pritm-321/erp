@@ -701,26 +701,10 @@ export default function GroupDesignsPage() {
                                                         {col.consumption}
                                                       </td>
                                                       <td className="px-6 py-1">
-                                                        {col.rate_info?.rate ??
-                                                          "-"}
+                                                        {col.cost?.rate ?? "-"}
                                                       </td>
                                                       <td className="px-6 py-1">
-                                                        {unitOptions.find(
-                                                          (u) =>
-                                                            (u.id ||
-                                                              u.unit_id) ===
-                                                            col.rate_info
-                                                              ?.unit_id
-                                                        )?.name ||
-                                                          unitOptions.find(
-                                                            (u) =>
-                                                              (u.id ||
-                                                                u.unit_id) ===
-                                                              col.rate_info
-                                                                ?.unit_id
-                                                          )?.unit_name ||
-                                                          col.rate_info
-                                                            ?.unit_id ||
+                                                        {col.cost?.unit_name ||
                                                           "-"}
                                                       </td>
                                                     </tr>
@@ -1057,149 +1041,185 @@ export default function GroupDesignsPage() {
                                       key={ci}
                                       className="flex flex-wrap gap-2 items-center mb-1"
                                     >
-                                      <select
-                                        className="border border-blue-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white min-w-[120px]"
-                                        value={c.color_id}
-                                        onChange={(e) => {
-                                          const newGroups = [...variantGroups];
-                                          newGroups[vgi].parts[pi].fabrics[
-                                            fi
-                                          ].colors[ci].color_id =
-                                            e.target.value;
-                                          setVariantGroups(newGroups);
-                                        }}
-                                      >
-                                        <option value="">Select Color</option>
-                                        {colorOptions.map((col) => (
-                                          <option
-                                            key={col.id || col.color_id}
-                                            value={col.id || col.color_id}
-                                          >
-                                            {col.name || col.color_name}
-                                          </option>
-                                        ))}
-                                      </select>
-                                      <label className="flex items-center gap-1">
-                                        <input
-                                          type="checkbox"
-                                          checked={!!c.is_base}
+                                      <div className="flex flex-col">
+                                        <label className="text-blue-700 font-medium mb-1">
+                                          Color
+                                        </label>
+                                        <select
+                                          className="border border-blue-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white min-w-[120px]"
+                                          value={c.color_id}
                                           onChange={(e) => {
                                             const newGroups = [
                                               ...variantGroups,
                                             ];
-                                            // Only one base color among all parts/fabrics in this variant group
-                                            newGroups[vgi].parts.forEach(
-                                              (partObj) => {
-                                                partObj.fabrics.forEach(
-                                                  (fabricObj) => {
-                                                    fabricObj.colors =
-                                                      fabricObj.colors.map(
-                                                        (colorObj) => ({
-                                                          ...colorObj,
-                                                          is_base: false,
-                                                        })
-                                                      );
-                                                  }
-                                                );
-                                              }
-                                            );
                                             newGroups[vgi].parts[pi].fabrics[
                                               fi
-                                            ].colors[ci].is_base =
-                                              e.target.checked;
+                                            ].colors[ci].color_id =
+                                              e.target.value;
+                                            setVariantGroups(newGroups);
+                                          }}
+                                        >
+                                          <option value="">Select Color</option>
+                                          {colorOptions.map((col) => (
+                                            <option
+                                              key={col.id || col.color_id}
+                                              value={col.id || col.color_id}
+                                            >
+                                              {col.name || col.color_name}
+                                            </option>
+                                          ))}
+                                        </select>
+                                      </div>
+                                      <div className="flex flex-col">
+                                        <label className="text-blue-700 font-medium mb-1">
+                                          Base
+                                        </label>
+                                        <label className="flex items-center gap-1">
+                                          <input
+                                            type="checkbox"
+                                            checked={!!c.is_base}
+                                            onChange={(e) => {
+                                              const newGroups = [
+                                                ...variantGroups,
+                                              ];
+                                              // Only one base color among all parts/fabrics in this variant group
+                                              newGroups[vgi].parts.forEach(
+                                                (partObj) => {
+                                                  partObj.fabrics.forEach(
+                                                    (fabricObj) => {
+                                                      fabricObj.colors =
+                                                        fabricObj.colors.map(
+                                                          (colorObj) => ({
+                                                            ...colorObj,
+                                                            is_base: false,
+                                                          })
+                                                        );
+                                                    }
+                                                  );
+                                                }
+                                              );
+                                              newGroups[vgi].parts[pi].fabrics[
+                                                fi
+                                              ].colors[ci].is_base =
+                                                e.target.checked;
+                                              setVariantGroups(newGroups);
+                                            }}
+                                          />
+                                          <span className="text-blue-700">
+                                            Base
+                                          </span>
+                                        </label>
+                                      </div>
+                                      <div className="flex flex-col">
+                                        <label className="text-blue-700 font-medium mb-1">
+                                          Consumption
+                                        </label>
+                                        <input
+                                          type="number"
+                                          step="0.01"
+                                          placeholder="Consumption"
+                                          className="border border-blue-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white w-50"
+                                          value={c.consumption}
+                                          min="0"
+                                          onInput={(e) => {
+                                            if (e.target.value < 0)
+                                              e.target.value = 0;
+                                          }}
+                                          onChange={(e) => {
+                                            const newGroups = [
+                                              ...variantGroups,
+                                            ];
+                                            newGroups[vgi].parts[pi].fabrics[
+                                              fi
+                                            ].colors[ci].consumption =
+                                              parseFloat(e.target.value) || 0;
+                                            setVariantGroups(newGroups);
+                                          }}
+                                          required
+                                        />
+                                      </div>
+                                      <div className="flex flex-col">
+                                        <label className="text-blue-700 font-medium mb-1">
+                                          Rate
+                                        </label>
+                                        <input
+                                          type="number"
+                                          step="0.01"
+                                          placeholder="Rate"
+                                          className="border border-blue-300 px-4 py-2 rounded-lg bg-white w-32"
+                                          value={c.rate_info?.rate || 0}
+                                          min="0"
+                                          onChange={(e) => {
+                                            const newGroups = [
+                                              ...variantGroups,
+                                            ];
+                                            newGroups[vgi].parts[pi].fabrics[
+                                              fi
+                                            ].colors[ci].rate_info = {
+                                              ...newGroups[vgi].parts[pi]
+                                                .fabrics[fi].colors[ci]
+                                                .rate_info,
+                                              rate: Number(e.target.value),
+                                            };
                                             setVariantGroups(newGroups);
                                           }}
                                         />
-                                        <span className="text-blue-700">
-                                          Base
-                                        </span>
-                                      </label>
-                                      <input
-                                        type="number"
-                                        step="0.01"
-                                        placeholder="Consumption"
-                                        className="border border-blue-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white w-50"
-                                        value={c.consumption}
-                                        min="0"
-                                        onInput={(e) => {
-                                          if (e.target.value < 0)
-                                            e.target.value = 0;
-                                        }}
-                                        onChange={(e) => {
-                                          const newGroups = [...variantGroups];
-                                          newGroups[vgi].parts[pi].fabrics[
-                                            fi
-                                          ].colors[ci].consumption =
-                                            parseFloat(e.target.value) || 0;
-                                          setVariantGroups(newGroups);
-                                        }}
-                                        required
-                                      />
-                                      {/* Add rate_info fields */}
-                                      <input
-                                        type="number"
-                                        step="0.01"
-                                        placeholder="Rate"
-                                        className="border border-blue-300 px-4 py-2 rounded-lg bg-white w-32"
-                                        value={c.rate_info?.rate || 0}
-                                        min="0"
-                                        onChange={(e) => {
-                                          const newGroups = [...variantGroups];
-                                          newGroups[vgi].parts[pi].fabrics[
-                                            fi
-                                          ].colors[ci].rate_info = {
-                                            ...newGroups[vgi].parts[pi].fabrics[
+                                      </div>
+                                      <div className="flex flex-col">
+                                        <label className="text-blue-700 font-medium mb-1">
+                                          Unit
+                                        </label>
+                                        <select
+                                          className="border border-blue-300 px-4 py-2 rounded-lg bg-white w-32"
+                                          value={c.rate_info?.unit_id || 0}
+                                          onChange={(e) => {
+                                            const newGroups = [
+                                              ...variantGroups,
+                                            ];
+                                            newGroups[vgi].parts[pi].fabrics[
                                               fi
-                                            ].colors[ci].rate_info,
-                                            rate: Number(e.target.value),
-                                          };
-                                          setVariantGroups(newGroups);
-                                        }}
-                                      />
-                                      <select
-                                        className="border border-blue-300 px-4 py-2 rounded-lg bg-white w-32"
-                                        value={c.rate_info?.unit_id || 0}
-                                        onChange={(e) => {
-                                          const newGroups = [...variantGroups];
-                                          newGroups[vgi].parts[pi].fabrics[
-                                            fi
-                                          ].colors[ci].rate_info = {
-                                            ...newGroups[vgi].parts[pi].fabrics[
+                                            ].colors[ci].rate_info = {
+                                              ...newGroups[vgi].parts[pi]
+                                                .fabrics[fi].colors[ci]
+                                                .rate_info,
+                                              unit_id: Number(e.target.value),
+                                            };
+                                            setVariantGroups(newGroups);
+                                          }}
+                                        >
+                                          <option value={0}>Select Unit</option>
+                                          {unitOptions.map((u) => (
+                                            <option
+                                              key={u.id || u.unit_id}
+                                              value={u.id || u.unit_id}
+                                            >
+                                              {u.name || u.unit_name}
+                                            </option>
+                                          ))}
+                                        </select>
+                                      </div>
+                                      <div className="flex flex-col justify-end">
+                                        <button
+                                          type="button"
+                                          className="text-red-500 font-semibold px-2 py-1 rounded hover:bg-red-50"
+                                          onClick={() => {
+                                            const newGroups = [
+                                              ...variantGroups,
+                                            ];
+                                            newGroups[vgi].parts[pi].fabrics[
                                               fi
-                                            ].colors[ci].rate_info,
-                                            unit_id: Number(e.target.value),
-                                          };
-                                          setVariantGroups(newGroups);
-                                        }}
-                                      >
-                                        <option value={0}>Select Unit</option>
-                                        {unitOptions.map((u) => (
-                                          <option
-                                            key={u.id || u.unit_id}
-                                            value={u.id || u.unit_id}
-                                          >
-                                            {u.name || u.unit_name}
-                                          </option>
-                                        ))}
-                                      </select>
-                                      <button
-                                        type="button"
-                                        className="text-red-500 font-semibold px-2 py-1 rounded hover:bg-red-50"
-                                        onClick={() => {
-                                          const newGroups = [...variantGroups];
-                                          newGroups[vgi].parts[pi].fabrics[
-                                            fi
-                                          ].colors = newGroups[vgi].parts[
-                                            pi
-                                          ].fabrics[fi].colors.filter(
-                                            (_, idx) => idx !== ci
-                                          );
-                                          setVariantGroups(newGroups);
-                                        }}
-                                      >
-                                        <Trash className="inline-block mr-1" />
-                                        Remove Color
-                                      </button>
+                                            ].colors = newGroups[vgi].parts[
+                                              pi
+                                            ].fabrics[fi].colors.filter(
+                                              (_, idx) => idx !== ci
+                                            );
+                                            setVariantGroups(newGroups);
+                                          }}
+                                        >
+                                          <Trash className="inline-block mr-1" />
+                                          Remove Color
+                                        </button>
+                                      </div>
                                     </div>
                                   ))}
                                   <button

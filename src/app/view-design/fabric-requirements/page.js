@@ -235,6 +235,9 @@ export default function FabricRequirementsPage() {
                         <th className="px-4 py-2">Color</th>
                         <th className="px-4 py-2">Consumption per Piece</th>
                         <th className="px-4 py-2">Total Required</th>
+                        <th className="px-4 py-2">Rate/unit</th>
+                        <th className="px-4 py-2">Unit</th>
+                        <th className="px-4 py-2">Total Cost</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -253,6 +256,9 @@ export default function FabricRequirementsPage() {
                             {fr.consumption_per_piece}
                           </td>
                           <td className="px-4 py-2">{fr.total_required}</td>
+                          <td className="px-4 py-2">{fr.rate_per_unit}</td>
+                          <td className="px-4 py-2">{fr.unit}</td>
+                          <td className="px-4 py-2">{fr.total_cost}</td>
                         </tr>
                       ))}
                     </tbody>

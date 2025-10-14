@@ -80,6 +80,9 @@ export default function AllPOPage() {
                   <th className="px-4 py-2 text-left text-blue-950 font-bold">
                     References
                   </th>
+                  <th className="px-4 py-2 text-left text-blue-950 font-bold">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -124,6 +127,16 @@ export default function AllPOPage() {
                       ) : (
                         <span className="text-gray-500">-</span>
                       )}
+                    </td>
+                    <td className="px-4 py-2">
+                      <button
+                        className="bg-foreground text-white px-4 py-2 rounded shadow hover:bg-blue-700 font-semibold"
+                        onClick={() =>
+                          router.push(`/view-design/view-po/${po.po_id}`)
+                        }
+                      >
+                        View Details
+                      </button>
                     </td>
                   </tr>
                 ))}

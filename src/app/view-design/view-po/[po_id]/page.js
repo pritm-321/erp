@@ -1,4 +1,5 @@
 "use client";
+// This page displays PO details for a given po_id.
 import Sidebar from "@/components/Sidebar";
 import { useEffect, useState } from "react";
 import axios from "axios";
