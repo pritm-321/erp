@@ -248,25 +248,7 @@ export default function GroupDesignsPage() {
         }
       };
 
-      // const fetchExistingAccessories = async () => {
-      //   try {
-      //     const res = await axios.get(
-      //       `${API}so/view-accessories/${accessoriesModal.designId}`,
-      //       {
-      //         headers: {
-      //           Authorization: `Bearer ${accessToken}`,
-      //           "Organization-ID": organizationId,
-      //         },
-      //       }
-      //     );
-      //     setExistingAccessories(res.data?.accessories || []);
-      //   } catch (err) {
-      //     setExistingAccessories([]);
-      //   }
-      // };
-
       fetchAccessoryDropdowns();
-      // fetchExistingAccessories();
     }
   }, [
     accessoriesModal.open,
@@ -339,20 +321,63 @@ export default function GroupDesignsPage() {
 
   const handleOpenAccessoriesModal = (designId) => {
     setAccessoriesModal({ open: true, designId });
-    // setAccessories([
-    //   {
-    //     accessory_id: "",
-    //     brand_id: "",
-    //     color_id: "",
-    //     size_id: "",
-    //     unit_id: "",
-    //     rate_per_unit: "",
-    //     required_qty: "",
-    //     remarks: "",
-    //   },
-    // ]);
     setAccessoriesError("");
     setAccessoriesSuccess("");
+
+    // Pre-fill existing trims data if available
+    const fetchExistingAccessories = async () => {
+      try {
+        const res = await axios.get(`${API}so/view-accessories/${designId}`, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Organization-ID": organizationId,
+          },
+        });
+        const existingAccessories = res.data?.data?.accessories || [];
+        if (existingAccessories.length > 0) {
+          setAccessories(
+            existingAccessories.map((acc) => ({
+              accessory_id: acc.accessory_id || "",
+              brand_id: acc.brand_id || "",
+              color_id: acc.color_id || "",
+              size_id: acc.size_id || "",
+              unit_id: acc.unit_id || "",
+              rate_per_unit: acc.rate_per_unit || "",
+              required_qty: acc.required_qty || "",
+              remarks: acc.remarks || "",
+            }))
+          );
+        } else {
+          setAccessories([
+            {
+              accessory_id: "",
+              brand_id: "",
+              color_id: "",
+              size_id: "",
+              unit_id: "",
+              rate_per_unit: "",
+              required_qty: "",
+              remarks: "",
+            },
+          ]);
+        }
+      } catch (err) {
+        setAccessories([
+          {
+            accessory_id: "",
+            brand_id: "",
+            color_id: "",
+            size_id: "",
+            unit_id: "",
+            rate_per_unit: "",
+            required_qty: "",
+            remarks: "",
+          },
+        ]);
+      }
+    };
+
+    fetchExistingAccessories();
   };
 
   const handleOpenViewAccessoriesModal = async (designId) => {
@@ -1465,7 +1490,6 @@ export default function GroupDesignsPage() {
                           newAcc[i].brand_id = e.target.value;
                           setAccessories(newAcc);
                         }}
-                        // required
                       >
                         <option value="">Select Brand</option>
                         {brandOptions.map((b) => (
@@ -1540,7 +1564,6 @@ export default function GroupDesignsPage() {
                           newAcc[i].unit_id = e.target.value;
                           setAccessories(newAcc);
                         }}
-                        // required
                       >
                         <option value="">Select Unit</option>
                         {unitOptions.map((u) => (
@@ -1727,7 +1750,7 @@ export default function GroupDesignsPage() {
                         {acc.color_name || acc.color_id}
                       </td>
                       <td className="px-2 py-1">
-                        {acc.size_name || acc.size_id}
+                        {acc.size_label || acc.size_id}
                       </td>
                       <td className="px-2 py-1">
                         {acc.unit_name || acc.unit_id}
