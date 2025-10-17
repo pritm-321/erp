@@ -121,7 +121,10 @@ export default function ViewPOByIdPage() {
                       <thead className="bg-yellow-50">
                         <tr className="text-left text-white border-b border-yellow-200 bg-gradient-to-br from-yellow-600 to-yellow-400">
                           <th className="px-4 py-2 text-left text-yellow-950 font-bold">
-                            Trim
+                            Trim Name
+                          </th>
+                          <th className="px-4 py-2 text-left text-yellow-950 font-bold">
+                            Trim Type
                           </th>
                           <th className="px-4 py-2 text-left text-yellow-950 font-bold">
                             Brand
@@ -157,6 +160,9 @@ export default function ViewPOByIdPage() {
                           <tr key={i} className="border-b border-yellow-100">
                             <td className="px-4 py-2">
                               {item.accessory_name || item.accessory_id}
+                            </td>
+                            <td className="px-4 py-2">
+                              {item.accessory_type || item.accessory_id}
                             </td>
                             <td className="px-4 py-2">
                               {item.brand_name || item.brand_id}

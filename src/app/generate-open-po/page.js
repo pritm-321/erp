@@ -137,7 +137,7 @@ export default function GenerateOpenPOPage() {
               colors: item.colors.map((c) => ({
                 color_id: Number(c.color_id),
                 required_qty: Number(c.required_qty),
-                ordered_qty: Number(c.ordered_qty),
+                ordered_qty: Number(c.required_qty), // Ensure ordered_qty matches required_qty
                 moq: Number(c.moq),
               })),
             };
@@ -147,7 +147,7 @@ export default function GenerateOpenPOPage() {
               accessories: item.accessories.map((a) => ({
                 accessory_id: Number(a.accessory_id),
                 required_qty: Number(a.required_qty),
-                ordered_qty: Number(a.ordered_qty),
+                ordered_qty: Number(a.required_qty), // Ensure ordered_qty matches required_qty
                 brand_id: a.brand_id ? Number(a.brand_id) : undefined,
                 color_id: a.color_id ? Number(a.color_id) : undefined,
                 size_id: a.size_id ? Number(a.size_id) : undefined,
@@ -340,7 +340,7 @@ export default function GenerateOpenPOPage() {
                               }}
                               required
                             />
-                            <input
+                            {/* <input
                               type="number"
                               placeholder="Ordered Qty"
                               className="border border-blue-300 px-4 py-2 rounded-lg bg-white min-w-[80px]"
@@ -352,7 +352,7 @@ export default function GenerateOpenPOPage() {
                                 setItemsData(newItems);
                               }}
                               required
-                            />
+                            /> */}
                             <input
                               type="number"
                               placeholder="MOQ"
@@ -525,7 +525,7 @@ export default function GenerateOpenPOPage() {
                             }}
                             required
                           />
-                          <input
+                          {/* <input
                             type="number"
                             placeholder="Ordered Qty"
                             className="border border-blue-300 px-4 py-2 rounded-lg bg-white min-w-[80px]"
@@ -537,7 +537,7 @@ export default function GenerateOpenPOPage() {
                               setItemsData(newItems);
                             }}
                             required
-                          />
+                          /> */}
                           <input
                             type="number"
                             step="0.01"

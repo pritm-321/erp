@@ -51,7 +51,9 @@ export default function TrimsRequirementsPage() {
         setLoading(true);
         setError("");
         const { data } = await axios.get(
-          `${API}so/trims-requirements/${localStorage.getItem("group_id")}`,
+          `${API}so/trims-requirements/${localStorage.getItem(
+            "group_id"
+          )}/type/${localStorage.getItem("accessory_type_id")}`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,
@@ -60,7 +62,9 @@ export default function TrimsRequirementsPage() {
           }
         );
         // Response: { designs: [...] }
-        setRequirements(data?.designs || {});
+        console.log(data);
+
+        setRequirements(data?.data?.designs || {});
       } catch (err) {
         setError("Failed to fetch trims requirements.");
       } finally {
@@ -92,6 +96,8 @@ export default function TrimsRequirementsPage() {
     }
   };
   let sortedEntries = requirements;
+  console.log(sortedEntries);
+
   if (sortedEntries && Array.isArray(sortedEntries)) {
     sortedEntries = sortedEntries.sort((a, b) => {
       const dateA = new Date(a.created_at);
@@ -112,7 +118,11 @@ export default function TrimsRequirementsPage() {
     try {
       const res = await axios.post(
         `${API}so/create-trims-po/${localStorage.getItem("group_id")}`,
-        { vendor_id: selectedVendor, design_ids: selectedDesignIds },
+        {
+          vendor_id: selectedVendor,
+          design_ids: selectedDesignIds,
+          accessory_type_id: localStorage.getItem("accessory_type_id"),
+        },
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -137,7 +147,7 @@ export default function TrimsRequirementsPage() {
 
   // Add select all logic
   const allDesignIds = sortedEntries
-    ? sortedEntries.map((req) => req.design_id)
+    ? sortedEntries?.map((req) => req.design_id)
     : [];
   const isAllSelected =
     allDesignIds.length > 0 && selectedDesignIds.length === allDesignIds.length;
@@ -228,7 +238,8 @@ export default function TrimsRequirementsPage() {
                     <table className="w-full rounded-lg overflow-hidden mt-2">
                       <thead>
                         <tr className="text-left text-white border-b border-blue-200 bg-foreground">
-                          <th className="px-4 py-2">Trim</th>
+                          <th className="px-4 py-2">Trim Name</th>
+                          <th className="px-4 py-2">Trim Type</th>
                           <th className="px-4 py-2">Brand</th>
                           <th className="px-4 py-2">Color</th>
                           <th className="px-4 py-2">Size</th>
@@ -247,6 +258,9 @@ export default function TrimsRequirementsPage() {
                           >
                             <td className="px-4 py-2">
                               {acc.accessory_name || acc.accessory_id}
+                            </td>
+                            <td className="px-4 py-2">
+                              {acc.accessory_type || acc.accessory_id}
                             </td>
                             <td className="px-4 py-2">
                               {acc.brand_name || acc.brand_id}

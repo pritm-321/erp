@@ -20,6 +20,8 @@ import CreateDesignForm from "@/components/CreateDesignForm";
 export default function GroupDesignsPage() {
   const searchParams = useSearchParams();
   const groupId = decodeURIComponent(searchParams.get("groupId"));
+  console.log(groupId);
+
   const [designs, setDesigns] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -153,7 +155,7 @@ export default function GroupDesignsPage() {
       const fetchDropdowns = async () => {
         // Use global organizationId and accessToken
         try {
-          const [colorRes, fabricRes, partRes] = await Promise.all([
+          const [colorRes, fabricRes, partRes, unitRes] = await Promise.all([
             axios.get(`${API}so/color-suggestions`, {
               headers: {
                 Authorization: `Bearer ${accessToken}`,
@@ -172,14 +174,22 @@ export default function GroupDesignsPage() {
                 "Organization-ID": organizationId,
               },
             }),
+            axios.get(`${API}so/unit-suggestions`, {
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+                "Organization-ID": organizationId,
+              },
+            }),
           ]);
           setColorOptions(colorRes.data?.data || []);
           setFabricTypeOptions(fabricRes.data?.data || []);
           setPartOptions(partRes.data?.data || []);
+          setUnitOptions(unitRes.data?.data || []);
         } catch (err) {
           setColorOptions([]);
           setFabricTypeOptions([]);
           setPartOptions([]);
+          setUnitOptions([]);
         }
       };
       fetchDropdowns();
@@ -191,49 +201,44 @@ export default function GroupDesignsPage() {
     if (accessoriesModal.open) {
       const fetchAccessoryDropdowns = async () => {
         try {
-          const [
-            accessoryRes,
-            brandRes,
-            colorRes,
-            sizeRes,
-            // unitRes
-          ] = await Promise.all([
-            axios.get(`${API}so/accessory-suggestions`, {
-              headers: {
-                Authorization: `Bearer ${accessToken}`,
-                "Organization-ID": organizationId,
-              },
-            }),
-            axios.get(`${API}so/brand-suggestions`, {
-              headers: {
-                Authorization: `Bearer ${accessToken}`,
-                "Organization-ID": organizationId,
-              },
-            }),
-            axios.get(`${API}so/color-suggestions`, {
-              headers: {
-                Authorization: `Bearer ${accessToken}`,
-                "Organization-ID": organizationId,
-              },
-            }),
-            axios.get(`${API}so/size-suggestions`, {
-              headers: {
-                Authorization: `Bearer ${accessToken}`,
-                "Organization-ID": organizationId,
-              },
-            }),
-            // axios.get(`${API}so/unit-suggestions`, {
-            //   headers: {
-            //     Authorization: `Bearer ${accessToken}`,
-            //     "Organization-ID": organizationId,
-            //   },
-            // }),
-          ]);
+          const [accessoryRes, brandRes, colorRes, sizeRes, unitRes] =
+            await Promise.all([
+              axios.get(`${API}so/accessory-suggestions`, {
+                headers: {
+                  Authorization: `Bearer ${accessToken}`,
+                  "Organization-ID": organizationId,
+                },
+              }),
+              axios.get(`${API}so/brand-suggestions`, {
+                headers: {
+                  Authorization: `Bearer ${accessToken}`,
+                  "Organization-ID": organizationId,
+                },
+              }),
+              axios.get(`${API}so/color-suggestions`, {
+                headers: {
+                  Authorization: `Bearer ${accessToken}`,
+                  "Organization-ID": organizationId,
+                },
+              }),
+              axios.get(`${API}so/size-suggestions`, {
+                headers: {
+                  Authorization: `Bearer ${accessToken}`,
+                  "Organization-ID": organizationId,
+                },
+              }),
+              axios.get(`${API}so/unit-suggestions`, {
+                headers: {
+                  Authorization: `Bearer ${accessToken}`,
+                  "Organization-ID": organizationId,
+                },
+              }),
+            ]);
           setAccessoryOptions(accessoryRes.data?.data || []);
           setBrandOptions(brandRes.data?.data || []);
           setColorAccessoryOptions(colorRes.data?.data || []);
           setSizeOptions(sizeRes.data?.data || []);
-          // setUnitOptions(unitRes.data?.data || []);
+          setUnitOptions(unitRes.data?.data || []);
         } catch (err) {
           setAccessoryOptions([]);
           setBrandOptions([]);
@@ -404,9 +409,22 @@ export default function GroupDesignsPage() {
               <Eye size={20} />
               Fabric Requirements
             </button>
-            <button
+            {/* <button
               className="bg-foreground text-white px-6 py-2 rounded-lg shadow hover:bg-blue-700 transition flex items-center gap-2"
               onClick={() => router.push("/view-design/trims-requirements")}
+            >
+              <Eye size={20} />
+              Trims Requirements
+            </button> */}
+            <button
+              className="bg-foreground text-white px-6 py-2 rounded-lg shadow hover:bg-blue-700 transition flex items-center gap-2"
+              onClick={() =>
+                router.push(
+                  `/view-design/accessory-types?groupId=${encodeURIComponent(
+                    groupId
+                  )}`
+                )
+              }
             >
               <Eye size={20} />
               Trims Requirements
