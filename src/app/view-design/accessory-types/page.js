@@ -8,12 +8,10 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { Eye } from "lucide-react";
 
 export default function AccessoryTypesPage() {
-  const searchParams = useSearchParams();
   const router = useRouter();
-  const queryGroupId = localStorage.getItem("group_id");
+  // const queryGroupId = localStorage.getItem("group_id");
   const groupId =
-    queryGroupId ||
-    (typeof window !== "undefined" && localStorage.getItem("group_id"));
+    typeof window !== "undefined" && localStorage.getItem("group_id");
   const [organizationId, setOrganizationId] = useState("");
   const [accessToken, setAccessToken] = useState("");
   const [loading, setLoading] = useState(true);
