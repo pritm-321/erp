@@ -5,7 +5,7 @@ import axios from "axios";
 import { API } from "@/utils/url";
 import { supabase } from "@/utils/supabaseClient";
 import { useRouter } from "next/navigation";
-import { Eye } from "lucide-react";
+import { DownloadIcon, Eye } from "lucide-react";
 
 export default function ViewPOPage() {
   // All POs state
@@ -79,6 +79,31 @@ export default function ViewPOPage() {
     }
   };
 
+  const handleDownloadInvoice = async (poId) => {
+    try {
+      const headers = {
+        Authorization: `Bearer ${accessToken}`,
+        "Organization-ID": organizationId,
+      };
+      const response = await axios.get(`${API}so/invoice/generate/${poId}`, {
+        headers,
+        responseType: "blob", // Ensure the response is treated as a file
+      });
+
+      // Create a URL for the file and trigger download
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `invoice_${poId}.pdf`); // Set the file name
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+    } catch (error) {
+      console.error("Failed to download invoice:", error);
+      alert("Failed to download invoice.");
+    }
+  };
+
   useEffect(() => {
     if (typeof window !== "undefined") {
       const orgs = localStorage.getItem("organizationId");
@@ -127,23 +152,34 @@ export default function ViewPOPage() {
         ) : poSummary.length === 0 ? (
           <div className="p-4 text-gray-500">No PO batches found.</div>
         ) : (
-          <div className="overflow-hidden rounded-xl border border-blue-200 bg-gray-50 shadow">
+          <div className="space-y-3">
             {poSummary?.map((batch, idx) => (
               <div
                 key={batch.batch_id || idx}
-                className="border-b border-gray-100 p-5"
+                className="rounded-xl border border-blue-200 bg-gray-50 shadow p-5 relative"
               >
                 <div className="flex flex-col md:flex-row md:items-center gap-8">
                   <span className="mb-4 py-2 text-foreground font-semibold">
-                    Batch Sl No. : {idx + 1}
+                    Po No. : {batch.po_number}
                   </span>
                   <span className="mb-4 py-2 text-foreground font-semibold">
-                    Created At : {formatToIST(batch?.order_date)}
+                    Order Date : {formatToIST(batch?.order_date)}
                   </span>
-
                   <span className="mb-4 py-2 text-foreground font-semibold">
+                    Due Date : {formatToIST(batch?.due_date)}
+                  </span>
+                  <button
+                    className="px-5 py-2 bg-foreground text-white rounded shadow hover:bg-blue-700 mr-2 flex items-center gap-2 absolute top-5 right-5"
+                    onClick={() =>
+                      router.push(`/view-design/view-po/${batch.po_id}`)
+                    }
+                  >
+                    <Eye size={16} />
+                    View PO
+                  </button>
+                  {/* <span className="mb-4 py-2 text-foreground font-semibold">
                     Batch Description : {batch?.description}
-                  </span>
+                  </span> */}
                 </div>
                 <br />
 
@@ -197,15 +233,26 @@ export default function ViewPOPage() {
                         <td className="px-2 py-1 text-foreground">
                           {batch.status || "-"}
                         </td>
-                        <td className="px-2 py-1">
+                        <td className="px-2 py-1 flex gap-2">
                           <button
                             className="px-5 py-2 bg-foreground text-white rounded shadow hover:bg-blue-700 mr-2 flex items-center gap-2"
-                            onClick={() =>
-                              router.push(`/view-design/view-po/${batch.po_id}`)
-                            }
+                            onClick={() => {
+                              router.push(`/view-design/view-items/`);
+                              window.localStorage.setItem(
+                                "reference_id",
+                                po.ref_id
+                              );
+                            }}
                           >
                             <Eye size={16} />
-                            View PO
+                            View Items
+                          </button>
+                          <button
+                            className="px-5 py-2 bg-foreground text-white rounded shadow hover:bg-blue-700 mr-2 flex items-center gap-2"
+                            onClick={() => handleDownloadInvoice(batch.po_id)} // Call the download function
+                          >
+                            <DownloadIcon size={16} />
+                            Download Invoice
                           </button>
                         </td>
                       </tr>

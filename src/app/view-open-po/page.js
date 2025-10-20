@@ -96,7 +96,7 @@ export default function OpenPOPage() {
                     Fabric Items
                   </th>
                   <th className="px-4 py-2 text-left text-blue-950 font-bold">
-                    Accessory Items
+                    Trims Items
                   </th>
                 </tr>
               </thead>
@@ -185,6 +185,9 @@ export default function OpenPOPage() {
                     <th className="px-2 py-1">Color</th>
                     <th className="px-2 py-1">Required Qty</th>
                     <th className="px-2 py-1">Ordered Qty</th>
+                    <th className="px-2 py-1">Unit</th>
+                    <th className="px-2 py-1">Rate/Unit</th>
+                    <th className="px-2 py-1">Total Amount</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -200,6 +203,11 @@ export default function OpenPOPage() {
                       </td>
                       <td className="px-2 py-1">{fi.required_qty}</td>
                       <td className="px-2 py-1">{fi.ordered_qty}</td>
+                      <td className="px-2 py-1">
+                        {fi.unit_name || fi.unit_id}
+                      </td>
+                      <td className="px-2 py-1">{fi.rate_per_unit}</td>
+                      <td className="px-2 py-1">{fi.total_amount}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -209,7 +217,7 @@ export default function OpenPOPage() {
         </div>
       )}
 
-      {/* Accessory Items Modal */}
+      {/* Trims Items Modal */}
       {accessoryModal.open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
           <div className="bg-white rounded-lg shadow-lg p-6 max-w-2xl w-full relative max-h-[95vh] overflow-y-auto">
@@ -220,15 +228,16 @@ export default function OpenPOPage() {
               &times;
             </button>
             <h2 className="text-lg font-semibold mb-4 text-yellow-700">
-              Accessory Items
+              Trims Items
             </h2>
             {accessoryModal.items.length === 0 ? (
-              <div className="text-gray-500">No accessory items.</div>
+              <div className="text-gray-500">No trim items.</div>
             ) : (
               <table className="min-w-full bg-white border border-yellow-100 rounded mb-2">
                 <thead>
                   <tr className="bg-yellow-50 text-xs">
-                    <th className="px-2 py-1">Accessory</th>
+                    <th className="px-2 py-1">Trims</th>
+                    <th className="px-2 py-1">Type</th>
                     <th className="px-2 py-1">Brand</th>
                     <th className="px-2 py-1">Color</th>
                     <th className="px-2 py-1">Size</th>
@@ -249,10 +258,19 @@ export default function OpenPOPage() {
                       <td className="px-2 py-1">
                         {ai.accessory_name || ai.accessory_id}
                       </td>
-                      <td className="px-2 py-1">{ai.brand_id}</td>
-                      <td className="px-2 py-1">{ai.color_id}</td>
-                      <td className="px-2 py-1">{ai.size_id}</td>
-                      <td className="px-2 py-1">{ai.unit_id}</td>
+                      <td className="px-2 py-1">{ai.accessory_type || "-"}</td>
+                      <td className="px-2 py-1">
+                        {ai.brand_name || ai.brand_id || "-"}
+                      </td>
+                      <td className="px-2 py-1">
+                        {ai.color_name || ai.color_id || "-"}
+                      </td>
+                      <td className="px-2 py-1">
+                        {ai.size_label || ai.size_id || "-"}
+                      </td>
+                      <td className="px-2 py-1">
+                        {ai.unit_name || ai.unit_id || "-"}
+                      </td>
                       <td className="px-2 py-1">{ai.rate_per_unit}</td>
                       <td className="px-2 py-1">{ai.required_qty}</td>
                       <td className="px-2 py-1">{ai.ordered_qty}</td>

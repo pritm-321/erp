@@ -67,13 +67,13 @@ export default function ViewPOByIdPage() {
         ) : (
           <div className="space-y-4">
             <div className="flex flex-row gap-10 w-full">
-              <Image
+              {/* <Image
                 src={poDetail.design_image || ""}
                 alt="Design Image"
                 width={500}
                 height={500}
                 className="w-48 h-48 object-cover rounded-lg shadow-lg border border-blue-200"
-              />
+              /> */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 rounded-xl p-4">
                 <div className="text-foreground">
                   <span className="font-semibold">PO Number:</span>{" "}
@@ -94,9 +94,15 @@ export default function ViewPOByIdPage() {
                     : poDetail.created_at || poDetail.date || "-"}
                 </div>
                 <div className="text-foreground">
+                  <span className="font-semibold">Due Date:</span>{" "}
+                  {poDetail.due_date
+                    ? new Date(poDetail.due_date).toLocaleString()
+                    : poDetail.created_at || poDetail.date || "-"}
+                </div>
+                {/* <div className="text-foreground">
                   <span className="font-semibold">Description:</span>{" "}
                   {poDetail.description || "-"}
-                </div>
+                </div> */}
                 <div className="text-foreground">
                   <span className="font-semibold">References:</span>{" "}
                   {poDetail.references && poDetail.references.length > 0
@@ -116,10 +122,10 @@ export default function ViewPOByIdPage() {
                   <h3 className="text-lg font-semibold text-foreground mb-2">
                     Trims Items
                   </h3>
-                  <div className="overflow-hidden rounded-xl border border-yellow-200">
+                  <div className="overflow-hidden rounded-xl border border-yellow-100">
                     <table className="min-w-full bg-white">
                       <thead className="bg-yellow-50">
-                        <tr className="text-left text-white border-b border-yellow-200 bg-gradient-to-br from-yellow-600 to-yellow-400">
+                        <tr className="text-left text-white border-b border-yellow-100 bg-yellow-50">
                           <th className="px-4 py-2 text-left text-yellow-950 font-bold">
                             Trim Name
                           </th>
@@ -198,7 +204,7 @@ export default function ViewPOByIdPage() {
                   <div className="overflow-hidden rounded-xl border border-blue-200">
                     <table className="min-w-full bg-white">
                       <thead className="bg-gray-50">
-                        <tr className="text-left text-white border-b border-blue-200 bg-gradient-to-br from-blue-600 to-blue-400">
+                        <tr className="text-left text-white border-b border-blue-200 ">
                           <th className="px-4 py-2 text-left text-blue-950 font-bold">
                             Fabric Name
                           </th>

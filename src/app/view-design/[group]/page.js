@@ -67,9 +67,9 @@ export default function GroupDesignsPage() {
                   color_id: "",
                   is_base: false,
                   consumption: 0.0,
-                  rate_info: {
+                  cost: {
                     rate: 0.0,
-                    unit_id: 1,
+                    unit_id: "",
                   },
                 },
               ],
@@ -308,6 +308,7 @@ export default function GroupDesignsPage() {
 
       setSizes(res.data.sizes || sizes);
       setVariantGroups(res.data.variants || variantGroups);
+      console.log(variantGroups);
     } catch (err) {
       setPartsDetails([]);
       setViewPartsModal({ open: true, designId });
@@ -334,6 +335,7 @@ export default function GroupDesignsPage() {
           },
         });
         const existingAccessories = res.data?.data?.accessories || [];
+
         if (existingAccessories.length > 0) {
           setAccessories(
             existingAccessories.map((acc) => ({
@@ -1190,7 +1192,7 @@ export default function GroupDesignsPage() {
                                           step="0.01"
                                           placeholder="Rate"
                                           className="border border-blue-300 px-4 py-2 rounded-lg bg-white w-32"
-                                          value={c.rate_info?.rate || 0}
+                                          value={c.cost?.rate || 0}
                                           min="0"
                                           onChange={(e) => {
                                             const newGroups = [
@@ -1198,10 +1200,9 @@ export default function GroupDesignsPage() {
                                             ];
                                             newGroups[vgi].parts[pi].fabrics[
                                               fi
-                                            ].colors[ci].rate_info = {
+                                            ].colors[ci].cost = {
                                               ...newGroups[vgi].parts[pi]
-                                                .fabrics[fi].colors[ci]
-                                                .rate_info,
+                                                .fabrics[fi].colors[ci].cost,
                                               rate: Number(e.target.value),
                                             };
                                             setVariantGroups(newGroups);
@@ -1214,17 +1215,16 @@ export default function GroupDesignsPage() {
                                         </label>
                                         <select
                                           className="border border-blue-300 px-4 py-2 rounded-lg bg-white w-32"
-                                          value={c.rate_info?.unit_id || 0}
+                                          value={c.cost?.unit_id || 0}
                                           onChange={(e) => {
                                             const newGroups = [
                                               ...variantGroups,
                                             ];
                                             newGroups[vgi].parts[pi].fabrics[
                                               fi
-                                            ].colors[ci].rate_info = {
+                                            ].colors[ci].cost = {
                                               ...newGroups[vgi].parts[pi]
-                                                .fabrics[fi].colors[ci]
-                                                .rate_info,
+                                                .fabrics[fi].colors[ci].cost,
                                               unit_id: Number(e.target.value),
                                             };
                                             setVariantGroups(newGroups);
@@ -1724,9 +1724,9 @@ export default function GroupDesignsPage() {
                 No trims found for this design.
               </div>
             ) : (
-              <table className="min-w-full rounded-xl mb-2">
-                <thead>
-                  <tr className="text-left bg-foreground text-white">
+              <table className="min-w-full rounded-xl mb-2 border border-yellow-100">
+                <thead className="border-yellow-100">
+                  <tr className="text-left bg-yellow-50">
                     <th className="px-2 py-1">Trim</th>
                     <th className="px-2 py-1">Brand</th>
                     <th className="px-2 py-1">Color</th>
@@ -1739,7 +1739,7 @@ export default function GroupDesignsPage() {
                 </thead>
                 <tbody>
                   {viewAccessories.map((acc, idx) => (
-                    <tr key={idx} className="border-b border-blue-300">
+                    <tr key={idx} className="border-b border-yellow-100">
                       <td className="px-2 py-1">
                         {acc.accessory_name || acc.accessory_id}
                       </td>

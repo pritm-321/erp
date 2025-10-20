@@ -49,7 +49,7 @@ export default function GenerateOpenPOPage() {
           accessoryRes,
           brandRes,
           sizeRes,
-          //   unitRes,
+          unitRes,
         ] = await Promise.all([
           axios.get(`${API}partners/vendors`, { headers }),
           axios.get(`${API}so/fabric-type-suggestions`, { headers }),
@@ -57,7 +57,7 @@ export default function GenerateOpenPOPage() {
           axios.get(`${API}so/accessory-suggestions`, { headers }),
           axios.get(`${API}so/brand-suggestions`, { headers }),
           axios.get(`${API}so/size-suggestions`, { headers }),
-          //   axios.get(`${API}so/unit-suggestions`, { headers }),
+          axios.get(`${API}so/unit-suggestions`, { headers }),
         ]);
         console.log(vendorRes.data?.vendors);
 
@@ -67,7 +67,7 @@ export default function GenerateOpenPOPage() {
         setAccessoryOptions(accessoryRes.data?.data || []);
         setBrandOptions(brandRes.data?.data || []);
         setSizeOptions(sizeRes.data?.data || []);
-        // setUnitOptions(unitRes.data?.data || []);
+        setUnitOptions(unitRes.data?.data || []);
       } catch (err) {
         setVendorOptions([]);
         setFabricTypeOptions([]);
@@ -91,7 +91,16 @@ export default function GenerateOpenPOPage() {
         fabric_type_id: "",
         gsm: "",
         dia: "",
-        colors: [{ color_id: "", required_qty: "", ordered_qty: "", moq: "" }],
+        colors: [
+          {
+            color_id: "",
+            required_qty: "",
+            ordered_qty: "",
+            moq: "",
+            unit_id: "",
+            rate_per_unit: "",
+          },
+        ],
       },
     ]);
   };
@@ -137,8 +146,10 @@ export default function GenerateOpenPOPage() {
               colors: item.colors.map((c) => ({
                 color_id: Number(c.color_id),
                 required_qty: Number(c.required_qty),
-                ordered_qty: Number(c.required_qty), // Ensure ordered_qty matches required_qty
+                ordered_qty: Number(c.required_qty),
                 moq: Number(c.moq),
+                unit_id: Number(c.unit_id),
+                rate_per_unit: Number(c.rate_per_unit),
               })),
             };
           } else {
@@ -147,14 +158,12 @@ export default function GenerateOpenPOPage() {
               accessories: item.accessories.map((a) => ({
                 accessory_id: Number(a.accessory_id),
                 required_qty: Number(a.required_qty),
-                ordered_qty: Number(a.required_qty), // Ensure ordered_qty matches required_qty
-                brand_id: a.brand_id ? Number(a.brand_id) : undefined,
-                color_id: a.color_id ? Number(a.color_id) : undefined,
-                size_id: a.size_id ? Number(a.size_id) : undefined,
-                unit_id: a.unit_id ? Number(a.unit_id) : undefined,
-                rate_per_unit: a.rate_per_unit
-                  ? Number(a.rate_per_unit)
-                  : undefined,
+                ordered_qty: Number(a.required_qty),
+                brand_id: Number(a.brand_id),
+                color_id: Number(a.color_id),
+                size_id: Number(a.size_id),
+                unit_id: Number(a.unit_id),
+                rate_per_unit: Number(a.rate_per_unit),
                 notes: a.notes,
               })),
             };
@@ -215,18 +224,7 @@ export default function GenerateOpenPOPage() {
                   className="border border-blue-200 rounded-xl p-4 bg-blue-50 mb-2"
                 >
                   <div className="flex gap-4 mb-2">
-                    <select
-                      className="border border-blue-300 px-4 py-2 rounded-lg bg-white"
-                      value={item.type}
-                      onChange={(e) => {
-                        const newItems = [...itemsData];
-                        newItems[idx].type = e.target.value;
-                        setItemsData(newItems);
-                      }}
-                    >
-                      <option value="fabric">Fabric</option>
-                      <option value="accessory">Accessory</option>
-                    </select>
+                    <span>{item.type === "fabric" ? "Fabric" : "Trims"}</span>
                     <button
                       type="button"
                       className="text-red-500 font-semibold px-2 py-1 rounded hover:bg-red-50"
@@ -365,6 +363,40 @@ export default function GenerateOpenPOPage() {
                               }}
                               required
                             />
+                            <select
+                              className="border border-blue-300 px-4 py-2 rounded-lg bg-white min-w-[120px]"
+                              value={c.unit_id}
+                              onChange={(e) => {
+                                const newItems = [...itemsData];
+                                newItems[idx].colors[ci].unit_id =
+                                  e.target.value;
+                                setItemsData(newItems);
+                              }}
+                              required
+                            >
+                              <option value="">Select Unit</option>
+                              {unitOptions.map((u) => (
+                                <option
+                                  key={u.id || u.unit_id}
+                                  value={u.id || u.unit_id}
+                                >
+                                  {u.name || u.unit_name}
+                                </option>
+                              ))}
+                            </select>
+                            <input
+                              type="number"
+                              placeholder="Rate/Unit"
+                              className="border border-blue-300 px-4 py-2 rounded-lg bg-white min-w-[80px]"
+                              value={c.rate_per_unit}
+                              onChange={(e) => {
+                                const newItems = [...itemsData];
+                                newItems[idx].colors[ci].rate_per_unit =
+                                  e.target.value;
+                                setItemsData(newItems);
+                              }}
+                              required
+                            />
                             <button
                               type="button"
                               className="text-red-500 font-semibold px-2 py-1 rounded hover:bg-red-50"
@@ -392,6 +424,8 @@ export default function GenerateOpenPOPage() {
                               required_qty: "",
                               ordered_qty: "",
                               moq: "",
+                              unit_id: "",
+                              rate_per_unit: "",
                             });
                             setItemsData(newItems);
                           }}
@@ -443,12 +477,12 @@ export default function GenerateOpenPOPage() {
                             }}
                           >
                             <option value="">Select Brand</option>
-                            {brandOptions.map((b) => (
+                            {brandOptions.map((brand) => (
                               <option
-                                key={b.id || b.brand_id}
-                                value={b.id || b.brand_id}
+                                key={brand.id || brand.brand_id}
+                                value={brand.id || brand.brand_id}
                               >
-                                {b.name || b.brand_name}
+                                {brand.name || brand.brand_name}
                               </option>
                             ))}
                           </select>
@@ -463,17 +497,17 @@ export default function GenerateOpenPOPage() {
                             }}
                           >
                             <option value="">Select Color</option>
-                            {colorOptions.map((col) => (
+                            {colorOptions.map((color) => (
                               <option
-                                key={col.id || col.color_id}
-                                value={col.id || col.color_id}
+                                key={color.id || color.color_id}
+                                value={color.id || color.color_id}
                               >
-                                {col.name || col.color_name}
+                                {color.name || color.color_name}
                               </option>
                             ))}
                           </select>
                           <select
-                            className="border border-blue-300 px-4 py-2 rounded-lg bg-white min-w-[100px]"
+                            className="border border-blue-300 px-4 py-2 rounded-lg bg-white min-w-[120px]"
                             value={a.size_id}
                             onChange={(e) => {
                               const newItems = [...itemsData];
@@ -483,32 +517,12 @@ export default function GenerateOpenPOPage() {
                             }}
                           >
                             <option value="">Select Size</option>
-                            {sizeOptions.map((sz) => (
+                            {sizeOptions.map((size) => (
                               <option
-                                key={sz.id || sz.size_id}
-                                value={sz.id || sz.size_id}
+                                key={size.id || size.size_id}
+                                value={size.id || size.size_id}
                               >
-                                {sz.name || sz.size_name}
-                              </option>
-                            ))}
-                          </select>
-                          <select
-                            className="border border-blue-300 px-4 py-2 rounded-lg bg-white min-w-[100px]"
-                            value={a.unit_id}
-                            onChange={(e) => {
-                              const newItems = [...itemsData];
-                              newItems[idx].accessories[ai].unit_id =
-                                e.target.value;
-                              setItemsData(newItems);
-                            }}
-                          >
-                            <option value="">Select Unit</option>
-                            {unitOptions.map((u) => (
-                              <option
-                                key={u.id || u.unit_id}
-                                value={u.id || u.unit_id}
-                              >
-                                {u.name || u.unit_name}
+                                {size.name || size.size_name}
                               </option>
                             ))}
                           </select>
@@ -538,9 +552,29 @@ export default function GenerateOpenPOPage() {
                             }}
                             required
                           /> */}
+                          <select
+                            className="border border-blue-300 px-4 py-2 rounded-lg bg-white min-w-[120px]"
+                            value={a.unit_id}
+                            onChange={(e) => {
+                              const newItems = [...itemsData];
+                              newItems[idx].accessories[ai].unit_id =
+                                e.target.value;
+                              setItemsData(newItems);
+                            }}
+                            required
+                          >
+                            <option value="">Select Unit</option>
+                            {unitOptions.map((unit) => (
+                              <option
+                                key={unit.id || unit.unit_id}
+                                value={unit.id || unit.unit_id}
+                              >
+                                {unit.name || unit.unit_name}
+                              </option>
+                            ))}
+                          </select>
                           <input
                             type="number"
-                            step="0.01"
                             placeholder="Rate/Unit"
                             className="border border-blue-300 px-4 py-2 rounded-lg bg-white min-w-[80px]"
                             value={a.rate_per_unit}
@@ -550,6 +584,7 @@ export default function GenerateOpenPOPage() {
                                 e.target.value;
                               setItemsData(newItems);
                             }}
+                            required
                           />
                           <input
                             type="text"
