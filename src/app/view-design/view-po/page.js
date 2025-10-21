@@ -168,8 +168,14 @@ export default function ViewPOPage() {
                   <span className="mb-4 py-2 text-foreground font-semibold">
                     Due Date : {formatToIST(batch?.due_date)}
                   </span>
+
+                  {/* <span className="mb-4 py-2 text-foreground font-semibold">
+                    Batch Description : {batch?.description}
+                  </span> */}
+                </div>
+                <div className="absolute top-5 right-5 flex gap-3">
                   <button
-                    className="px-5 py-2 bg-foreground text-white rounded shadow hover:bg-blue-700 mr-2 flex items-center gap-2 absolute top-5 right-5"
+                    className="px-5 py-2 bg-foreground text-white rounded shadow hover:bg-blue-700 mr-2 flex items-center gap-2"
                     onClick={() =>
                       router.push(`/view-design/view-po/${batch.po_id}`)
                     }
@@ -177,9 +183,13 @@ export default function ViewPOPage() {
                     <Eye size={16} />
                     View PO
                   </button>
-                  {/* <span className="mb-4 py-2 text-foreground font-semibold">
-                    Batch Description : {batch?.description}
-                  </span> */}
+                  <button
+                    className="px-5 py-2 bg-foreground text-white rounded shadow hover:bg-blue-700 mr-2 flex items-center gap-2"
+                    onClick={() => handleDownloadInvoice(batch.po_id)} // Call the download function
+                  >
+                    <DownloadIcon size={16} />
+                    Download Invoice
+                  </button>
                 </div>
                 <br />
 
@@ -246,13 +256,6 @@ export default function ViewPOPage() {
                           >
                             <Eye size={16} />
                             View Items
-                          </button>
-                          <button
-                            className="px-5 py-2 bg-foreground text-white rounded shadow hover:bg-blue-700 mr-2 flex items-center gap-2"
-                            onClick={() => handleDownloadInvoice(batch.po_id)} // Call the download function
-                          >
-                            <DownloadIcon size={16} />
-                            Download Invoice
                           </button>
                         </td>
                       </tr>
