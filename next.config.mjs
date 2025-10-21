@@ -4,5 +4,4 @@ const nextConfig = {
     domains: ["lh3.googleusercontent.com"],
   },
 };
-
 export default nextConfig;
