@@ -79,7 +79,7 @@ export default function ViewPOPage() {
     }
   };
 
-  const handleDownloadInvoice = async (poId) => {
+  const handlePoDownloadInvoice = async (poId) => {
     try {
       const headers = {
         Authorization: `Bearer ${accessToken}`,
@@ -95,6 +95,34 @@ export default function ViewPOPage() {
       const link = document.createElement("a");
       link.href = url;
       link.setAttribute("download", `invoice_${poId}.pdf`); // Set the file name
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+    } catch (error) {
+      console.error("Failed to download invoice:", error);
+      alert("Failed to download invoice.");
+    }
+  };
+
+  const handleRefDownloadInvoice = async (poId) => {
+    try {
+      const headers = {
+        Authorization: `Bearer ${accessToken}`,
+        "Organization-ID": organizationId,
+      };
+      const response = await axios.get(
+        `${API}so/invoice/generate/reference/${refId}`,
+        {
+          headers,
+          responseType: "blob", // Ensure the response is treated as a file
+        }
+      );
+
+      // Create a URL for the file and trigger download
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `invoice_${refId}.pdf`); // Set the file name
       document.body.appendChild(link);
       link.click();
       link.parentNode.removeChild(link);
@@ -185,7 +213,7 @@ export default function ViewPOPage() {
                   </button>
                   <button
                     className="px-5 py-2 bg-foreground text-white rounded shadow hover:bg-blue-700 mr-2 flex items-center gap-2"
-                    onClick={() => handleDownloadInvoice(batch.po_id)} // Call the download function
+                    onClick={() => handlePoDownloadInvoice(batch.po_id)} // Call the download function
                   >
                     <DownloadIcon size={16} />
                     Download Invoice
@@ -256,6 +284,15 @@ export default function ViewPOPage() {
                           >
                             <Eye size={16} />
                             View Items
+                          </button>
+                          <button
+                            className="px-5 py-2 bg-foreground text-white rounded shadow hover:bg-blue-700 mr-2 flex items-center gap-2"
+                            onClick={() =>
+                              handleRefDownloadInvoice(batch.ref_id)
+                            } // Call the download function
+                          >
+                            <DownloadIcon size={16} />
+                            Download Invoice
                           </button>
                         </td>
                       </tr>
