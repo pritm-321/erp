@@ -126,14 +126,12 @@ export default function GroupDesignsPage() {
     },
   ]);
   const [marginCostModal, setMarginCostModal] = useState(false);
-  const [marginCostRows, setMarginCostRows] = useState([
-    {
-      margin_type: "percentage", // default value
-      cost_margin_value: "",
-      currency: "INR", // default value for absolute margins
-      remarks: "",
-    },
-  ]);
+  const [marginCostRows, setMarginCostRows] = useState({
+    margin_type: "percentage", // default value
+    cost_margin_value: "",
+    currency: "INR", // default value for absolute margins
+    remarks: "",
+  });
   const [marginCostError, setMarginCostError] = useState("");
   const [departmentCostModal, setDepartmentCostModal] = useState(false);
   const [departmentCostRows, setDepartmentCostRows] = useState([
@@ -550,10 +548,11 @@ export default function GroupDesignsPage() {
     }
   };
 
-  const handleMarginCostRowChange = (index, field, value) => {
-    setMarginCostRows((prev) =>
-      prev.map((row, i) => (i === index ? { ...row, [field]: value } : row))
-    );
+  const handleMarginCostRowChange = (field, value) => {
+    setMarginCostRows((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
   };
 
   const handleAddMarginCostRow = () => {
@@ -578,10 +577,12 @@ export default function GroupDesignsPage() {
     try {
       const payload = {
         margin_data: selectedDesigns.reduce((acc, designId, index) => {
-          acc[designId] = marginCostRows[index];
+          acc[designId] = marginCostRows;
           return acc;
         }, {}),
       };
+      console.log(payload);
+
       const headers = {
         Authorization: `Bearer ${accessToken}`,
         "Organization-ID": organizationId,
@@ -2273,108 +2274,82 @@ export default function GroupDesignsPage() {
               <div className="text-red-600 mb-4">{marginCostError}</div>
             )}
             <form onSubmit={handleMarginCostSubmit} className="space-y-6">
-              {marginCostRows.map((row, index) => (
-                <div
-                  key={index}
-                  className="border border-blue-300 rounded-xl p-4 bg-gray-50 mb-4"
-                >
-                  <div className="flex flex-wrap gap-4 mb-2">
+              <div className="border border-blue-300 rounded-xl p-4 bg-gray-50 mb-4">
+                <div className="flex flex-wrap gap-4 mb-2">
+                  <div className="flex flex-col">
+                    <label className="text-blue-700 font-medium mb-1">
+                      Margin Type
+                    </label>
+                    <select
+                      className="border border-blue-300 px-4 py-2 rounded-lg bg-white"
+                      value={marginCostRows.margin_type}
+                      onChange={(e) =>
+                        handleMarginCostRowChange("margin_type", e.target.value)
+                      }
+                      required
+                    >
+                      <option value="percentage">Percentage</option>
+                      <option value="absolute">Absolute</option>
+                    </select>
+                  </div>
+                  <div className="flex flex-col">
+                    <label className="text-blue-700 font-medium mb-1">
+                      Margin Value
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      className="border border-blue-300 px-4 py-2 rounded-lg bg-white"
+                      value={marginCostRows.cost_margin_value}
+                      onChange={(e) =>
+                        handleMarginCostRowChange(
+                          "cost_margin_value",
+                          e.target.value
+                        )
+                      }
+                      required
+                    />
+                  </div>
+                  {marginCostRows.margin_type === "absolute" && (
                     <div className="flex flex-col">
                       <label className="text-blue-700 font-medium mb-1">
-                        Margin Type
+                        Currency
                       </label>
                       <select
                         className="border border-blue-300 px-4 py-2 rounded-lg bg-white"
-                        value={row.margin_type}
+                        value={marginCostRows.currency}
                         onChange={(e) =>
-                          handleMarginCostRowChange(
-                            index,
-                            "margin_type",
-                            e.target.value
-                          )
+                          handleMarginCostRowChange("currency", e.target.value)
                         }
                         required
                       >
-                        <option value="percentage">Percentage</option>
-                        <option value="absolute">Absolute</option>
+                        <option value="INR">INR</option>
                       </select>
                     </div>
-                    <div className="flex flex-col">
-                      <label className="text-blue-700 font-medium mb-1">
-                        Margin Value
-                      </label>
-                      <input
-                        type="number"
-                        step="0.01"
-                        className="border border-blue-300 px-4 py-2 rounded-lg bg-white"
-                        value={row.cost_margin_value}
-                        onChange={(e) =>
-                          handleMarginCostRowChange(
-                            index,
-                            "cost_margin_value",
-                            e.target.value
-                          )
-                        }
-                        required
-                      />
-                    </div>
-                    {row.margin_type === "absolute" && (
-                      <div className="flex flex-col">
-                        <label className="text-blue-700 font-medium mb-1">
-                          Currency
-                        </label>
-                        <select
-                          className="border border-blue-300 px-4 py-2 rounded-lg bg-white"
-                          value={row.currency}
-                          onChange={(e) =>
-                            handleMarginCostRowChange(
-                              index,
-                              "currency",
-                              e.target.value
-                            )
-                          }
-                          required
-                        >
-                          <option value="INR">INR</option>
-                        </select>
-                      </div>
-                    )}
-                    <div className="flex flex-col flex-1">
-                      <label className="text-blue-700 font-medium mb-1">
-                        Remarks
-                      </label>
-                      <input
-                        type="text"
-                        className="border border-blue-300 px-4 py-2 rounded-lg bg-white"
-                        value={row.remarks}
-                        onChange={(e) =>
-                          handleMarginCostRowChange(
-                            index,
-                            "remarks",
-                            e.target.value
-                          )
-                        }
-                      />
-                    </div>
-                  </div>
-                  {marginCostRows.length > 1 && (
-                    <button
-                      type="button"
-                      className="text-red-500 font-semibold px-2 py-1 rounded hover:bg-red-50"
-                      onClick={() => handleRemoveMarginCostRow(index)}
-                    >
-                      Remove Row
-                    </button>
                   )}
+                  <div className="flex flex-col flex-1">
+                    <label className="text-blue-700 font-medium mb-1">
+                      Remarks
+                    </label>
+                    <input
+                      type="text"
+                      className="border border-blue-300 px-4 py-2 rounded-lg bg-white"
+                      value={marginCostRows.remarks}
+                      onChange={(e) =>
+                        handleMarginCostRowChange("remarks", e.target.value)
+                      }
+                    />
+                  </div>
                 </div>
-              ))}
-              <button
+              </div>
+
+              {/* <button
                 type="button"
                 className="text-blue-700 font-semibold"
                 onClick={handleAddMarginCostRow}
               >
                 Add Row
-              </button>
+              </button> */}
               <button
                 type="submit"
                 className="bg-foreground text-white px-6 py-3 rounded-xl shadow hover:bg-blue-700 font-semibold transition w-full mt-2"
