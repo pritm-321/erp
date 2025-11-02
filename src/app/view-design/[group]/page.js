@@ -135,6 +135,19 @@ export default function GroupDesignsPage() {
     },
   ]);
   const [marginCostError, setMarginCostError] = useState("");
+  const [departmentCostModal, setDepartmentCostModal] = useState(false);
+  const [departmentCostRows, setDepartmentCostRows] = useState([
+    {
+      department_id: "",
+      cost_value: "",
+      unit_type: "",
+      design_id: "",
+      remarks: "",
+    },
+  ]);
+  const [departmentOptions, setDepartmentOptions] = useState([]);
+  const [departmentCostError, setDepartmentCostError] = useState("");
+  const [selectedDesignId, setSelectedDesignId] = useState(null);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -592,6 +605,99 @@ export default function GroupDesignsPage() {
     }
   };
 
+  const handleDepartmentCostRowChange = (index, field, value) => {
+    setDepartmentCostRows((prev) =>
+      prev.map((row, i) => (i === index ? { ...row, [field]: value } : row))
+    );
+  };
+
+  const handleAddDepartmentCostRow = () => {
+    setDepartmentCostRows((prev) => [
+      ...prev,
+      {
+        department_id: "",
+        cost_value: "",
+        unit_type: "",
+        design_id: "",
+        remarks: "",
+      },
+    ]);
+  };
+
+  const handleRemoveDepartmentCostRow = (index) => {
+    setDepartmentCostRows((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleDepartmentCostSubmit = async (e) => {
+    e.preventDefault();
+    setDepartmentCostError(""); // Clear previous error
+    try {
+      const payload = {
+        cost_data: departmentCostRows.reduce((acc, row) => {
+          selectedDesigns.forEach((designId) => {
+            if (!acc[row.department_id]) acc[row.department_id] = [];
+            acc[row.department_id].push({
+              cost_value: row.cost_value,
+              unit_type_id: row.unit_type,
+              design_id: designId,
+              remarks: row.remarks,
+            });
+          });
+          return acc;
+        }, {}),
+      };
+      const headers = {
+        Authorization: `Bearer ${accessToken}`,
+        "Organization-ID": organizationId,
+      };
+      await axios.post(`${API}costing/department-costs`, payload, { headers });
+      alert("Department costs submitted successfully!");
+      setDepartmentCostModal(false);
+      setDepartmentCostRows([
+        {
+          department_id: "",
+          cost_value: "",
+          unit_type: "",
+          design_id: "",
+          remarks: "",
+        },
+      ]);
+    } catch (err) {
+      setDepartmentCostError(
+        err.response?.data?.message || "Failed to submit department costs."
+      );
+    }
+  };
+
+  useEffect(() => {
+    if (departmentCostModal) {
+      const fetchDepartmentsAndUnits = async () => {
+        try {
+          const [departmentsRes, unitsRes] = await Promise.all([
+            axios.get(`${API}production/departments/active`, {
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+                "Organization-ID": organizationId,
+              },
+            }),
+            axios.get(`${API}so/unit-suggestions`, {
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+                "Organization-ID": organizationId,
+              },
+            }),
+          ]);
+          setDepartmentOptions(departmentsRes.data?.data || []);
+          setUnitOptions(unitsRes.data?.data || []);
+        } catch (err) {
+          setDepartmentOptions([]);
+          setUnitOptions([]);
+        }
+      };
+      fetchDepartmentsAndUnits();
+    }
+  }, [departmentCostModal, accessToken, organizationId]);
+
   useEffect(() => {
     if (uploadModal.open || accessoriesModal.open || additionalCostModal) {
       const fetchUnitSuggestions = async () => {
@@ -816,6 +922,13 @@ export default function GroupDesignsPage() {
               disabled={selectedDesigns.length === 0}
             >
               Submit Margin Cost
+            </button>
+            <button
+              className="bg-foreground text-white px-6 py-2 rounded-lg shadow hover:bg-blue-700 transition font-semibold flex items-center gap-2"
+              onClick={() => setDepartmentCostModal(true)}
+              disabled={selectedDesigns.length === 0}
+            >
+              Submit Department Cost
             </button>
           </>
         )}
@@ -2259,6 +2372,145 @@ export default function GroupDesignsPage() {
                 type="button"
                 className="text-blue-700 font-semibold"
                 onClick={handleAddMarginCostRow}
+              >
+                Add Row
+              </button>
+              <button
+                type="submit"
+                className="bg-foreground text-white px-6 py-3 rounded-xl shadow hover:bg-blue-700 font-semibold transition w-full mt-2"
+              >
+                Submit
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+      {/* Department Cost Modal */}
+      {departmentCostModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+          <div className="bg-white rounded-lg shadow-lg p-6 max-w-3xl w-full relative max-h-[95vh] overflow-y-auto">
+            <button
+              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-xl"
+              onClick={() => setDepartmentCostModal(false)}
+            >
+              &times;
+            </button>
+            <h2 className="text-lg font-semibold mb-4">
+              Submit Department Costs for Selected Designs
+            </h2>
+            {departmentCostError && (
+              <div className="text-red-600 mb-4">{departmentCostError}</div>
+            )}
+            <form onSubmit={handleDepartmentCostSubmit} className="space-y-6">
+              {departmentCostRows.map((row, index) => (
+                <div
+                  key={index}
+                  className="border border-blue-300 rounded-xl p-4 bg-gray-50 mb-4"
+                >
+                  <div className="flex flex-wrap gap-4 mb-2">
+                    <div className="flex flex-col">
+                      <label className="text-blue-700 font-medium mb-1">
+                        Department
+                      </label>
+                      <select
+                        className="border border-blue-300 px-4 py-2 rounded-lg bg-white"
+                        value={row.department_id}
+                        onChange={(e) =>
+                          handleDepartmentCostRowChange(
+                            index,
+                            "department_id",
+                            e.target.value
+                          )
+                        }
+                        required
+                      >
+                        <option value="">Select Department</option>
+                        {departmentOptions.map((dept) => (
+                          <option key={dept.id} value={dept.department_id}>
+                            {dept.department_type}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="flex flex-col">
+                      <label className="text-blue-700 font-medium mb-1">
+                        Cost Value
+                      </label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        className="border border-blue-300 px-4 py-2 rounded-lg bg-white"
+                        value={row.cost_value}
+                        onChange={(e) =>
+                          handleDepartmentCostRowChange(
+                            index,
+                            "cost_value",
+                            e.target.value
+                          )
+                        }
+                        required
+                      />
+                    </div>
+                    <div className="flex flex-col">
+                      <label className="text-blue-700 font-medium mb-1">
+                        Unit Type
+                      </label>
+                      <select
+                        className="border border-blue-300 px-4 py-2 rounded-lg bg-white"
+                        value={row.unit_type}
+                        onChange={(e) =>
+                          handleDepartmentCostRowChange(
+                            index,
+                            "unit_type",
+                            e.target.value
+                          )
+                        }
+                        required
+                      >
+                        <option value="">Select Unit</option>
+                        {unitOptions.map((unit) => (
+                          <option
+                            key={unit.id || unit.unit_id}
+                            value={unit.name || unit.name}
+                          >
+                            {unit.name || unit.unit_name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="flex flex-col flex-1">
+                      <label className="text-blue-700 font-medium mb-1">
+                        Remarks
+                      </label>
+                      <input
+                        type="text"
+                        className="border border-blue-300 px-4 py-2 rounded-lg bg-white"
+                        value={row.remarks}
+                        onChange={(e) =>
+                          handleDepartmentCostRowChange(
+                            index,
+                            "remarks",
+                            e.target.value
+                          )
+                        }
+                      />
+                    </div>
+                  </div>
+                  {departmentCostRows.length > 1 && (
+                    <button
+                      type="button"
+                      className="text-red-500 font-semibold px-2 py-1 rounded hover:bg-red-50"
+                      onClick={() => handleRemoveDepartmentCostRow(index)}
+                    >
+                      Remove Row
+                    </button>
+                  )}
+                </div>
+              ))}
+              <button
+                type="button"
+                className="text-blue-700 font-semibold"
+                onClick={handleAddDepartmentCostRow}
               >
                 Add Row
               </button>
