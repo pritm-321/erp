@@ -105,6 +105,26 @@ export default function GroupDesignsPage() {
   const [viewAccessoriesLoading, setViewAccessoriesLoading] = useState(false);
   const [viewAccessoriesError, setViewAccessoriesError] = useState("");
   const [viewAccessories, setViewAccessories] = useState([]);
+  const [selectedDesigns, setSelectedDesigns] = useState([]);
+  const [additionalCostModal, setAdditionalCostModal] = useState(false);
+  const [additionalCostData, setAdditionalCostData] = useState({});
+  const [additionalCostForm, setAdditionalCostForm] = useState({
+    cost_type: "",
+    cost_value: "",
+    unit_type: "",
+    max_allowed_value: "",
+    remarks: "",
+  });
+  const [additionalCostError, setAdditionalCostError] = useState("");
+  const [additionalCostRows, setAdditionalCostRows] = useState([
+    {
+      cost_type: "",
+      cost_value: "",
+      unit_type: "",
+      max_allowed_value: "",
+      remarks: "",
+    },
+  ]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -412,6 +432,126 @@ export default function GroupDesignsPage() {
     setCreateDesignModal(true);
   };
 
+  const handleCheckboxChange = (designId) => {
+    setSelectedDesigns((prev) =>
+      prev.includes(designId)
+        ? prev.filter((id) => id !== designId)
+        : [...prev, designId]
+    );
+  };
+
+  const handleAddCostField = (designId) => {
+    setAdditionalCostData((prev) => ({
+      ...prev,
+      [designId]: [
+        ...(prev[designId] || []),
+        {
+          cost_type: "",
+          cost_value: "",
+          unit_type: "",
+          max_allowed_value: "",
+          remarks: "",
+        },
+      ],
+    }));
+  };
+
+  const handleRemoveCostField = (designId, index) => {
+    setAdditionalCostData((prev) => ({
+      ...prev,
+      [designId]: prev[designId].filter((_, i) => i !== index),
+    }));
+  };
+
+  const handleAdditionalCostFormChange = (field, value) => {
+    setAdditionalCostForm((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const handleAdditionalCostRowChange = (index, field, value) => {
+    setAdditionalCostRows((prev) =>
+      prev.map((row, i) => (i === index ? { ...row, [field]: value } : row))
+    );
+  };
+
+  const handleAddAdditionalCostRow = () => {
+    setAdditionalCostRows((prev) => [
+      ...prev,
+      {
+        cost_type: "",
+        cost_value: "",
+        unit_type: "",
+        max_allowed_value: "",
+        remarks: "",
+      },
+    ]);
+  };
+
+  const handleRemoveAdditionalCostRow = (index) => {
+    setAdditionalCostRows((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleAdditionalCostSubmit = async (e) => {
+    e.preventDefault();
+    setAdditionalCostError(""); // Clear previous error
+    try {
+      const payload = {
+        additional_cost_data: selectedDesigns.reduce((acc, designId) => {
+          acc[designId] = additionalCostRows;
+          return acc;
+        }, {}),
+      };
+      const headers = {
+        Authorization: `Bearer ${accessToken}`,
+        "Organization-ID": organizationId,
+      };
+      await axios.post(`${API}costing/additional-costs`, payload, { headers });
+      alert("Additional costs submitted successfully!");
+      setAdditionalCostModal(false);
+      setAdditionalCostRows([
+        {
+          cost_type: "",
+          cost_value: "",
+          unit_type: "",
+          max_allowed_value: "",
+          remarks: "",
+        },
+      ]);
+      setSelectedDesigns([]);
+    } catch (err) {
+      setAdditionalCostError(
+        err.response?.data?.message || "Failed to submit additional costs."
+      );
+    }
+  };
+
+  useEffect(() => {
+    if (uploadModal.open || accessoriesModal.open || additionalCostModal) {
+      const fetchUnitSuggestions = async () => {
+        try {
+          const res = await axios.get(`${API}so/unit-suggestions`, {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              "Organization-ID": organizationId,
+            },
+          });
+          setUnitOptions(res.data?.data || []);
+        } catch (err) {
+          setUnitOptions([]);
+        }
+      };
+      fetchUnitSuggestions();
+    }
+  }, [
+    uploadModal.open,
+    accessoriesModal.open,
+    additionalCostModal,
+    accessToken,
+    organizationId,
+  ]);
+
   return (
     <div className="flex min-h-screen">
       <Sidebar />
@@ -513,6 +653,9 @@ export default function GroupDesignsPage() {
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-4 py-2 text-left text-blue-950 font-bold">
+                      Select
+                    </th>
+                    <th className="px-4 py-2 text-left text-blue-950 font-bold">
                       Image
                     </th>
                     <th className="px-4 py-2 text-left text-blue-950 font-bold">
@@ -535,6 +678,13 @@ export default function GroupDesignsPage() {
                       key={d.design_id}
                       className="border-b border-gray-100 hover:bg-blue-50"
                     >
+                      <td className="px-4 py-2">
+                        <input
+                          type="checkbox"
+                          checked={selectedDesigns.includes(d.design_id)}
+                          onChange={() => handleCheckboxChange(d.design_id)}
+                        />
+                      </td>
                       <td className="px-4 py-2">
                         <img
                           src={d?.image?.url || "/default-design.png"}
@@ -588,6 +738,13 @@ export default function GroupDesignsPage() {
                 </tbody>
               </table>
             </div>
+            <button
+              className="bg-foreground text-white px-6 py-2 rounded-lg shadow hover:bg-blue-700 transition font-semibold flex items-center gap-2"
+              onClick={() => setAdditionalCostModal(true)}
+              disabled={selectedDesigns.length === 0}
+            >
+              Submit Additional Cost
+            </button>
           </>
         )}
       </main>
@@ -1674,7 +1831,29 @@ export default function GroupDesignsPage() {
           </div>
         </div>
       )}
-      {/* View Trims Modal */}
+      {/* Create Design Modal */}
+      {createDesignModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+          <div className="bg-gray-50 rounded-2xl shadow-2xl max-w-2xl w-full relative overflow-hidden">
+            <div className=" flex p-5 justify-between items-center bg-foreground">
+              <h2 className="text-2xl font-bold text-white">Create Design</h2>
+              <button
+                className="text-white hover:text-blue-700 text-2xl font-bold"
+                onClick={() => setCreateDesignModal(false)}
+              >
+                &times;
+              </button>
+            </div>
+            <CreateDesignForm
+              onClose={() => setCreateDesignModal(false)}
+              onSuccess={() => {
+                setCreateDesignModal(false);
+                setDesignCreated((prev) => !prev);
+              }}
+            />
+          </div>
+        </div>
+      )}
       {viewAccessoriesModal.open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
           <div className="bg-white rounded-lg shadow-lg p-6 max-w-3xl w-full relative max-h-[95vh] overflow-y-auto">
@@ -1741,26 +1920,154 @@ export default function GroupDesignsPage() {
           </div>
         </div>
       )}
-      {/* Create Design Modal */}
-      {createDesignModal && (
+      {/* Additional Cost Modal */}
+      {additionalCostModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-          <div className="bg-gray-50 rounded-2xl shadow-2xl max-w-2xl w-full relative overflow-hidden">
-            <div className=" flex p-5 justify-between items-center bg-foreground">
-              <h2 className="text-2xl font-bold text-white">Create Design</h2>
+          <div className="bg-white rounded-lg shadow-lg p-6 max-w-3xl w-full relative max-h-[95vh] overflow-y-auto">
+            <button
+              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-xl"
+              onClick={() => setAdditionalCostModal(false)}
+            >
+              &times;
+            </button>
+            <h2 className="text-lg font-semibold mb-4">
+              Submit Additional Costs for Selected Designs
+            </h2>
+            {additionalCostError && (
+              <div className="text-red-600 mb-4">{additionalCostError}</div>
+            )}
+            <form onSubmit={handleAdditionalCostSubmit} className="space-y-6">
+              {additionalCostRows.map((row, index) => (
+                <div
+                  key={index}
+                  className="border border-blue-300 rounded-xl p-4 bg-gray-50 mb-4"
+                >
+                  <div className="flex flex-wrap gap-4 mb-2">
+                    <div className="flex flex-col">
+                      <label className="text-blue-700 font-medium mb-1">
+                        Cost Type
+                      </label>
+                      <input
+                        type="text"
+                        className="border border-blue-300 px-4 py-2 rounded-lg bg-white"
+                        value={row.cost_type}
+                        onChange={(e) =>
+                          handleAdditionalCostRowChange(
+                            index,
+                            "cost_type",
+                            e.target.value
+                          )
+                        }
+                        required
+                      />
+                    </div>
+                    <div className="flex flex-col">
+                      <label className="text-blue-700 font-medium mb-1">
+                        Cost Value
+                      </label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        className="border border-blue-300 px-4 py-2 rounded-lg bg-white"
+                        value={row.cost_value}
+                        onChange={(e) =>
+                          handleAdditionalCostRowChange(
+                            index,
+                            "cost_value",
+                            e.target.value
+                          )
+                        }
+                        required
+                      />
+                    </div>
+                    <div className="flex flex-col">
+                      <label className="text-blue-700 font-medium mb-1">
+                        Unit Type
+                      </label>
+                      <select
+                        className="border border-blue-300 px-4 py-2 rounded-lg bg-white"
+                        value={row.unit_type}
+                        onChange={(e) =>
+                          handleAdditionalCostRowChange(
+                            index,
+                            "unit_type",
+                            e.target.value
+                          )
+                        }
+                        required
+                      >
+                        <option value="">Select Unit</option>
+                        {unitOptions.map((unit) => (
+                          <option
+                            key={unit.id || unit.unit_id}
+                            value={unit.name || unit.unit_name}
+                          >
+                            {unit.name || unit.unit_name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="flex flex-col">
+                      <label className="text-blue-700 font-medium mb-1">
+                        Max Allowed Value
+                      </label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        className="border border-blue-300 px-4 py-2 rounded-lg bg-white"
+                        value={row.max_allowed_value}
+                        onChange={(e) =>
+                          handleAdditionalCostRowChange(
+                            index,
+                            "max_allowed_value",
+                            e.target.value
+                          )
+                        }
+                      />
+                    </div>
+                    <div className="flex flex-col flex-1">
+                      <label className="text-blue-700 font-medium mb-1">
+                        Remarks
+                      </label>
+                      <input
+                        type="text"
+                        className="border border-blue-300 px-4 py-2 rounded-lg bg-white"
+                        value={row.remarks}
+                        onChange={(e) =>
+                          handleAdditionalCostRowChange(
+                            index,
+                            "remarks",
+                            e.target.value
+                          )
+                        }
+                      />
+                    </div>
+                  </div>
+                  {additionalCostRows.length > 1 && (
+                    <button
+                      type="button"
+                      className="text-red-500 font-semibold px-2 py-1 rounded hover:bg-red-50"
+                      onClick={() => handleRemoveAdditionalCostRow(index)}
+                    >
+                      Remove Row
+                    </button>
+                  )}
+                </div>
+              ))}
               <button
-                className="text-white hover:text-blue-700 text-2xl font-bold"
-                onClick={() => setCreateDesignModal(false)}
+                type="button"
+                className="text-blue-700 font-semibold"
+                onClick={handleAddAdditionalCostRow}
               >
-                &times;
+                Add Row
               </button>
-            </div>
-            <CreateDesignForm
-              onClose={() => setCreateDesignModal(false)}
-              onSuccess={() => {
-                setCreateDesignModal(false);
-                setDesignCreated((prev) => !prev);
-              }}
-            />
+              <button
+                type="submit"
+                className="bg-foreground text-white px-6 py-3 rounded-xl shadow hover:bg-blue-700 font-semibold transition w-full mt-2"
+              >
+                Submit
+              </button>
+            </form>
           </div>
         </div>
       )}
