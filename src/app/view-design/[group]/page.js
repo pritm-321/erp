@@ -20,7 +20,7 @@ import CreateDesignForm from "@/components/CreateDesignForm";
 export default function GroupDesignsPage() {
   const searchParams = useSearchParams();
   const groupId = decodeURIComponent(searchParams.get("groupId"));
-  console.log(groupId);
+  // console.log(groupId);
 
   const [designs, setDesigns] = useState({});
   const [loading, setLoading] = useState(true);
@@ -80,9 +80,7 @@ export default function GroupDesignsPage() {
     },
   ]);
   const [createDesignModal, setCreateDesignModal] = useState(false);
-  const [defaultDesignFields, setDefaultDesignFields] = useState(null);
   const router = useRouter();
-  const [groupCreated, setGroupCreated] = useState(false);
   const [designCreated, setDesignCreated] = useState(false);
   const [accessories, setAccessories] = useState([
     {
@@ -104,7 +102,6 @@ export default function GroupDesignsPage() {
   const [accessoriesLoading, setAccessoriesLoading] = useState(false);
   const [accessoriesError, setAccessoriesError] = useState("");
   const [accessoriesSuccess, setAccessoriesSuccess] = useState("");
-  const [existingAccessories, setExistingAccessories] = useState([]);
   const [viewAccessoriesLoading, setViewAccessoriesLoading] = useState(false);
   const [viewAccessoriesError, setViewAccessoriesError] = useState("");
   const [viewAccessories, setViewAccessories] = useState([]);
@@ -776,7 +773,7 @@ export default function GroupDesignsPage() {
           </div>
         </div>
       )}
-      {/* Upload Modal */}
+      {/* Parts Upload Modal */}
       {uploadModal.open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
           <div className="bg-white rounded-lg shadow-lg p-6 max-w-5xl w-full relative max-h-[95vh] overflow-y-auto">
@@ -1677,29 +1674,7 @@ export default function GroupDesignsPage() {
           </div>
         </div>
       )}
-      {/* Create Design Modal */}
-      {createDesignModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-          <div className="bg-gray-50 rounded-2xl shadow-2xl max-w-2xl w-full relative overflow-hidden">
-            <div className=" flex p-5 justify-between items-center bg-foreground">
-              <h2 className="text-2xl font-bold text-white">Create Design</h2>
-              <button
-                className="text-white hover:text-blue-700 text-2xl font-bold"
-                onClick={() => setCreateDesignModal(false)}
-              >
-                &times;
-              </button>
-            </div>
-            <CreateDesignForm
-              onClose={() => setCreateDesignModal(false)}
-              onSuccess={() => {
-                setCreateDesignModal(false);
-                setDesignCreated((prev) => !prev);
-              }}
-            />
-          </div>
-        </div>
-      )}
+      {/* View Trims Modal */}
       {viewAccessoriesModal.open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
           <div className="bg-white rounded-lg shadow-lg p-6 max-w-3xl w-full relative max-h-[95vh] overflow-y-auto">
@@ -1763,6 +1738,29 @@ export default function GroupDesignsPage() {
                 </tbody>
               </table>
             )}
+          </div>
+        </div>
+      )}
+      {/* Create Design Modal */}
+      {createDesignModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+          <div className="bg-gray-50 rounded-2xl shadow-2xl max-w-2xl w-full relative overflow-hidden">
+            <div className=" flex p-5 justify-between items-center bg-foreground">
+              <h2 className="text-2xl font-bold text-white">Create Design</h2>
+              <button
+                className="text-white hover:text-blue-700 text-2xl font-bold"
+                onClick={() => setCreateDesignModal(false)}
+              >
+                &times;
+              </button>
+            </div>
+            <CreateDesignForm
+              onClose={() => setCreateDesignModal(false)}
+              onSuccess={() => {
+                setCreateDesignModal(false);
+                setDesignCreated((prev) => !prev);
+              }}
+            />
           </div>
         </div>
       )}
