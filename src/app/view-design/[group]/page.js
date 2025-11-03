@@ -13,6 +13,7 @@ import {
   Trash,
   Upload,
   PackagePlus,
+  ChevronDown,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import CreateDesignForm from "@/components/CreateDesignForm";
@@ -147,6 +148,7 @@ export default function GroupDesignsPage() {
   const [departmentCostError, setDepartmentCostError] = useState("");
   const [selectedDesignId, setSelectedDesignId] = useState(null);
   const [selectAll, setSelectAll] = useState(false);
+  const [actionsDropdownOpen, setActionsDropdownOpen] = useState(false);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -757,13 +759,6 @@ export default function GroupDesignsPage() {
               <Eye size={20} />
               Fabric Requirements
             </button>
-            {/* <button
-              className="bg-foreground text-white px-6 py-2 rounded-lg shadow hover:bg-blue-700 transition flex items-center gap-2"
-              onClick={() => router.push("/view-design/trims-requirements")}
-            >
-              <Eye size={20} />
-              Trims Requirements
-            </button> */}
             <button
               className="bg-foreground text-white px-6 py-2 rounded-lg shadow hover:bg-blue-700 transition flex items-center gap-2"
               onClick={() =>
@@ -831,6 +826,48 @@ export default function GroupDesignsPage() {
                   <span className="font-bold">{groupInfo.delivery_date}</span>
                 </div>
               </div>
+            </div>
+            <div className="relative w-full flex justify-end mb-4">
+              <button
+                className="bg-foreground text-white px-6 py-2 rounded-lg shadow hover:bg-blue-700 transition font-semibold"
+                onClick={() => setActionsDropdownOpen((prev) => !prev)}
+              >
+                Actions <ChevronDown size={16} className="inline-block ml-2" />
+              </button>
+              {actionsDropdownOpen && (
+                <div className="absolute right-0 mt-12 w-60 bg-white border border-gray-100 rounded-lg shadow-lg z-10 divide-gray-300 divide-y-2 p-2">
+                  <button
+                    className="block w-full text-left px-4 py-2 text-blue-950 hover:bg-gray-100"
+                    onClick={() => {
+                      setActionsDropdownOpen(false);
+                      setDepartmentCostModal(true);
+                    }}
+                    disabled={selectedDesigns.length === 0}
+                  >
+                    Submit Department Cost
+                  </button>
+                  <button
+                    className="block w-full text-left px-4 py-2 text-blue-950 hover:bg-gray-100"
+                    onClick={() => {
+                      setActionsDropdownOpen(false);
+                      setAdditionalCostModal(true);
+                    }}
+                    disabled={selectedDesigns.length === 0}
+                  >
+                    Submit Additional Cost
+                  </button>
+                  <button
+                    className="block w-full text-left px-4 py-2 text-blue-950 hover:bg-gray-100"
+                    onClick={() => {
+                      setActionsDropdownOpen(false);
+                      setMarginCostModal(true);
+                    }}
+                    disabled={selectedDesigns.length === 0}
+                  >
+                    Submit Margin Cost
+                  </button>
+                </div>
+              )}
             </div>
             <div className="overflow-hidden rounded-xl border border-blue-200">
               <table className="min-w-full bg-white rounded-xl shadow">
@@ -922,27 +959,6 @@ export default function GroupDesignsPage() {
                 </tbody>
               </table>
             </div>
-            <button
-              className="bg-foreground text-white px-6 py-2 rounded-lg shadow hover:bg-blue-700 transition font-semibold flex items-center gap-2"
-              onClick={() => setAdditionalCostModal(true)}
-              disabled={selectedDesigns.length === 0}
-            >
-              Submit Additional Cost
-            </button>
-            <button
-              className="bg-foreground text-white px-6 py-2 rounded-lg shadow hover:bg-blue-700 transition font-semibold flex items-center gap-2"
-              onClick={() => setMarginCostModal(true)}
-              disabled={selectedDesigns.length === 0}
-            >
-              Submit Margin Cost
-            </button>
-            <button
-              className="bg-foreground text-white px-6 py-2 rounded-lg shadow hover:bg-blue-700 transition font-semibold flex items-center gap-2"
-              onClick={() => setDepartmentCostModal(true)}
-              disabled={selectedDesigns.length === 0}
-            >
-              Submit Department Cost
-            </button>
           </>
         )}
       </main>
