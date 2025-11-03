@@ -146,6 +146,7 @@ export default function GroupDesignsPage() {
   const [departmentOptions, setDepartmentOptions] = useState([]);
   const [departmentCostError, setDepartmentCostError] = useState("");
   const [selectedDesignId, setSelectedDesignId] = useState(null);
+  const [selectAll, setSelectAll] = useState(false);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -453,12 +454,23 @@ export default function GroupDesignsPage() {
     setCreateDesignModal(true);
   };
 
+  const handleSelectAll = () => {
+    if (selectAll) {
+      setSelectedDesigns([]);
+    } else {
+      setSelectedDesigns(groupedEntries.map((design) => design.design_id));
+    }
+    setSelectAll(!selectAll);
+  };
+
   const handleCheckboxChange = (designId) => {
-    setSelectedDesigns((prev) =>
-      prev.includes(designId)
+    setSelectedDesigns((prev) => {
+      const updatedSelection = prev.includes(designId)
         ? prev.filter((id) => id !== designId)
-        : [...prev, designId]
-    );
+        : [...prev, designId];
+      setSelectAll(updatedSelection.length === groupedEntries.length);
+      return updatedSelection;
+    });
   };
 
   const handleAddCostField = (designId) => {
@@ -821,11 +833,15 @@ export default function GroupDesignsPage() {
               </div>
             </div>
             <div className="overflow-hidden rounded-xl border border-blue-200">
-              <table className="min-w-full bg-white  rounded-xl  shadow">
+              <table className="min-w-full bg-white rounded-xl shadow">
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-4 py-2 text-left text-blue-950 font-bold">
-                      Select
+                      <input
+                        type="checkbox"
+                        checked={selectAll}
+                        onChange={handleSelectAll}
+                      />
                     </th>
                     <th className="px-4 py-2 text-left text-blue-950 font-bold">
                       Image
@@ -836,9 +852,6 @@ export default function GroupDesignsPage() {
                     <th className="px-4 py-2 text-left text-blue-950 font-bold">
                       Status
                     </th>
-                    {/* <th className="px-4 py-2 text-left text-blue-950 font-bold">
-                      PO
-                    </th> */}
                     <th className="px-4 py-2 text-left text-blue-950 font-bold">
                       Actions
                     </th>
@@ -868,7 +881,6 @@ export default function GroupDesignsPage() {
                         {d.design_name}
                       </td>
                       <td className="px-4 py-2 text-blue-700">{d.status}</td>
-                      {/* <td className="px-4 py-2 text-blue-700">{d.po}</td> */}
                       <td className="px-4 py-2">
                         <div className="flex gap-2">
                           <button
