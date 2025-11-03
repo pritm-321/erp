@@ -85,12 +85,14 @@ export default function GroupDesignsPage() {
   const [designCreated, setDesignCreated] = useState(false);
   const [accessories, setAccessories] = useState([
     {
+      department_id: "",
       accessory_id: "1",
       brand_id: "1",
       color_id: "",
       size_id: "1",
       unit_id: "1",
       rate_per_unit: "0",
+      consumption_per_piece: "0",
       required_qty: "0",
       remarks: "",
     },
@@ -146,9 +148,21 @@ export default function GroupDesignsPage() {
   ]);
   const [departmentOptions, setDepartmentOptions] = useState([]);
   const [departmentCostError, setDepartmentCostError] = useState("");
-  const [selectedDesignId, setSelectedDesignId] = useState(null);
   const [selectAll, setSelectAll] = useState(false);
   const [actionsDropdownOpen, setActionsDropdownOpen] = useState(false);
+  const [viewDepartmentCostModal, setViewDepartmentCostModal] = useState({
+    open: false,
+    data: [],
+  });
+  const [viewAdditionalCostModal, setViewAdditionalCostModal] = useState({
+    open: false,
+    data: [],
+  });
+  const [viewMarginCostModal, setViewMarginCostModal] = useState({
+    open: false,
+    data: [],
+  });
+  const [rowActionDropdown, setRowActionDropdown] = useState(null);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -242,44 +256,57 @@ export default function GroupDesignsPage() {
     if (accessoriesModal.open) {
       const fetchAccessoryDropdowns = async () => {
         try {
-          const [accessoryRes, brandRes, colorRes, sizeRes, unitRes] =
-            await Promise.all([
-              axios.get(`${API}so/accessory-suggestions`, {
-                headers: {
-                  Authorization: `Bearer ${accessToken}`,
-                  "Organization-ID": organizationId,
-                },
-              }),
-              axios.get(`${API}so/brand-suggestions`, {
-                headers: {
-                  Authorization: `Bearer ${accessToken}`,
-                  "Organization-ID": organizationId,
-                },
-              }),
-              axios.get(`${API}so/color-suggestions`, {
-                headers: {
-                  Authorization: `Bearer ${accessToken}`,
-                  "Organization-ID": organizationId,
-                },
-              }),
-              axios.get(`${API}so/size-suggestions`, {
-                headers: {
-                  Authorization: `Bearer ${accessToken}`,
-                  "Organization-ID": organizationId,
-                },
-              }),
-              axios.get(`${API}so/unit-suggestions`, {
-                headers: {
-                  Authorization: `Bearer ${accessToken}`,
-                  "Organization-ID": organizationId,
-                },
-              }),
-            ]);
+          const [
+            accessoryRes,
+            brandRes,
+            colorRes,
+            sizeRes,
+            unitRes,
+            departmentsRes,
+          ] = await Promise.all([
+            axios.get(`${API}so/accessory-suggestions`, {
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+                "Organization-ID": organizationId,
+              },
+            }),
+            axios.get(`${API}so/brand-suggestions`, {
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+                "Organization-ID": organizationId,
+              },
+            }),
+            axios.get(`${API}so/color-suggestions`, {
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+                "Organization-ID": organizationId,
+              },
+            }),
+            axios.get(`${API}so/size-suggestions`, {
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+                "Organization-ID": organizationId,
+              },
+            }),
+            axios.get(`${API}so/unit-suggestions`, {
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+                "Organization-ID": organizationId,
+              },
+            }),
+            axios.get(`${API}production/departments/active`, {
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+                "Organization-ID": organizationId,
+              },
+            }),
+          ]);
           setAccessoryOptions(accessoryRes.data?.data || []);
           setBrandOptions(brandRes.data?.data || []);
           setColorAccessoryOptions(colorRes.data?.data || []);
           setSizeOptions(sizeRes.data?.data || []);
           setUnitOptions(unitRes.data?.data || []);
+          setDepartmentOptions(departmentsRes.data?.data || []);
         } catch (err) {
           setAccessoryOptions([]);
           setBrandOptions([]);
@@ -386,6 +413,7 @@ export default function GroupDesignsPage() {
               size_id: acc.size_id || "",
               unit_id: acc.unit_id || "",
               rate_per_unit: acc.rate_per_unit || "",
+              consumption_per_piece: acc.consumption_per_piece || "",
               required_qty: acc.required_qty || "",
               remarks: acc.remarks || "",
             }))
@@ -399,6 +427,7 @@ export default function GroupDesignsPage() {
               size_id: "",
               unit_id: "",
               rate_per_unit: "",
+              consumption_per_piece: "",
               required_qty: "",
               remarks: "",
             },
@@ -413,6 +442,7 @@ export default function GroupDesignsPage() {
             size_id: "",
             unit_id: "",
             rate_per_unit: "",
+            consumption_per_piece: "",
             required_qty: "",
             remarks: "",
           },
@@ -569,22 +599,6 @@ export default function GroupDesignsPage() {
     }));
   };
 
-  const handleAddMarginCostRow = () => {
-    setMarginCostRows((prev) => [
-      ...prev,
-      {
-        margin_type: "percentage",
-        cost_margin_value: "",
-        currency: "INR",
-        remarks: "",
-      },
-    ]);
-  };
-
-  const handleRemoveMarginCostRow = (index) => {
-    setMarginCostRows((prev) => prev.filter((_, i) => i !== index));
-  };
-
   const handleMarginCostSubmit = async (e) => {
     e.preventDefault();
     setMarginCostError(""); // Clear previous error
@@ -681,6 +695,39 @@ export default function GroupDesignsPage() {
       setDepartmentCostError(
         err.response?.data?.message || "Failed to submit department costs."
       );
+    }
+  };
+
+  const fetchCostData = async (designId) => {
+    try {
+      const [departmentCostRes, additionalCostRes, marginCostRes] =
+        await Promise.all([
+          axios.get(`${API}costing/department-costs/${designId}`, {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              "Organization-ID": organizationId,
+            },
+          }),
+          axios.get(`${API}costing/additional-costs/${designId}`, {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              "Organization-ID": organizationId,
+            },
+          }),
+          axios.get(`${API}costing/margin-costs/${designId}`, {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              "Organization-ID": organizationId,
+            },
+          }),
+        ]);
+      setDepartmentCostData(departmentCostRes.data?.data || []);
+      setAdditionalCostData(additionalCostRes.data?.data || []);
+      setMarginCostData(marginCostRes.data?.data || []);
+    } catch (err) {
+      setDepartmentCostData([]);
+      setAdditionalCostData([]);
+      setMarginCostData([]);
     }
   };
 
@@ -954,6 +1001,58 @@ export default function GroupDesignsPage() {
                           </button>
                         </div>
                       </td>
+                      {/* <td className="px-4 py-2 relative">
+                        <button
+                          className="bg-gray-200 text-blue-950 px-4 py-2 rounded-lg shadow hover:bg-gray-300 transition"
+                          onClick={() =>
+                            setRowActionDropdown((prev) =>
+                              prev === d.design_id ? null : d.design_id
+                            )
+                          }
+                        >
+                          Actions
+                        </button>
+                        {rowActionDropdown === d.design_id && (
+                          <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
+                            <button
+                              className="block w-full text-left px-4 py-2 text-blue-950 hover:bg-gray-100"
+                              onClick={() => {
+                                setRowActionDropdown(null);
+                                fetchCostData(
+                                  `${API}costing/department-costs/${d.design_id}`,
+                                  setViewDepartmentCostModal
+                                );
+                              }}
+                            >
+                              View Department Cost
+                            </button>
+                            <button
+                              className="block w-full text-left px-4 py-2 text-blue-950 hover:bg-gray-100"
+                              onClick={() => {
+                                setRowActionDropdown(null);
+                                fetchCostData(
+                                  `${API}costing/additional-costs/${d.design_id}`,
+                                  setViewAdditionalCostModal
+                                );
+                              }}
+                            >
+                              View Additional Cost
+                            </button>
+                            <button
+                              className="block w-full text-left px-4 py-2 text-blue-950 hover:bg-gray-100"
+                              onClick={() => {
+                                setRowActionDropdown(null);
+                                fetchCostData(
+                                  `${API}costing/margin-costs/${d.design_id}`,
+                                  setViewMarginCostModal
+                                );
+                              }}
+                            >
+                              View Margin Cost
+                            </button>
+                          </div>
+                        )}
+                      </td> */}
                     </tr>
                   ))}
                 </tbody>
@@ -1788,8 +1887,10 @@ export default function GroupDesignsPage() {
                   size_id: Number(acc.size_id),
                   unit_id: Number(acc.unit_id),
                   rate_per_unit: Number(acc.rate_per_unit),
+                  consumption_per_piece: Number(acc.consumption_per_piece),
                   required_qty: Number(acc.required_qty),
                   remarks: acc.remarks,
+                  department_id: acc.department_id,
                 }));
                 try {
                   await axios.post(
@@ -1822,8 +1923,30 @@ export default function GroupDesignsPage() {
                 >
                   <div className="flex flex-wrap gap-4 mb-2">
                     <div className="flex flex-col">
+                      <label className="text-blue-700 font-medium mb-1">
+                        Department
+                      </label>
+                      <select
+                        className="border border-blue-300 px-4 py-2 rounded-lg bg-white"
+                        value={acc.department_id}
+                        onChange={(e) => {
+                          const newAcc = [...accessories];
+                          newAcc[i].department_id = e.target.value;
+                          setAccessories(newAcc);
+                        }}
+                        required
+                      >
+                        <option value="">Select Department</option>
+                        {departmentOptions.map((dept) => (
+                          <option key={dept.id} value={dept.department_id}>
+                            {dept.department_type}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="flex flex-col">
                       <label className="text-foreground font-medium mb-1">
-                        Accessory
+                        Trim
                       </label>
                       <select
                         className="border border-blue-300 px-4 py-2 rounded-lg bg-white min-w-[150px]"
@@ -1835,7 +1958,7 @@ export default function GroupDesignsPage() {
                         }}
                         // required
                       >
-                        <option value="">Select Accessory</option>
+                        <option value="">Select Trim</option>
                         {accessoryOptions.map((a) => (
                           <option
                             key={a.id || a.accessory_id}
@@ -1959,6 +2082,24 @@ export default function GroupDesignsPage() {
                         onChange={(e) => {
                           const newAcc = [...accessories];
                           newAcc[i].rate_per_unit = e.target.value;
+                          setAccessories(newAcc);
+                        }}
+                        // required
+                      />
+                    </div>
+                    <div className="flex flex-col">
+                      <label className="text-foreground font-medium mb-1">
+                        Consumption
+                      </label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        className="border border-blue-300 px-4 py-2 rounded-lg bg-white min-w-[100px]"
+                        value={acc.consumption_per_piece}
+                        onChange={(e) => {
+                          const newAcc = [...accessories];
+                          newAcc[i].consumption_per_piece = e.target.value;
                           setAccessories(newAcc);
                         }}
                         // required
