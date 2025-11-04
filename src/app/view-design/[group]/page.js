@@ -602,9 +602,10 @@ export default function GroupDesignsPage() {
   const handleMarginCostSubmit = async (e) => {
     e.preventDefault();
     setMarginCostError(""); // Clear previous error
+    console.log(marginCostRows);
     try {
       const payload = {
-        margin_data: selectedDesigns.reduce((acc, designId, index) => {
+        margin_data: selectedDesigns.reduce((acc, designId) => {
           acc[designId] = marginCostRows;
           return acc;
         }, {}),
@@ -615,17 +616,20 @@ export default function GroupDesignsPage() {
         Authorization: `Bearer ${accessToken}`,
         "Organization-ID": organizationId,
       };
-      await axios.post(`${API}costing/margin-costs`, payload, { headers });
+      const { data } = await axios.post(`${API}costing/margin-costs`, payload, {
+        headers,
+      });
+
       alert("Margin costs submitted successfully!");
       setMarginCostModal(false);
-      setMarginCostRows([
-        {
-          margin_type: "percentage",
-          cost_margin_value: "",
-          currency: "INR",
-          remarks: "",
-        },
-      ]);
+      setMarginCostRows({
+        margin_type: "percentage",
+        cost_margin_value: "",
+        currency: "INR",
+        remarks: "",
+      });
+      console.log(marginCostRows, "test", data);
+
       setSelectedDesigns([]);
     } catch (err) {
       setMarginCostError(
@@ -2488,7 +2492,7 @@ export default function GroupDesignsPage() {
                         className="border border-blue-300 px-4 py-2 rounded-lg bg-white"
                         value={marginCostRows.currency}
                         onChange={(e) =>
-                          handleMarginCostRowChange("currency", e.target.value)
+                          handleMarginCostRowChange("currency", "INR")
                         }
                         required
                       >
