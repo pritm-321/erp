@@ -610,7 +610,6 @@ export default function GroupDesignsPage() {
           return acc;
         }, {}),
       };
-      console.log(payload);
 
       const headers = {
         Authorization: `Bearer ${accessToken}`,
@@ -702,36 +701,37 @@ export default function GroupDesignsPage() {
     }
   };
 
-  const fetchCostData = async (designId) => {
+  const fetchCostData = async (designId, type) => {
+    const headers = {
+      Authorization: `Bearer ${accessToken}`,
+      "Organization-ID": organizationId,
+    };
     try {
-      const [departmentCostRes, additionalCostRes, marginCostRes] =
-        await Promise.all([
-          axios.get(`${API}costing/department-costs/${designId}`, {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-              "Organization-ID": organizationId,
-            },
-          }),
-          axios.get(`${API}costing/additional-costs/${designId}`, {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-              "Organization-ID": organizationId,
-            },
-          }),
-          axios.get(`${API}costing/margin-costs/${designId}`, {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-              "Organization-ID": organizationId,
-            },
-          }),
-        ]);
-      setDepartmentCostData(departmentCostRes.data?.data || []);
-      setAdditionalCostData(additionalCostRes.data?.data || []);
-      setMarginCostData(marginCostRes.data?.data || []);
+      let res;
+      if (type === "department") {
+        res = await axios.get(`${API}costing/department-costs/${designId}`, {
+          headers,
+        });
+        setViewDepartmentCostModal({ open: true, data: res.data?.data || [] });
+      } else if (type === "additional") {
+        res = await axios.get(`${API}costing/additional-costs/${designId}`, {
+          headers,
+        });
+        setViewAdditionalCostModal({ open: true, data: res.data?.data || [] });
+      } else if (type === "margin") {
+        res = await axios.get(`${API}costing/margin-costs/${designId}`, {
+          headers,
+        });
+        setViewMarginCostModal({ open: true, data: res.data?.data || [] });
+      }
     } catch (err) {
-      setDepartmentCostData([]);
-      setAdditionalCostData([]);
-      setMarginCostData([]);
+      // Open the modal with empty data on error (do not expose internal errors to users)
+      if (type === "department")
+        setViewDepartmentCostModal({ open: true, data: [] });
+      if (type === "additional")
+        setViewAdditionalCostModal({ open: true, data: [] });
+      if (type === "margin") setViewMarginCostModal({ open: true, data: [] });
+      console.error("Failed to fetch cost data:", err);
     }
   };
 
@@ -920,7 +920,7 @@ export default function GroupDesignsPage() {
                 </div>
               )}
             </div>
-            <div className="overflow-hidden rounded-xl border border-blue-200">
+            <div className=" rounded-xl border border-blue-200">
               <table className="min-w-full bg-white rounded-xl shadow">
                 <thead className="bg-gray-50">
                   <tr>
@@ -943,6 +943,7 @@ export default function GroupDesignsPage() {
                     <th className="px-4 py-2 text-left text-blue-950 font-bold">
                       Actions
                     </th>
+                    <th></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1005,7 +1006,7 @@ export default function GroupDesignsPage() {
                           </button>
                         </div>
                       </td>
-                      {/* <td className="px-4 py-2 relative">
+                      <td className="px-4 py-2 relative">
                         <button
                           className="bg-gray-200 text-blue-950 px-4 py-2 rounded-lg shadow hover:bg-gray-300 transition"
                           onClick={() =>
@@ -1014,18 +1015,15 @@ export default function GroupDesignsPage() {
                             )
                           }
                         >
-                          Actions
+                          Cost Actions
                         </button>
                         {rowActionDropdown === d.design_id && (
-                          <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
+                          <div className="absolute right-0 mt-2 w-60 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
                             <button
                               className="block w-full text-left px-4 py-2 text-blue-950 hover:bg-gray-100"
                               onClick={() => {
                                 setRowActionDropdown(null);
-                                fetchCostData(
-                                  `${API}costing/department-costs/${d.design_id}`,
-                                  setViewDepartmentCostModal
-                                );
+                                fetchCostData(d.design_id, "department");
                               }}
                             >
                               View Department Cost
@@ -1034,10 +1032,7 @@ export default function GroupDesignsPage() {
                               className="block w-full text-left px-4 py-2 text-blue-950 hover:bg-gray-100"
                               onClick={() => {
                                 setRowActionDropdown(null);
-                                fetchCostData(
-                                  `${API}costing/additional-costs/${d.design_id}`,
-                                  setViewAdditionalCostModal
-                                );
+                                fetchCostData(d.design_id, "additional");
                               }}
                             >
                               View Additional Cost
@@ -1046,17 +1041,14 @@ export default function GroupDesignsPage() {
                               className="block w-full text-left px-4 py-2 text-blue-950 hover:bg-gray-100"
                               onClick={() => {
                                 setRowActionDropdown(null);
-                                fetchCostData(
-                                  `${API}costing/margin-costs/${d.design_id}`,
-                                  setViewMarginCostModal
-                                );
+                                fetchCostData(d.design_id, "margin");
                               }}
                             >
                               View Margin Cost
                             </button>
                           </div>
                         )}
-                      </td> */}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -2669,6 +2661,159 @@ export default function GroupDesignsPage() {
                 Submit
               </button>
             </form>
+          </div>
+        </div>
+      )}
+      {/* View Department Cost Modal */}
+      {viewDepartmentCostModal.open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+          <div className="bg-white rounded-lg shadow-lg p-6 max-w-3xl w-full relative max-h-[85vh] overflow-y-auto">
+            <button
+              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-xl"
+              onClick={() =>
+                setViewDepartmentCostModal({ open: false, data: [] })
+              }
+            >
+              &times;
+            </button>
+            <h2 className="text-lg font-semibold mb-4">Department Costs</h2>
+            {viewDepartmentCostModal.data.length === 0 ? (
+              <div className="text-gray-500">
+                No department cost data available.
+              </div>
+            ) : (
+              <table className="min-w-full rounded-lg mb-2 overflow-hidden shadow-md">
+                <thead className="bg-foreground text-white">
+                  <tr>
+                    <th className="px-4 py-2 text-left font-bold">
+                      Department
+                    </th>
+                    <th className="px-4 py-2 text-left font-bold">
+                      Cost Value
+                    </th>
+                    <th className="px-4 py-2 text-left font-bold">Unit</th>
+                    <th className="px-4 py-2 text-left font-bold">Remarks</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-blue-50">
+                  {viewDepartmentCostModal.data.map((item, idx) => (
+                    <tr key={idx} className="border-t border-foreground">
+                      <td className="px-4 py-2">
+                        {item.department_name || item.department_id || "-"}
+                      </td>
+                      <td className="px-4 py-2">{item.cost_value ?? "-"}</td>
+                      <td className="px-4 py-2">{item.unit || "-"}</td>
+                      <td className="px-4 py-2">{item.remarks || "-"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </div>
+      )}
+      {/* View Additional Cost Modal */}
+      {viewAdditionalCostModal.open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+          <div className="bg-white rounded-lg shadow-lg p-6 max-w-3xl w-full relative max-h-[85vh] overflow-y-auto">
+            <button
+              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-xl"
+              onClick={() =>
+                setViewAdditionalCostModal({ open: false, data: [] })
+              }
+            >
+              &times;
+            </button>
+            <h2 className="text-lg font-semibold mb-4">Additional Costs</h2>
+            {viewAdditionalCostModal.data.length === 0 ? (
+              <div className="text-gray-500">
+                No additional cost data available.
+              </div>
+            ) : (
+              <table className="min-w-full rounded-xl mb-2 border">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-2 text-left font-bold">Cost Type</th>
+                    <th className="px-4 py-2 text-left font-bold">
+                      Cost Value
+                    </th>
+                    <th className="px-4 py-2 text-left font-bold">Unit</th>
+                    <th className="px-4 py-2 text-left font-bold">Remarks</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {viewAdditionalCostModal.data.map((item, idx) => (
+                    <tr key={idx} className="border-t">
+                      <td className="px-4 py-2">{item.cost_type || "-"}</td>
+                      <td className="px-4 py-2">{item.cost_value ?? "-"}</td>
+                      <td className="px-4 py-2">{item.unit_name || "-"}</td>
+                      <td className="px-4 py-2">{item.remarks || "-"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </div>
+      )}
+      {/* View Margin Cost Modal */}
+      {viewMarginCostModal.open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+          <div className="bg-white rounded-lg shadow-lg p-6 max-w-3xl w-full relative max-h-[85vh] overflow-y-auto">
+            <button
+              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-xl"
+              onClick={() => setViewMarginCostModal({ open: false, data: [] })}
+            >
+              &times;
+            </button>
+            <h2 className="text-lg font-semibold mb-4">Margin Costs</h2>
+            {viewMarginCostModal.data.length === 0 ? (
+              <div className="text-gray-500">
+                No margin cost data available.
+              </div>
+            ) : (
+              <table className="min-w-full rounded-lg mb-2 overflow-hidden shadow-md">
+                <thead className="bg-foreground text-white">
+                  <tr>
+                    <th className="px-4 py-2 text-left font-bold">
+                      Margin Type
+                    </th>
+                    <th className="px-4 py-2 text-left font-bold">Margin</th>
+                    <th className="px-4 py-2 text-left font-bold">Currency</th>
+                    <th className="px-4 py-2 text-left font-bold">Remarks</th>
+                    <th className="px-4 py-2 text-left font-bold">
+                      Created At
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-blue-50">
+                  <tr className="border-t">
+                    <td className="px-4 py-2">
+                      {viewMarginCostModal.data.margin_type || "-"}
+                    </td>
+                    <td className="px-4 py-2">
+                      {viewMarginCostModal.data.margin_display ??
+                        (viewMarginCostModal.data.cost_margin_value != null
+                          ? `${
+                              viewMarginCostModal.data.currency
+                                ? viewMarginCostModal.data.currency + " "
+                                : ""
+                            }${viewMarginCostModal.data.cost_margin_value}`
+                          : "-")}
+                    </td>
+                    <td className="px-4 py-2">
+                      {viewMarginCostModal.data.currency || "-"}
+                    </td>
+                    <td className="px-4 py-2">
+                      {viewMarginCostModal.data.remarks || "-"}
+                    </td>
+                    <td className="px-4 py-2">
+                      {formatToIST(viewMarginCostModal.data.created_at)}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            )}
           </div>
         </div>
       )}
