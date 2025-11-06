@@ -5,16 +5,7 @@ import { useEffect, useState } from "react";
 import axios, { all } from "axios";
 import { API } from "@/utils/url";
 import { supabase } from "@/utils/supabaseClient";
-import {
-  Delete,
-  DeleteIcon,
-  Eye,
-  Plus,
-  Trash,
-  Upload,
-  PackagePlus,
-  ChevronDown,
-} from "lucide-react";
+import { Eye, Plus, Trash, ChevronDown, PlusIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import CreateDesignForm from "@/components/CreateDesignForm";
 
@@ -163,6 +154,29 @@ export default function GroupDesignsPage() {
     data: [],
   });
   const [rowActionDropdown, setRowActionDropdown] = useState(null);
+  const [rowPartsDropdown, setRowPartsDropdown] = useState(null);
+  const [rowTrimsDropdown, setRowTrimsDropdown] = useState(null);
+  const [approvingDesignId, setApprovingDesignId] = useState(null);
+  const [approvedDesigns, setApprovedDesigns] = useState([]); // store design_ids which are approved
+  const [approveError, setApproveError] = useState("");
+  const [approvingBulk, setApprovingBulk] = useState(false);
+
+  // Ensure only one row dropdown is open at a time
+  const togglePartsDropdown = (designId) => {
+    setRowTrimsDropdown(null);
+    setRowActionDropdown(null);
+    setRowPartsDropdown((prev) => (prev === designId ? null : designId));
+  };
+  const toggleTrimsDropdown = (designId) => {
+    setRowPartsDropdown(null);
+    setRowActionDropdown(null);
+    setRowTrimsDropdown((prev) => (prev === designId ? null : designId));
+  };
+  const toggleCostDropdown = (designId) => {
+    setRowPartsDropdown(null);
+    setRowTrimsDropdown(null);
+    setRowActionDropdown((prev) => (prev === designId ? null : designId));
+  };
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -735,6 +749,37 @@ export default function GroupDesignsPage() {
     }
   };
 
+  const handleApproveSelectedCosts = async () => {
+    if (!selectedDesigns || selectedDesigns.length === 0) return;
+    setApproveError("");
+    setApprovingBulk(true);
+    const headers = {
+      Authorization: `Bearer ${accessToken}`,
+      "Organization-ID": organizationId,
+    };
+    try {
+      // New API accepts multiple design_ids in one request
+      await axios.post(
+        `${API}costing/cost-request`,
+        { design_ids: selectedDesigns },
+        { headers }
+      );
+      setApprovedDesigns((prev) => [
+        ...new Set([...(prev || []), ...selectedDesigns]),
+      ]);
+      alert("Selected cost approvals processed.");
+      // clear selection after approval
+      setSelectedDesigns([]);
+      setSelectAll(false);
+    } catch (err) {
+      console.error("Bulk approve failed:", err);
+      setApproveError("Failed to approve selected costs. Try again.");
+      alert("Failed to approve selected costs. Try again.");
+    } finally {
+      setApprovingBulk(false);
+    }
+  };
+
   useEffect(() => {
     if (departmentCostModal) {
       const fetchDepartmentsAndUnits = async () => {
@@ -917,6 +962,16 @@ export default function GroupDesignsPage() {
                   >
                     Submit Margin Cost
                   </button>
+                  <button
+                    className="block w-full text-left px-4 py-2 text-blue-950 hover:bg-gray-100"
+                    onClick={() => {
+                      setActionsDropdownOpen(false);
+                      handleApproveSelectedCosts();
+                    }}
+                    disabled={selectedDesigns.length === 0 || approvingBulk}
+                  >
+                    {approvingBulk ? "Approving..." : "Approve Cost"}
+                  </button>
                 </div>
               )}
             </div>
@@ -941,9 +996,14 @@ export default function GroupDesignsPage() {
                       Status
                     </th>
                     <th className="px-4 py-2 text-left text-blue-950 font-bold">
-                      Actions
+                      Part Actions
                     </th>
-                    <th></th>
+                    <th className="px-4 py-2 text-left text-blue-950 font-bold">
+                      Trim Actions
+                    </th>
+                    <th className="px-4 py-2 text-left text-blue-950 font-bold">
+                      Cost Actions
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -966,85 +1026,132 @@ export default function GroupDesignsPage() {
                           className="w-16 h-16 object-cover rounded-xl border-2 border-blue-200"
                         />
                       </td>
-                      <td className="px-4 py-2 font-semibold text-blue-950">
-                        {d.design_name}
+                      <td className="px-4 py-2 font-semibold text-blue-950 w-52 flex items-center justify-between gap-2">
+                        <span className="">{d.design_name}</span>
+                        {/* <div className="ml-2">
+                          {approvedDesigns.includes(d.design_id) && (
+                            <button
+                              className="bg-green-600 text-white px-3 py-1 rounded-md text-sm"
+                              disabled
+                              title="Already approved"
+                            >
+                              Approved
+                            </button>
+                          )}
+                        </div> */}
                       </td>
                       <td className="px-4 py-2 text-blue-700">{d.status}</td>
-                      <td className="px-4 py-2">
-                        <div className="flex gap-2">
-                          <button
-                            className="bg-blue-500 text-white px-4 py-2 rounded-lg shadow hover:bg-foreground transition flex items-center gap-2"
-                            onClick={() => handleViewParts(d.design_id)}
-                          >
-                            <Eye size={16} />
-                            View Parts
-                          </button>
-                          <button
-                            className="bg-green-500 text-white px-4 py-2 rounded-lg shadow hover:bg-green-600 transition flex items-center gap-2"
-                            onClick={() => handleOpenUploadModal(d.design_id)}
-                          >
-                            <Upload size={16} />
-                            Upload Parts
-                          </button>
-                          <button
-                            className="bg-yellow-500 text-white px-4 py-2 rounded-lg shadow hover:bg-yellow-600 transition flex items-center gap-2"
-                            onClick={() =>
-                              handleOpenAccessoriesModal(d.design_id)
-                            }
-                          >
-                            <PackagePlus size={16} />
-                            Upload Trims
-                          </button>
-                          <button
-                            className="bg-blue-500 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700 transition flex items-center gap-2"
-                            onClick={() =>
-                              handleOpenViewAccessoriesModal(d.design_id)
-                            }
-                          >
-                            <Eye size={16} />
-                            View Trims
-                          </button>
-                        </div>
-                      </td>
+                      {/* Part Actions dropdown */}
                       <td className="px-4 py-2 relative">
                         <button
                           className="bg-gray-200 text-blue-950 px-4 py-2 rounded-lg shadow hover:bg-gray-300 transition"
-                          onClick={() =>
-                            setRowActionDropdown((prev) =>
-                              prev === d.design_id ? null : d.design_id
-                            )
-                          }
+                          onClick={() => togglePartsDropdown(d.design_id)}
                         >
-                          Cost Actions
+                          Part Actions{" "}
+                          <ChevronDown
+                            size={16}
+                            className="inline-block ml-2"
+                          />
+                        </button>
+                        {rowPartsDropdown === d.design_id && (
+                          <div className="absolute right-0 mt-2 w-44 bg-white border border-gray-200 rounded-lg shadow-lg z-10 divide-gray-300 divide-y-2 p-2">
+                            <button
+                              className="w-full text-left px-4 py-2 text-blue-950 hover:bg-gray-100 flex"
+                              onClick={() => {
+                                setRowPartsDropdown(null);
+                                handleOpenUploadModal(d.design_id);
+                              }}
+                            >
+                              <PlusIcon /> &nbsp;Upload Parts
+                            </button>
+                            <button
+                              className="w-full text-left px-4 py-2 text-blue-950 hover:bg-gray-100 flex"
+                              onClick={() => {
+                                setRowPartsDropdown(null);
+                                handleViewParts(d.design_id);
+                              }}
+                            >
+                              <Eye /> &nbsp;View Parts
+                            </button>
+                          </div>
+                        )}
+                      </td>
+                      {/* Trim Actions dropdown */}
+                      <td className="px-4 py-2 relative">
+                        <button
+                          className="bg-gray-200 text-blue-950 px-4 py-2 rounded-lg shadow hover:bg-gray-300 transition"
+                          onClick={() => toggleTrimsDropdown(d.design_id)}
+                        >
+                          Trim Actions{" "}
+                          <ChevronDown
+                            size={16}
+                            className="inline-block ml-2"
+                          />
+                        </button>
+                        {rowTrimsDropdown === d.design_id && (
+                          <div className="absolute right-0 mt-2 w-44 bg-white border border-gray-200 rounded-lg shadow-lg z-10 divide-gray-300 divide-y-2 p-2">
+                            <button
+                              className="w-full text-left px-4 py-2 text-blue-950 hover:bg-gray-100 flex"
+                              onClick={() => {
+                                setRowTrimsDropdown(null);
+                                handleOpenAccessoriesModal(d.design_id);
+                              }}
+                            >
+                              <Plus /> &nbsp;Upload Trims
+                            </button>
+                            <button
+                              className="w-full text-left px-4 py-2 text-blue-950 hover:bg-gray-100 flex"
+                              onClick={() => {
+                                setRowTrimsDropdown(null);
+                                handleOpenViewAccessoriesModal(d.design_id);
+                              }}
+                            >
+                              <Eye /> &nbsp;View Trims
+                            </button>
+                          </div>
+                        )}
+                      </td>
+                      {/* Cost Actions dropdown (unchanged) */}
+                      <td className="px-4 py-2 relative">
+                        <button
+                          className="bg-gray-200 text-blue-950 px-4 py-2 rounded-lg shadow hover:bg-gray-300 transition"
+                          onClick={() => toggleCostDropdown(d.design_id)}
+                        >
+                          Cost Actions{" "}
+                          <ChevronDown
+                            size={16}
+                            className="inline-block ml-2"
+                          />
                         </button>
                         {rowActionDropdown === d.design_id && (
-                          <div className="absolute right-0 mt-2 w-60 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
+                          <div className="absolute right-0 mt-2 w-60 bg-white border border-gray-200 rounded-lg shadow-lg z-10 divide-gray-300 divide-y-2 p-2">
                             <button
-                              className="block w-full text-left px-4 py-2 text-blue-950 hover:bg-gray-100"
+                              className="w-full text-left px-4 py-2 text-blue-950 hover:bg-gray-100 flex"
                               onClick={() => {
                                 setRowActionDropdown(null);
                                 fetchCostData(d.design_id, "department");
                               }}
                             >
-                              View Department Cost
+                              <Eye /> &nbsp;View Department Cost
                             </button>
                             <button
-                              className="block w-full text-left px-4 py-2 text-blue-950 hover:bg-gray-100"
+                              className="w-full text-left px-4 py-2 text-blue-950 hover:bg-gray-100 flex"
                               onClick={() => {
                                 setRowActionDropdown(null);
                                 fetchCostData(d.design_id, "additional");
                               }}
                             >
-                              View Additional Cost
+                              <Eye /> &nbsp;View Additional Cost
                             </button>
                             <button
-                              className="block w-full text-left px-4 py-2 text-blue-950 hover:bg-gray-100"
+                              className="w-full text-left px-4 py-2 text-blue-950 hover:bg-gray-100 flex"
                               onClick={() => {
                                 setRowActionDropdown(null);
                                 fetchCostData(d.design_id, "margin");
                               }}
                             >
-                              View Margin Cost
+                              <Eye />
+                              &nbsp; View Margin Cost
                             </button>
                           </div>
                         )}
@@ -1290,7 +1397,9 @@ export default function GroupDesignsPage() {
                     designId: null,
                   });
                 } catch (err) {
-                  setUploadError("Failed to upload design data.");
+                  setUploadError(
+                    err.response?.data?.message || "Upload failed."
+                  );
                 } finally {
                   setUploadLoading(false);
                   setViewPartsModal({
@@ -1933,8 +2042,8 @@ export default function GroupDesignsPage() {
                         required
                       >
                         <option value="">Select Department</option>
-                        {departmentOptions.map((dept) => (
-                          <option key={dept.id} value={dept.department_id}>
+                        {departmentOptions.map((dept, index) => (
+                          <option key={index} value={dept.department_id}>
                             {dept.department_type}
                           </option>
                         ))}
