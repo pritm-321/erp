@@ -2194,7 +2194,7 @@ export default function GroupDesignsPage() {
                     </div>
                     <div className="flex flex-col">
                       <label className="text-foreground font-medium mb-1">
-                        Consumption
+                        Consumption/Piece
                       </label>
                       <input
                         type="number"
