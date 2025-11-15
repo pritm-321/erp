@@ -105,7 +105,7 @@ export default function GroupDesignsPage() {
   const [additionalCostForm, setAdditionalCostForm] = useState({
     cost_type: "",
     cost_value: "",
-    unit_type: "",
+    unit_type_id: "",
     max_allowed_value: "",
     remarks: "",
   });
@@ -114,7 +114,7 @@ export default function GroupDesignsPage() {
     {
       cost_type: "",
       cost_value: "",
-      unit_type: "",
+      unit_type_id: "",
       max_allowed_value: "",
       remarks: "",
     },
@@ -132,7 +132,7 @@ export default function GroupDesignsPage() {
     {
       department_id: "",
       cost_value: "",
-      unit_type: "",
+      unit_type_id: "",
       design_id: "",
       remarks: "",
     },
@@ -531,7 +531,7 @@ export default function GroupDesignsPage() {
       {
         cost_type: "",
         cost_value: "",
-        unit_type: "",
+        unit_type_id: "",
         max_allowed_value: "",
         remarks: "",
       },
@@ -563,7 +563,7 @@ export default function GroupDesignsPage() {
         {
           cost_type: "",
           cost_value: "",
-          unit_type: "",
+          unit_type_id: "",
           max_allowed_value: "",
           remarks: "",
         },
@@ -633,7 +633,7 @@ export default function GroupDesignsPage() {
       {
         department_id: "",
         cost_value: "",
-        unit_type: "",
+        unit_type_id: "",
         design_id: "",
         remarks: "",
       },
@@ -812,11 +812,10 @@ export default function GroupDesignsPage() {
               part_name: part.part_name,
               department_id: "",
               cost_value: "",
-              unit_type: "",
+              unit_type_id: "",
               remarks: "",
             });
           });
-          console.log(rows, " dept cost rows");
 
           setDepartmentCostRows(
             rows.length > 0
@@ -830,7 +829,7 @@ export default function GroupDesignsPage() {
                     variation: "",
                     department_id: "",
                     cost_value: "",
-                    unit_type: "",
+                    unit_type_id: "",
                     remarks: "",
                   },
                 ]
@@ -845,7 +844,7 @@ export default function GroupDesignsPage() {
               variation: "",
               department_id: "",
               cost_value: "",
-              unit_type: "",
+              unit_type_id: "",
               remarks: "",
             },
           ]);
@@ -983,30 +982,39 @@ export default function GroupDesignsPage() {
                   <button
                     className="block w-full text-left px-4 py-2 text-blue-950 hover:bg-gray-100"
                     onClick={() => {
+                      if (selectedDesigns.length === 0) {
+                        alert("Please select at least one design.");
+                        return;
+                      }
                       setActionsDropdownOpen(false);
                       setDepartmentCostModal(true);
                     }}
-                    disabled={selectedDesigns.length === 0}
                   >
                     Submit Department Cost
                   </button>
                   <button
                     className="block w-full text-left px-4 py-2 text-blue-950 hover:bg-gray-100"
                     onClick={() => {
+                      if (selectedDesigns.length === 0) {
+                        alert("Please select at least one design.");
+                        return;
+                      }
                       setActionsDropdownOpen(false);
                       setAdditionalCostModal(true);
                     }}
-                    disabled={selectedDesigns.length === 0}
                   >
                     Submit Additional Cost
                   </button>
                   <button
                     className="block w-full text-left px-4 py-2 text-blue-950 hover:bg-gray-100"
                     onClick={() => {
+                      if (selectedDesigns.length === 0) {
+                        alert("Please select at least one design.");
+                        return;
+                      }
                       setActionsDropdownOpen(false);
                       setMarginCostModal(true);
                     }}
-                    disabled={selectedDesigns.length === 0}
                   >
                     Submit Margin Cost
                   </button>
@@ -2493,11 +2501,11 @@ export default function GroupDesignsPage() {
                       </label>
                       <select
                         className="border border-blue-300 px-4 py-2 rounded-lg bg-white"
-                        value={row.unit_type}
+                        value={row.unit_type_id}
                         onChange={(e) =>
                           handleAdditionalCostRowChange(
                             index,
-                            "unit_type",
+                            "unit_type_id",
                             e.target.value
                           )
                         }
@@ -2507,22 +2515,23 @@ export default function GroupDesignsPage() {
                         {unitOptions.map((unit) => (
                           <option
                             key={unit.id || unit.unit_id}
-                            value={unit.name || unit.unit_name}
+                            value={unit.id || unit.unit_id}
                           >
                             {unit.name || unit.unit_name}
                           </option>
                         ))}
                       </select>
                     </div>
-                    <div className="flex flex-col">
+                    <div className=" hidden flex-col">
                       <label className="text-blue-700 font-medium mb-1">
                         Max Allowed Value
                       </label>
                       <input
+                        disabled
                         type="number"
                         step="0.01"
-                        className="border border-blue-300 px-4 py-2 rounded-lg bg-white"
-                        value={row.max_allowed_value}
+                        className="hidden border border-blue-300 px-4 py-2 rounded-lg bg-white"
+                        value={row.cost_value}
                         onChange={(e) =>
                           handleAdditionalCostRowChange(
                             index,
@@ -2787,7 +2796,7 @@ export default function GroupDesignsPage() {
                         {unitOptions.map((unit) => (
                           <option
                             key={unit.id || unit.unit_id}
-                            value={unit.name || unit.unit_name}
+                            value={unit.id || unit.unit_id}
                           >
                             {unit.name || unit.unit_name}
                           </option>
