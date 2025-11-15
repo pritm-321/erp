@@ -519,36 +519,6 @@ export default function GroupDesignsPage() {
     });
   };
 
-  const handleAddCostField = (designId) => {
-    setAdditionalCostData((prev) => ({
-      ...prev,
-      [designId]: [
-        ...(prev[designId] || []),
-        {
-          cost_type: "",
-          cost_value: "",
-          unit_type: "",
-          max_allowed_value: "",
-          remarks: "",
-        },
-      ],
-    }));
-  };
-
-  const handleRemoveCostField = (designId, index) => {
-    setAdditionalCostData((prev) => ({
-      ...prev,
-      [designId]: prev[designId].filter((_, i) => i !== index),
-    }));
-  };
-
-  const handleAdditionalCostFormChange = (field, value) => {
-    setAdditionalCostForm((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
-
   const handleAdditionalCostRowChange = (index, field, value) => {
     setAdditionalCostRows((prev) =>
       prev.map((row, i) => (i === index ? { ...row, [field]: value } : row))
@@ -678,36 +648,54 @@ export default function GroupDesignsPage() {
     e.preventDefault();
     setDepartmentCostError(""); // Clear previous error
     try {
-      const payload = {
-        cost_data: departmentCostRows.reduce((acc, row) => {
-          selectedDesigns.forEach((designId) => {
-            if (!acc[row.department_id]) acc[row.department_id] = [];
-            acc[row.department_id].push({
-              cost_value: row.cost_value,
-              unit_type_id: row.unit_type,
-              design_id: designId,
-              remarks: row.remarks,
-            });
+      // Build department_costs object: { department_id: { parts: [...] } }
+      const department_costs = {};
+      departmentCostRows.forEach((row) => {
+        // Support both array of departments (for multi-dept per part) and single dept per part
+        if (row.department_id) {
+          // fallback for single department_id field
+          if (!department_costs[row.department_id]) {
+            department_costs[row.department_id] = { parts: [] };
+          }
+          department_costs[row.department_id].parts.push({
+            part_id: row.part_id,
+            cost_value: Number(row.cost_value),
+            unit_type_id: row.unit_type,
+            remarks: row.remarks,
           });
-          return acc;
-        }, {}),
+        }
+      });
+
+      // If no valid department_costs, throw error
+      if (
+        !department_costs ||
+        Object.keys(department_costs).length === 0 ||
+        Object.values(department_costs).every((v) => !v.parts.length)
+      ) {
+        setDepartmentCostError(
+          "Please select at least one department and fill cost details."
+        );
+        return;
+      }
+
+      const payload = {
+        part_cost_data: {
+          department_costs,
+          design_ids: selectedDesigns,
+        },
       };
+
       const headers = {
         Authorization: `Bearer ${accessToken}`,
         "Organization-ID": organizationId,
       };
-      await axios.post(`${API}costing/department-costs`, payload, { headers });
+
+      await axios.post(`${API}costing/part-wise-costs`, payload, {
+        headers,
+      });
       alert("Department costs submitted successfully!");
       setDepartmentCostModal(false);
-      setDepartmentCostRows([
-        {
-          department_id: "",
-          cost_value: "",
-          unit_type: "",
-          design_id: "",
-          remarks: "",
-        },
-      ]);
+      setDepartmentCostRows([]);
     } catch (err) {
       setDepartmentCostError(
         err.response?.data?.message || "Failed to submit department costs."
@@ -784,19 +772,14 @@ export default function GroupDesignsPage() {
     if (departmentCostModal) {
       const fetchDepartmentsAndUnits = async () => {
         try {
+          const headers = {
+            Authorization: `Bearer ${accessToken}`,
+            "Organization-ID": organizationId,
+          };
+          // Fetch departments and units as before
           const [departmentsRes, unitsRes] = await Promise.all([
-            axios.get(`${API}production/departments/active`, {
-              headers: {
-                Authorization: `Bearer ${accessToken}`,
-                "Organization-ID": organizationId,
-              },
-            }),
-            axios.get(`${API}so/unit-suggestions`, {
-              headers: {
-                Authorization: `Bearer ${accessToken}`,
-                "Organization-ID": organizationId,
-              },
-            }),
+            axios.get(`${API}production/departments/active`, { headers }),
+            axios.get(`${API}so/unit-suggestions`, { headers }),
           ]);
           setDepartmentOptions(departmentsRes.data?.data || []);
           setUnitOptions(unitsRes.data?.data || []);
@@ -805,9 +788,79 @@ export default function GroupDesignsPage() {
           setUnitOptions([]);
         }
       };
+
+      const fetchPartsForDesigns = async () => {
+        try {
+          const headers = {
+            Authorization: `Bearer ${accessToken}`,
+            "Organization-ID": organizationId,
+          };
+          // Call the new API to get parts for selected designs
+          const res = await axios.post(
+            `${API}costing/parts-for-designs`,
+            { design_ids: selectedDesigns },
+            { headers }
+          );
+          const parts = res.data?.data?.parts || [];
+          console.log(parts);
+
+          // Flatten variant_parts into departmentCostRows
+          const rows = [];
+          parts.forEach((part) => {
+            part.variant_parts.forEach((vp) => {
+              rows.push({
+                part_id: part.part_id,
+                part_name: part.part_name,
+                variant_part_id: vp.variant_part_id,
+                design_id: vp.design_id,
+                variation: vp.variation,
+                department_id: "",
+                cost_value: "",
+                unit_type: "",
+                remarks: "",
+              });
+            });
+          });
+          console.log(rows, " dept cost rows");
+
+          setDepartmentCostRows(
+            rows.length > 0
+              ? rows
+              : [
+                  {
+                    part_id: "",
+                    part_name: "",
+                    variant_part_id: "",
+                    design_id: "",
+                    variation: "",
+                    department_id: "",
+                    cost_value: "",
+                    unit_type: "",
+                    remarks: "",
+                  },
+                ]
+          );
+        } catch (err) {
+          setDepartmentCostRows([
+            {
+              part_id: "",
+              part_name: "",
+              variant_part_id: "",
+              design_id: "",
+              variation: "",
+              department_id: "",
+              cost_value: "",
+              unit_type: "",
+              remarks: "",
+            },
+          ]);
+        }
+      };
+
       fetchDepartmentsAndUnits();
+      fetchPartsForDesigns();
     }
-  }, [departmentCostModal, accessToken, organizationId]);
+  }, [departmentCostModal, accessToken, organizationId, selectedDesigns]);
 
   useEffect(() => {
     if (uploadModal.open || accessoriesModal.open || additionalCostModal) {
@@ -2657,6 +2710,23 @@ export default function GroupDesignsPage() {
                   className="border border-blue-300 rounded-xl p-4 bg-gray-50 mb-4"
                 >
                   <div className="flex flex-wrap gap-4 mb-2">
+                    <div className="flex flex-col justify-center">
+                      <label className="text-blue-700 font-medium mb-1">
+                        Part Name
+                      </label>
+                      <div className="font-semibold text-blue-950 px-4 py-2">
+                        {row.part_name}
+                      </div>
+                    </div>
+                    <div className="flex flex-col justify-center">
+                      <label className="text-blue-700 font-medium mb-1">
+                        Variation
+                      </label>
+                      <div className="font-semibold text-blue-950 px-4 py-2">
+                        {row.variation}
+                      </div>
+                    </div>
+                    {/* Design ID is NOT displayed */}
                     <div className="flex flex-col">
                       <label className="text-blue-700 font-medium mb-1">
                         Department
@@ -2720,7 +2790,7 @@ export default function GroupDesignsPage() {
                         {unitOptions.map((unit) => (
                           <option
                             key={unit.id || unit.unit_id}
-                            value={unit.name || unit.name}
+                            value={unit.name || unit.unit_name}
                           >
                             {unit.name || unit.unit_name}
                           </option>
@@ -2745,24 +2815,8 @@ export default function GroupDesignsPage() {
                       />
                     </div>
                   </div>
-                  {departmentCostRows.length > 1 && (
-                    <button
-                      type="button"
-                      className="text-red-500 font-semibold px-2 py-1 rounded hover:bg-red-50"
-                      onClick={() => handleRemoveDepartmentCostRow(index)}
-                    >
-                      Remove Row
-                    </button>
-                  )}
                 </div>
               ))}
-              <button
-                type="button"
-                className="text-blue-700 font-semibold"
-                onClick={handleAddDepartmentCostRow}
-              >
-                Add Row
-              </button>
               <button
                 type="submit"
                 className="bg-foreground text-white px-6 py-3 rounded-xl shadow hover:bg-blue-700 font-semibold transition w-full mt-2"
