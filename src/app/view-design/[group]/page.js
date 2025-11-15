@@ -807,18 +807,13 @@ export default function GroupDesignsPage() {
           // Flatten variant_parts into departmentCostRows
           const rows = [];
           parts.forEach((part) => {
-            part.variant_parts.forEach((vp) => {
-              rows.push({
-                part_id: part.part_id,
-                part_name: part.part_name,
-                variant_part_id: vp.variant_part_id,
-                design_id: vp.design_id,
-                variation: vp.variation,
-                department_id: "",
-                cost_value: "",
-                unit_type: "",
-                remarks: "",
-              });
+            rows.push({
+              part_id: part.part_id,
+              part_name: part.part_name,
+              department_id: "",
+              cost_value: "",
+              unit_type: "",
+              remarks: "",
             });
           });
           console.log(rows, " dept cost rows");
@@ -2072,7 +2067,6 @@ export default function GroupDesignsPage() {
                   setAccessoriesLoading(false);
                 }
               }}
-              className="space-y-6 max-h-[80vh] overflow-y-auto"
             >
               {accessories.map((acc, i) => (
                 <div
@@ -2726,7 +2720,7 @@ export default function GroupDesignsPage() {
                         {row.variation}
                       </div>
                     </div>
-                    {/* Design ID is NOT displayed */}
+
                     <div className="flex flex-col">
                       <label className="text-blue-700 font-medium mb-1">
                         Department
@@ -2746,7 +2740,10 @@ export default function GroupDesignsPage() {
                         <option value="">Select Department</option>
                         {departmentOptions.map((dept) => (
                           <option key={dept.id} value={dept.department_id}>
-                            {dept.department_type}
+                            {dept.department_name}
+                            {dept.department_type
+                              ? ` - ${dept.department_type}`
+                              : ""}
                           </option>
                         ))}
                       </select>
@@ -2840,37 +2837,82 @@ export default function GroupDesignsPage() {
               &times;
             </button>
             <h2 className="text-lg font-semibold mb-4">Department Costs</h2>
-            {viewDepartmentCostModal.data.length === 0 ? (
+            {/* Adapted for new response structure */}
+            {!viewDepartmentCostModal.data?.departments ||
+            viewDepartmentCostModal.data.departments.length === 0 ? (
               <div className="text-gray-500">
                 No department cost data available.
               </div>
             ) : (
-              <table className="min-w-full rounded-lg mb-2 overflow-hidden shadow-md">
-                <thead className="bg-foreground text-white">
-                  <tr>
-                    <th className="px-4 py-2 text-left font-bold">
-                      Department
-                    </th>
-                    <th className="px-4 py-2 text-left font-bold">
-                      Cost Value
-                    </th>
-                    <th className="px-4 py-2 text-left font-bold">Unit</th>
-                    <th className="px-4 py-2 text-left font-bold">Remarks</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-blue-50">
-                  {viewDepartmentCostModal.data.map((item, idx) => (
-                    <tr key={idx} className="border-t border-foreground">
-                      <td className="px-4 py-2">
-                        {item.department_name || item.department_id || "-"}
-                      </td>
-                      <td className="px-4 py-2">{item.cost_value ?? "-"}</td>
-                      <td className="px-4 py-2">{item.unit || "-"}</td>
-                      <td className="px-4 py-2">{item.remarks || "-"}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <div>
+                {viewDepartmentCostModal.data.departments.map(
+                  (dept, deptIdx) => (
+                    <div key={deptIdx} className="mb-6">
+                      <div className="font-bold text-blue-950 mb-2">
+                        {dept.department_name}{" "}
+                        <span className="text-blue-700 font-normal">
+                          ({dept.department_type})
+                        </span>
+                      </div>
+                      <table className="min-w-full rounded-lg mb-2 overflow-hidden shadow-md">
+                        <thead className="bg-foreground text-white">
+                          <tr>
+                            <th className="px-4 py-2 text-left font-bold">
+                              Part Name
+                            </th>
+                            <th className="px-4 py-2 text-left font-bold">
+                              Cost Value
+                            </th>
+                            <th className="px-4 py-2 text-left font-bold">
+                              Unit
+                            </th>
+                            <th className="px-4 py-2 text-left font-bold">
+                              Remarks
+                            </th>
+                            <th className="px-4 py-2 text-left font-bold">
+                              Created At
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-blue-50">
+                          {dept.parts.map((part, partIdx) => (
+                            <tr
+                              key={partIdx}
+                              className="border-t border-foreground"
+                            >
+                              <td className="px-4 py-2">
+                                {part.part_name || part.part_id || "-"}
+                              </td>
+                              <td className="px-4 py-2">
+                                {part.uniform_cost?.cost_value ?? "-"}
+                              </td>
+                              <td className="px-4 py-2">
+                                {part.uniform_cost?.unit || "-"}
+                              </td>
+                              <td className="px-4 py-2">
+                                {part.uniform_cost?.remarks || "-"}
+                              </td>
+                              <td className="px-4 py-2">
+                                {part.uniform_cost?.created_at
+                                  ? new Date(
+                                      part.uniform_cost.created_at
+                                    ).toLocaleString("en-IN", {
+                                      year: "numeric",
+                                      month: "short",
+                                      day: "2-digit",
+                                      hour: "2-digit",
+                                      minute: "2-digit",
+                                    })
+                                  : "-"}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )
+                )}
+              </div>
             )}
           </div>
         </div>
