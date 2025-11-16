@@ -2944,10 +2944,10 @@ export default function GroupDesignsPage() {
                 No additional cost data available.
               </div>
             ) : (
-              <table className="min-w-full rounded-xl mb-2 border">
-                <thead className="bg-gray-50">
+              <table className="min-w-full rounded-lg mb-2 overflow-hidden shadow-md">
+                <thead className="bg-foreground text-white">
                   <tr>
-                    <th className="px-4 py-2 text-left font-bold">Cost Type</th>
+                    <th className="px-4 py-2 text-left font-bold">Cost Name</th>
                     <th className="px-4 py-2 text-left font-bold">
                       Cost Value
                     </th>
@@ -2955,10 +2955,10 @@ export default function GroupDesignsPage() {
                     <th className="px-4 py-2 text-left font-bold">Remarks</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="bg-blue-50">
                   {viewAdditionalCostModal.data.map((item, idx) => (
                     <tr key={idx} className="border-t">
-                      <td className="px-4 py-2">{item.cost_type || "-"}</td>
+                      <td className="px-4 py-2">{item.cost_name || "-"}</td>
                       <td className="px-4 py-2">{item.cost_value ?? "-"}</td>
                       <td className="px-4 py-2">{item.unit_name || "-"}</td>
                       <td className="px-4 py-2">{item.remarks || "-"}</td>
