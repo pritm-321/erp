@@ -128,15 +128,7 @@ export default function GroupDesignsPage() {
   });
   const [marginCostError, setMarginCostError] = useState("");
   const [departmentCostModal, setDepartmentCostModal] = useState(false);
-  const [departmentCostRows, setDepartmentCostRows] = useState([
-    {
-      department_id: "",
-      cost_value: "",
-      unit_type_id: "",
-      design_id: "",
-      remarks: "",
-    },
-  ]);
+  const [departmentCostRows, setDepartmentCostRows] = useState([]);
   const [departmentOptions, setDepartmentOptions] = useState([]);
   const [departmentCostError, setDepartmentCostError] = useState("");
   const [selectAll, setSelectAll] = useState(false);
@@ -621,52 +613,78 @@ export default function GroupDesignsPage() {
     }
   };
 
-  const handleDepartmentCostRowChange = (index, field, value) => {
+  const handleDepartmentCostRowChange = (partIdx, costIdx, field, value) => {
     setDepartmentCostRows((prev) =>
-      prev.map((row, i) => (i === index ? { ...row, [field]: value } : row))
+      prev.map((part, i) =>
+        i === partIdx
+          ? {
+              ...part,
+              costs: part.costs.map((cost, j) =>
+                j === costIdx ? { ...cost, [field]: value } : cost
+              ),
+            }
+          : part
+      )
     );
   };
 
-  const handleAddDepartmentCostRow = () => {
-    setDepartmentCostRows((prev) => [
-      ...prev,
-      {
-        department_id: "",
-        cost_value: "",
-        unit_type_id: "",
-        design_id: "",
-        remarks: "",
-      },
-    ]);
+  const handleAddDepartmentCostRow = (partIdx) => {
+    setDepartmentCostRows((prev) =>
+      prev.map((part, i) =>
+        i === partIdx
+          ? {
+              ...part,
+              costs: [
+                ...part.costs,
+                {
+                  department_id: "",
+                  cost_value: "",
+                  unit_type: "",
+                  remarks: "",
+                },
+              ],
+            }
+          : part
+      )
+    );
   };
 
-  const handleRemoveDepartmentCostRow = (index) => {
-    setDepartmentCostRows((prev) => prev.filter((_, i) => i !== index));
+  const handleRemoveDepartmentCostRow = (partIdx, costIdx) => {
+    setDepartmentCostRows((prev) =>
+      prev.map((part, i) =>
+        i === partIdx
+          ? {
+              ...part,
+              costs: part.costs.filter((_, j) => j !== costIdx),
+            }
+          : part
+      )
+    );
   };
 
   const handleDepartmentCostSubmit = async (e) => {
     e.preventDefault();
-    setDepartmentCostError(""); // Clear previous error
+    setDepartmentCostError("");
     try {
       // Build department_costs object: { department_id: { parts: [...] } }
       const department_costs = {};
-      departmentCostRows.forEach((row) => {
-        // Support both array of departments (for multi-dept per part) and single dept per part
-        if (row.department_id) {
-          // fallback for single department_id field
-          if (!department_costs[row.department_id]) {
-            department_costs[row.department_id] = { parts: [] };
+      departmentCostRows.forEach((part) => {
+        part.costs.forEach((cost) => {
+          if (cost.department_id) {
+            if (!department_costs[cost.department_id]) {
+              department_costs[cost.department_id] = { parts: [] };
+            }
+            department_costs[cost.department_id].parts.push({
+              part_id: part.part_id,
+              part_name: part.part_name,
+              variation: part.variation,
+              cost_value: Number(cost.cost_value),
+              unit_type_id: cost.unit_type,
+              remarks: cost.remarks,
+            });
           }
-          department_costs[row.department_id].parts.push({
-            part_id: row.part_id,
-            cost_value: Number(row.cost_value),
-            unit_type_id: row.unit_type,
-            remarks: row.remarks,
-          });
-        }
+        });
       });
-
-      // If no valid department_costs, throw error
       if (
         !department_costs ||
         Object.keys(department_costs).length === 0 ||
@@ -677,19 +695,16 @@ export default function GroupDesignsPage() {
         );
         return;
       }
-
       const payload = {
         part_cost_data: {
           department_costs,
           design_ids: selectedDesigns,
         },
       };
-
       const headers = {
         Authorization: `Bearer ${accessToken}`,
         "Organization-ID": organizationId,
       };
-
       await axios.post(`${API}costing/part-wise-costs`, payload, {
         headers,
       });
@@ -805,17 +820,19 @@ export default function GroupDesignsPage() {
           console.log(parts);
 
           // Flatten variant_parts into departmentCostRows
-          const rows = [];
-          parts.forEach((part) => {
-            rows.push({
-              part_id: part.part_id,
-              part_name: part.part_name,
-              department_id: "",
-              cost_value: "",
-              unit_type_id: "",
-              remarks: "",
-            });
-          });
+          const rows = parts.map((part) => ({
+            part_id: part.part_id,
+            part_name: part.part_name,
+            variation: part.variation,
+            costs: [
+              {
+                department_id: "",
+                cost_value: "",
+                unit_type: "",
+                remarks: "",
+              },
+            ],
+          }));
 
           setDepartmentCostRows(
             rows.length > 0
@@ -824,13 +841,15 @@ export default function GroupDesignsPage() {
                   {
                     part_id: "",
                     part_name: "",
-                    variant_part_id: "",
-                    design_id: "",
                     variation: "",
-                    department_id: "",
-                    cost_value: "",
-                    unit_type_id: "",
-                    remarks: "",
+                    costs: [
+                      {
+                        department_id: "",
+                        cost_value: "",
+                        unit_type: "",
+                        remarks: "",
+                      },
+                    ],
                   },
                 ]
           );
@@ -839,13 +858,15 @@ export default function GroupDesignsPage() {
             {
               part_id: "",
               part_name: "",
-              variant_part_id: "",
-              design_id: "",
               variation: "",
-              department_id: "",
-              cost_value: "",
-              unit_type_id: "",
-              remarks: "",
+              costs: [
+                {
+                  department_id: "",
+                  cost_value: "",
+                  unit_type: "",
+                  remarks: "",
+                },
+              ],
             },
           ]);
         }
@@ -2513,10 +2534,7 @@ export default function GroupDesignsPage() {
                       >
                         <option value="">Select Unit</option>
                         {unitOptions.map((unit) => (
-                          <option
-                            key={unit.id || unit.unit_id}
-                            value={unit.id || unit.unit_id}
-                          >
+                          <option key={unit.id || unit.unit_id} value={unit.id}>
                             {unit.name || unit.unit_name}
                           </option>
                         ))}
@@ -2693,7 +2711,7 @@ export default function GroupDesignsPage() {
       {/* Department Cost Modal */}
       {departmentCostModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-          <div className="bg-white rounded-lg shadow-lg p-6 max-w-3xl w-full relative max-h-[95vh] overflow-y-auto">
+          <div className="bg-white rounded-lg shadow-lg p-6 max-w-3xl w-full relative max-h-[90vh] overflow-y-auto">
             <button
               className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-xl"
               onClick={() => setDepartmentCostModal(false)}
@@ -2707,120 +2725,140 @@ export default function GroupDesignsPage() {
               <div className="text-red-600 mb-4">{departmentCostError}</div>
             )}
             <form onSubmit={handleDepartmentCostSubmit} className="space-y-6">
-              {departmentCostRows.map((row, index) => (
+              {departmentCostRows.map((row, partIdx) => (
                 <div
-                  key={index}
+                  key={partIdx}
                   className="border border-blue-300 rounded-xl p-4 bg-gray-50 mb-4"
                 >
                   <div className="flex flex-wrap gap-4 mb-2">
-                    <div className="flex flex-col justify-center">
+                    <div className="flex flex-row justify-center">
                       <label className="text-blue-700 font-medium mb-1">
-                        Part Name
+                        Part Name : &nbsp;
                       </label>
-                      <div className="font-semibold text-blue-950 px-4 py-2">
+                      <label className="font-semibold text-blue-950">
                         {row.part_name}
-                      </div>
-                    </div>
-                    <div className="flex flex-col justify-center">
-                      <label className="text-blue-700 font-medium mb-1">
-                        Variation
                       </label>
-                      <div className="font-semibold text-blue-950 px-4 py-2">
-                        {row.variation}
-                      </div>
-                    </div>
-
-                    <div className="flex flex-col">
-                      <label className="text-blue-700 font-medium mb-1">
-                        Department
-                      </label>
-                      <select
-                        className="border border-blue-300 px-4 py-2 rounded-lg bg-white"
-                        value={row.department_id}
-                        onChange={(e) =>
-                          handleDepartmentCostRowChange(
-                            index,
-                            "department_id",
-                            e.target.value
-                          )
-                        }
-                        required
-                      >
-                        <option value="">Select Department</option>
-                        {departmentOptions.map((dept) => (
-                          <option key={dept.id} value={dept.department_id}>
-                            {dept.department_name}
-                            {dept.department_type
-                              ? ` - ${dept.department_type}`
-                              : ""}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <div className="flex flex-col">
-                      <label className="text-blue-700 font-medium mb-1">
-                        Cost Value
-                      </label>
-                      <input
-                        type="number"
-                        step="0.01"
-                        className="border border-blue-300 px-4 py-2 rounded-lg bg-white"
-                        value={row.cost_value}
-                        onChange={(e) =>
-                          handleDepartmentCostRowChange(
-                            index,
-                            "cost_value",
-                            e.target.value
-                          )
-                        }
-                        required
-                      />
-                    </div>
-                    <div className="flex flex-col">
-                      <label className="text-blue-700 font-medium mb-1">
-                        Unit Type
-                      </label>
-                      <select
-                        className="border border-blue-300 px-4 py-2 rounded-lg bg-white"
-                        value={row.unit_type}
-                        onChange={(e) =>
-                          handleDepartmentCostRowChange(
-                            index,
-                            "unit_type",
-                            e.target.value
-                          )
-                        }
-                        required
-                      >
-                        <option value="">Select Unit</option>
-                        {unitOptions.map((unit) => (
-                          <option
-                            key={unit.id || unit.unit_id}
-                            value={unit.id || unit.unit_id}
-                          >
-                            {unit.name || unit.unit_name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <div className="flex flex-col flex-1">
-                      <label className="text-blue-700 font-medium mb-1">
-                        Remarks
-                      </label>
-                      <input
-                        type="text"
-                        className="border border-blue-300 px-4 py-2 rounded-lg bg-white"
-                        value={row.remarks}
-                        onChange={(e) =>
-                          handleDepartmentCostRowChange(
-                            index,
-                            "remarks",
-                            e.target.value
-                          )
-                        }
-                      />
                     </div>
                   </div>
+                  {row.costs.map((cost, costIdx) => (
+                    <div
+                      key={costIdx}
+                      className="flex flex-wrap gap-4 mb-2 border-t border-blue-200 pt-2"
+                    >
+                      <div className="flex flex-col">
+                        <label className="text-blue-700 font-medium mb-1">
+                          Department
+                        </label>
+                        <select
+                          className="border border-blue-300 px-4 py-2 rounded-lg bg-white"
+                          value={cost.department_id}
+                          onChange={(e) =>
+                            handleDepartmentCostRowChange(
+                              partIdx,
+                              costIdx,
+                              "department_id",
+                              e.target.value
+                            )
+                          }
+                          required
+                        >
+                          <option value="">Select Department</option>
+                          {departmentOptions.map((dept) => (
+                            <option key={dept.id} value={dept.department_id}>
+                              {dept.department_name}
+                              {dept.department_type
+                                ? ` - ${dept.department_type}`
+                                : ""}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="flex flex-col">
+                        <label className="text-blue-700 font-medium mb-1">
+                          Cost Value
+                        </label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          className="border border-blue-300 px-4 py-2 rounded-lg bg-white"
+                          value={cost.cost_value}
+                          onChange={(e) =>
+                            handleDepartmentCostRowChange(
+                              partIdx,
+                              costIdx,
+                              "cost_value",
+                              e.target.value
+                            )
+                          }
+                          required
+                        />
+                      </div>
+                      <div className="flex flex-col">
+                        <label className="text-blue-700 font-medium mb-1">
+                          Unit Type
+                        </label>
+                        <select
+                          className="border border-blue-300 px-4 py-2 rounded-lg bg-white"
+                          value={cost.unit_type}
+                          onChange={(e) =>
+                            handleDepartmentCostRowChange(
+                              partIdx,
+                              costIdx,
+                              "unit_type",
+                              e.target.value
+                            )
+                          }
+                          required
+                        >
+                          <option value="">Select Unit</option>
+                          {unitOptions.map((unit) => (
+                            <option
+                              key={unit.id || unit.unit_id}
+                              value={unit.id || unit.unit_id}
+                            >
+                              {unit.name || unit.unit_name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="flex flex-col flex-1">
+                        <label className="text-blue-700 font-medium mb-1">
+                          Remarks
+                        </label>
+                        <input
+                          type="text"
+                          className="border border-blue-300 px-4 py-2 rounded-lg bg-white"
+                          value={cost.remarks}
+                          onChange={(e) =>
+                            handleDepartmentCostRowChange(
+                              partIdx,
+                              costIdx,
+                              "remarks",
+                              e.target.value
+                            )
+                          }
+                        />
+                      </div>
+                      {row.costs.length > 1 && (
+                        <button
+                          type="button"
+                          className="text-red-500 font-semibold px-2 py-1 rounded hover:bg-red-50 self-end"
+                          onClick={() =>
+                            handleRemoveDepartmentCostRow(partIdx, costIdx)
+                          }
+                        >
+                          Remove Row
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    className="text-blue-700 font-semibold"
+                    onClick={() => handleAddDepartmentCostRow(partIdx)}
+                  >
+                    Add Department Cost Row
+                  </button>
                 </div>
               ))}
               <button
