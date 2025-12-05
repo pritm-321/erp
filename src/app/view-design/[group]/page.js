@@ -1026,7 +1026,7 @@ export default function GroupDesignsPage() {
                     }}
                     disabled={selectedDesigns.length === 0 || approvingBulk}
                   >
-                    {approvingBulk ? "Approving..." : "Approve Cost"}
+                    {approvingBulk ? "Approving..." : "Send for Approval"}
                   </button>
                 </div>
               )}
